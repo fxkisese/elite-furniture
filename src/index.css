@@ -1,0 +1,250 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 4%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 4%;
+    --primary: 0 0% 4%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 85%;
+    --secondary-foreground: 0 0% 4%;
+    --muted: 0 0% 85%;
+    --muted-foreground: 0 0% 35%;
+    --accent: 0 0% 85%;
+    --accent-foreground: 0 0% 4%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 0 0% 4%;
+    --radius: 0rem;
+    --font-heading: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --sidebar-background: 0 0% 4%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 0 0% 16%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 16%;
+    --sidebar-ring: 0 0% 100%;
+  }
+
+  .dark {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 4%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 4%;
+    --primary: 0 0% 4%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 85%;
+    --secondary-foreground: 0 0% 4%;
+    --muted: 0 0% 85%;
+    --muted-foreground: 0 0% 35%;
+    --accent: 0 0% 85%;
+    --accent-foreground: 0 0% 4%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 0 0% 4%;
+  }
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: #FFFFFF;
+    color: #0A0A0A;
+    font-size: 16px;
+    line-height: 1.618;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: -0.05em;
+    color: #0A0A0A;
+  }
+
+  h1 {
+    margin-bottom: 2rem;
+  }
+
+  h2 {
+    margin-bottom: 1.75rem;
+  }
+}
+
+@layer utilities {
+  .font-mono-custom {
+    font-family: var(--font-mono);
+  }
+
+  .hairline {
+    border: 1px solid #D5D5D5;
+  }
+
+  .hairline-top {
+    border-top: 1px solid #D5D5D5;
+  }
+
+  .hairline-bottom {
+    border-bottom: 1px solid #D5D5D5;
+  }
+
+  .hairline-left {
+    border-left: 1px solid #D5D5D5;
+  }
+
+  .img-grayscale {
+    filter: grayscale(100%);
+    transition: filter 0.5s ease;
+  }
+
+  .img-grayscale:hover {
+    filter: grayscale(70%) saturate(0.3);
+  }
+
+  .gold-accent {
+    color: #D4AF37;
+  }
+
+  .gold-border {
+    border-color: #D4AF37 !important;
+  }
+
+  .gold-underline {
+    border-bottom: 2px solid #D4AF37;
+    padding-bottom: 0.5rem;
+  }
+
+  .product-card-hover {
+    transition: transform 0.3s ease;
+  }
+
+  .product-card-hover:hover {
+    transform: translate(-8px, -8px);
+  }
+
+  .hero-img-zoom {
+    transition: transform 6s ease;
+  }
+
+  .hero-img-zoom:hover {
+    transform: scale(1.02);
+  }
+
+  .animate-draw-line {
+    animation: drawLine 1s ease forwards;
+  }
+
+  @keyframes drawLine {
+    from {
+      width: 0%;
+    }
+
+    to {
+      width: 100%;
+    }
+  }
+
+  @keyframes scrollDot {
+    0% {
+      opacity: 1;
+      top: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      top: 100%;
+    }
+  }
+
+  .btn-sharp {
+    border-radius: 0 !important;
+    border: 1px solid #FFFFFF;
+    padding: 12px 32px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .btn-primary-sharp {
+    background: #0A0A0A;
+    color: #FFFFFF;
+  }
+
+  .btn-primary-sharp:hover {
+    background: #333333;
+    color: #FFFFFF;
+  }
+
+  .btn-outline-sharp {
+    background: transparent;
+    color: #0A0A0A;
+  }
+
+  .btn-outline-sharp:hover {
+    background: #0A0A0A;
+    color: #FFFFFF;
+  }
+
+  .input-underline {
+    background: transparent;
+    border: none !important;
+    border-bottom: 1px solid #D5D5D5 !important;
+    color: #0A0A0A;
+    padding: 12px 0;
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    border-radius: 0 !important;
+  }
+
+  .input-underline:focus {
+    border-bottom-color: #0A0A0A !important;
+  }
+
+  .input-underline::placeholder {
+    color: #AAAAAA;
+  }
+
+  .label-upper {
+    font-family: var(--font-heading);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #AAAAAA;
+  }
+}
