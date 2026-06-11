@@ -30,12 +30,17 @@ export default function SiteHeader() {
       }}>
         {/* Logo */}
         <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '36px', height: '36px', border: '2px solid #D4AF37',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>
-            <Armchair size={18} color="#D4AF37" />
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="Logo" 
+            style={{ 
+              width: '42px', 
+              height: '42px', 
+              objectFit: 'cover', 
+              borderRadius: '4px',
+              border: '1px solid #D4AF37'
+            }} 
+          />
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
             <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '14px', letterSpacing: '0.12em', color: '#FFFFFF', textTransform: 'uppercase' }}>
               FURNITURE <span style={{ color: '#D4AF37' }}>ELITE SPACE</span>
