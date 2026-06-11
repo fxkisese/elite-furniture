@@ -38,8 +38,11 @@ export default function SiteFooter() {
                 textTransform: 'uppercase',
               }}>ELITE SPACE</div>
             </div>
+            <p style={{ color: '#0A0A0A', fontSize: '13px', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+              Elegance. Comfort. Quality.
+            </p>
             <p style={{ color: '#AAAAAA', fontSize: '13px', lineHeight: '1.8', maxWidth: '220px' }}>
-              Premium furniture for modern Kenyan homes & offices. Quality craftsmanship, affordable pricing.
+              Premium furniture crafted for homes, offices, and businesses across Kenya.
             </p>
           </div>
 

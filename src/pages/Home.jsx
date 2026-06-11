@@ -62,29 +62,29 @@ export default function Home() {
             <div className="flex items-center justify-center space-x-4 px-2">
               <Lock strokeWidth={1.5} className="w-10 h-10 text-red-600" />
               <div className="text-left">
-                <p className="font-bold text-red-600 text-[15px]">Secure Payments</p>
-                <p className="text-sm text-gray-500">Payment After Delivery</p>
+                <p className="font-bold text-red-600 text-[15px]">Pay After Delivery</p>
+                <p className="text-sm text-gray-500">100% Secure Shopping</p>
               </div>
             </div>
             <div className="flex items-center justify-center space-x-4 px-2">
               <Truck strokeWidth={1.5} className="w-10 h-10 text-red-600" />
               <div className="text-left">
-                <p className="font-bold text-red-600 text-[15px]">Fast Delivery</p>
-                <p className="text-sm text-gray-500">Done Countrywide</p>
+                <p className="font-bold text-red-600 text-[15px]">Nationwide Delivery</p>
+                <p className="text-sm text-gray-500">Fast & Reliable</p>
               </div>
             </div>
             <div className="flex items-center justify-center space-x-4 px-2">
-              <Headphones strokeWidth={1.5} className="w-10 h-10 text-red-600" />
+              <CheckCircle strokeWidth={1.5} className="w-10 h-10 text-red-600" />
               <div className="text-left">
-                <p className="font-bold text-red-600 text-[15px]">24 - 7 Support</p>
-                <p className="text-sm text-gray-500">Customer support</p>
+                <p className="font-bold text-red-600 text-[15px]">Custom Furniture</p>
+                <p className="text-sm text-gray-500">Made to Order</p>
               </div>
             </div>
             <div className="flex items-center justify-center space-x-4 px-2">
               <Gem strokeWidth={1.5} className="w-10 h-10 text-red-600" />
               <div className="text-left">
-                <p className="font-bold text-red-600 text-[15px]">High Quality</p>
-                <p className="text-sm text-gray-500">Best Quality Products</p>
+                <p className="font-bold text-red-600 text-[15px]">Premium Materials</p>
+                <p className="text-sm text-gray-500">Built to Last</p>
               </div>
             </div>
           </div>
@@ -159,69 +159,55 @@ export default function Home() {
               fontSize: '11px',
               letterSpacing: '0.35em',
               textTransform: 'uppercase',
-              color: '#888888',
-              marginBottom: '1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-            }}>
-              <span style={{ display: 'inline-block', width: '40px', height: '1px', backgroundColor: '#555555' }} />
-              NAIROBI, KENYA
+          <div style={{ maxWidth: '600px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '1.5rem' }}>
+              <div style={{ width: '40px', height: '1px', backgroundColor: '#555' }} />
+              <span style={{ color: '#888', letterSpacing: '0.2em', fontSize: '11px', textTransform: 'uppercase' }}>NAIROBI, KENYA</span>
             </div>
-
             <h1 style={{
-              fontFamily: 'Space Grotesk, sans-serif',
-              fontWeight: 700,
-              fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
-              letterSpacing: '-0.04em',
-              color: '#FFFFFF',
+              fontSize: 'clamp(3rem, 5vw, 4.5rem)',
+              fontWeight: 800,
               lineHeight: 1.05,
-              marginBottom: '2.5rem',
+              color: '#FFFFFF',
+              letterSpacing: '-0.02em',
+              marginBottom: '1.5rem',
             }}>
-              PREMIUM<br />
-              <span style={{ color: '#D4AF37', fontWeight: 300 }}>FURNITURE</span><br />
-              FOR MODERN<br />KENYAN HOMES
+              ELEVATE YOUR <br />
+              <span style={{ color: '#D4AF37', fontWeight: 400 }}>SPACE</span>
             </h1>
-
             <p style={{
-              color: '#888888',
-              fontSize: '15px',
-              lineHeight: 1.8,
-              marginBottom: '3.5rem',
-              maxWidth: '460px',
+              fontSize: '16px',
+              lineHeight: 1.6,
+              color: '#AAAAAA',
+              marginBottom: '3rem',
+              maxWidth: '85%',
             }}>
-              Elegant, durable, and affordable furniture solutions crafted for homes, offices, and businesses across Kenya.
+              Premium furniture crafted for homes, offices, and businesses across Kenya.
             </p>
-
+            
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
               <Link to="/products" style={{
                 backgroundColor: '#FFFFFF', color: '#0A0A0A',
-                padding: '14px 32px', textDecoration: 'none',
-                fontFamily: 'Space Grotesk, sans-serif',
-                fontSize: '11px', fontWeight: 600,
-                letterSpacing: '0.2em', textTransform: 'uppercase',
-                display: 'inline-flex', alignItems: 'center', gap: '8px',
-                transition: 'background 0.2s ease, color 0.2s ease',
+                padding: '16px 32px', fontSize: '12px', fontWeight: 600,
+                letterSpacing: '0.15em', textDecoration: 'none',
+                display: 'flex', alignItems: 'center', gap: '10px',
+                transition: 'background 0.3s ease',
               }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#333333'; e.currentTarget.style.color = '#FFFFFF'; }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFFFFF'; e.currentTarget.style.color = '#0A0A0A'; }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#FFFFFF'}
               >
-                VIEW COLLECTION <ChevronRight size={14} />
+                SHOP FURNITURE <ChevronRight size={14} />
               </Link>
-              <Link to="/custom-orders" style={{
-                backgroundColor: 'transparent', color: '#FFFFFF',
-                border: '1px solid #FFFFFF', padding: '14px 32px',
-                textDecoration: 'none',
-                fontFamily: 'Space Grotesk, sans-serif',
-                fontSize: '11px', fontWeight: 600,
-                letterSpacing: '0.2em', textTransform: 'uppercase',
-                display: 'inline-flex', alignItems: 'center', gap: '8px',
-                transition: 'background 0.2s ease, color 0.2s ease',
+              <Link to="/contact" style={{
+                border: '1px solid #FFFFFF', color: '#FFFFFF',
+                padding: '16px 32px', fontSize: '12px', fontWeight: 600,
+                letterSpacing: '0.15em', textDecoration: 'none',
+                transition: 'background 0.3s ease, color 0.3s ease',
               }}
                 onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FFFFFF'; e.currentTarget.style.color = '#0A0A0A'; }}
                 onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#FFFFFF'; }}
               >
-                GET A QUOTE
+                GET A FREE QUOTE
               </Link>
             </div>
           </div>
