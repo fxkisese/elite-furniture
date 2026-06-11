@@ -55,44 +55,8 @@ export default function Home() {
 
   return (
     <PageLayout>
-      {/* Top Features Banner */}
-      <div className="bg-white py-4 border-b border-gray-100 hidden md:block">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-4 gap-4 text-center divide-x divide-gray-100">
-            <div className="flex items-center justify-center space-x-4 px-2">
-              <Lock strokeWidth={1.5} className="w-10 h-10 text-red-600" />
-              <div className="text-left">
-                <p className="font-bold text-red-600 text-[15px]">Pay After Delivery</p>
-                <p className="text-sm text-gray-500">100% Secure Shopping</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-center space-x-4 px-2">
-              <Truck strokeWidth={1.5} className="w-10 h-10 text-red-600" />
-              <div className="text-left">
-                <p className="font-bold text-red-600 text-[15px]">Nationwide Delivery</p>
-                <p className="text-sm text-gray-500">Fast & Reliable</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-center space-x-4 px-2">
-              <CheckCircle strokeWidth={1.5} className="w-10 h-10 text-red-600" />
-              <div className="text-left">
-                <p className="font-bold text-red-600 text-[15px]">Custom Furniture</p>
-                <p className="text-sm text-gray-500">Made to Order</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-center space-x-4 px-2">
-              <Gem strokeWidth={1.5} className="w-10 h-10 text-red-600" />
-              <div className="text-left">
-                <p className="font-bold text-red-600 text-[15px]">Premium Materials</p>
-                <p className="text-sm text-gray-500">Built to Last</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Hero Section */}
-      <section style={{ position: 'relative', height: 'calc(100vh - 100px)', overflow: 'hidden', minHeight: '600px' }}>
+      <section style={{ position: 'relative', height: 'calc(100vh - 70px)', overflow: 'hidden', minHeight: '600px' }}>
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', backgroundColor: '#0A0A0A' }}>
           {/* Blurred Background Layer */}
           {heroSlides.map((src, idx) => (
@@ -165,15 +129,14 @@ export default function Home() {
               <span style={{ color: '#888', letterSpacing: '0.2em', fontSize: '11px', textTransform: 'uppercase' }}>NAIROBI, KENYA</span>
             </div>
             <h1 style={{
-              fontSize: 'clamp(3rem, 5vw, 4.5rem)',
+              fontSize: 'clamp(2.5rem, 4vw, 4rem)',
               fontWeight: 800,
-              lineHeight: 1.05,
+              lineHeight: 1.1,
               color: '#FFFFFF',
               letterSpacing: '-0.02em',
               marginBottom: '1.5rem',
             }}>
-              ELEVATE YOUR <br />
-              <span style={{ color: '#D4AF37', fontWeight: 400 }}>SPACE</span>
+              FURNITURE THAT MAKES EVERY <span style={{ color: '#D4AF37' }}>SPACE</span> EXCEPTIONAL
             </h1>
             <p style={{
               fontSize: '16px',
@@ -182,19 +145,19 @@ export default function Home() {
               marginBottom: '3rem',
               maxWidth: '85%',
             }}>
-              Premium furniture crafted for homes, offices, and businesses across Kenya.
+              Discover stylish, durable, and affordable furniture tailored to your lifestyle and business needs.
             </p>
             
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
               <Link to="/products" style={{
-                backgroundColor: '#FFFFFF', color: '#0A0A0A',
+                backgroundColor: '#D4AF37', color: '#0A0A0A',
                 padding: '16px 32px', fontSize: '12px', fontWeight: 600,
                 letterSpacing: '0.15em', textDecoration: 'none',
                 display: 'flex', alignItems: 'center', gap: '10px',
                 transition: 'background 0.3s ease',
               }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#FFFFFF'}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f2c94c'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#D4AF37'}
               >
                 SHOP FURNITURE <ChevronRight size={14} />
               </Link>
@@ -207,11 +170,12 @@ export default function Home() {
                 onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FFFFFF'; e.currentTarget.style.color = '#0A0A0A'; }}
                 onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#FFFFFF'; }}
               >
-                GET A FREE QUOTE
+                REQUEST FREE QUOTE
               </Link>
             </div>
           </div>
         </div>
+
 
         {/* Scroll indicator */}
         <div style={{
@@ -228,6 +192,38 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Trust Banner Below Hero */}
+      <div className="bg-white py-6 border-b border-gray-200 hidden md:block">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-4 gap-4 text-center divide-x divide-gray-200">
+            <div className="flex items-center justify-center space-x-3 px-2">
+              <Lock strokeWidth={1.5} className="w-8 h-8 text-[#D4AF37]" />
+              <div className="text-left">
+                <p className="font-bold text-gray-900 text-sm">Pay After Delivery</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center space-x-3 px-2">
+              <Truck strokeWidth={1.5} className="w-8 h-8 text-[#D4AF37]" />
+              <div className="text-left">
+                <p className="font-bold text-gray-900 text-sm">Nationwide Delivery</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center space-x-3 px-2">
+              <CheckCircle strokeWidth={1.5} className="w-8 h-8 text-[#D4AF37]" />
+              <div className="text-left">
+                <p className="font-bold text-gray-900 text-sm">Custom Furniture</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center space-x-3 px-2">
+              <Gem strokeWidth={1.5} className="w-8 h-8 text-[#D4AF37]" />
+              <div className="text-left">
+                <p className="font-bold text-gray-900 text-sm">Premium Materials</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Section Divider */}
       <div style={{ borderBottom: '2px solid #D4AF37' }} />
