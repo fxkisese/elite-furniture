@@ -24,11 +24,11 @@ export default function ProductCard({ product }) {
   return (
     <article className="group relative rounded-lg overflow-hidden bg-white flex flex-col hover:shadow-xl transition-all duration-300 border border-gray-200">
       {/* Image Container */}
-      <div className="aspect-[4/3] overflow-hidden bg-muted relative">
+      <div className="aspect-[4/3] overflow-hidden bg-white relative p-2">
         {image ? (
-          <img src={image} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <img src={image} alt={title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-gray-200">No Image</div>
+          <div className="w-full h-full flex items-center justify-center text-gray-500 bg-gray-100 rounded">No Image</div>
         )}
         
         {/* Category Badge */}
