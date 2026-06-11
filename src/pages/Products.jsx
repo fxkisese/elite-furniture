@@ -182,7 +182,7 @@ export default function Products() {
         {/* Custom Order CTA */}
         <div className="bg-black text-white rounded-2xl p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
           <div className="relative z-10 max-w-2xl text-center md:text-left">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Can't find what you're looking for?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Can't find what you're looking for?</h2>
             <p className="text-gray-300 text-lg">
               We do custom furniture to fit your space and style.
             </p>
