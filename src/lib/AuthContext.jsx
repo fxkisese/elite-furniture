@@ -1,34 +1,63 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from './supabase';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [isLoadingAuth, setIsLoadingAuth] = useState(false);
-  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
-  const [authError, setAuthError] = useState(null);
+  const [session, setSession] = useState(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
-  const signIn = (userData) => {
-    setUser(userData);
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsLoadingAuth(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsLoadingAuth(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signIn = async (email, password) => {
+    return supabase.auth.signInWithPassword({ email, password });
   };
 
-  const signOut = () => {
-    setUser(null);
+  const signUp = async (email, password, options) => {
+    return supabase.auth.signUp({ email, password, options });
   };
 
-  const navigateToLogin = () => {
-    window.location.href = '/login';
+  const signOut = async () => {
+    return supabase.auth.signOut();
+  };
+  
+  const resetPassword = async (email) => {
+    return supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+  };
+
+  const updatePassword = async (newPassword) => {
+    return supabase.auth.updateUser({ password: newPassword });
   };
 
   return (
     <AuthContext.Provider value={{ 
       user, 
+      session,
       signIn, 
+      signUp,
       signOut,
-      isLoadingAuth,
-      isLoadingPublicSettings,
-      authError,
-      navigateToLogin
+      resetPassword,
+      updatePassword,
+      isLoadingAuth
     }}>
       {children}
     </AuthContext.Provider>

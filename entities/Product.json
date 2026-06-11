@@ -1,0 +1,49 @@
+{
+  "name": "Product",
+    "type": "object",
+      "properties": {
+    "name": {
+      "type": "string",
+        "description": "Product name"
+    },
+    "category": {
+      "type": "string",
+        "enum": [
+          "Living Room",
+          "Bedroom",
+          "Dining",
+          "Office"
+        ],
+          "description": "Product category"
+    },
+    "subcategory": {
+      "type": "string",
+        "description": "Product subcategory"
+    },
+    "price": {
+      "type": "number",
+        "description": "Price in KSh"
+    },
+    "description": {
+      "type": "string",
+        "description": "Product description"
+    },
+    "image": {
+      "type": "string",
+        "description": "Product image URL"
+    },
+    "featured": {
+      "type": "boolean",
+        "default": false,
+          "description": "Show on homepage"
+    },
+    "in_stock": {
+      "type": "boolean",
+        "default": true
+    }
+  },
+  "required": [
+    "name",
+    "category"
+  ]
+}

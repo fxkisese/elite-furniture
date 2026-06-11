@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Phone, Armchair } from 'lucide-react';
+import { Menu, X, Phone, Armchair, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/lib/CartContext';
+import CartDrawer from '@/components/cart/CartDrawer';
 
 const NAV_LINKS = [
   { label: 'HOME', to: '/' },
@@ -13,6 +15,7 @@ const NAV_LINKS = [
 export default function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const { cartCount, setIsCartOpen } = useCart();
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
 
@@ -62,11 +65,50 @@ export default function SiteHeader() {
           ))}
         </nav>
 
-        {/* Right: Phone + CTA */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }} className="hidden md:flex">
+        {/* Right: Phone + Cart + CTA */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }} className="hidden md:flex">
           <a href="tel:+254700000000" style={{ color: '#D4AF37', display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}>
             <Phone size={16} color="#D4AF37" />
           </a>
+          
+          <button 
+            onClick={() => setIsCartOpen(true)}
+            style={{ 
+              position: 'relative', 
+              background: 'none', 
+              border: 'none', 
+              cursor: 'pointer',
+              color: '#FFFFFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'color 0.2s'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#D4AF37'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#FFFFFF'; }}
+          >
+            <ShoppingCart size={20} />
+            {cartCount > 0 && (
+              <span style={{
+                position: 'absolute',
+                top: '-8px',
+                right: '-8px',
+                backgroundColor: '#D4AF37',
+                color: '#0A0A0A',
+                fontSize: '10px',
+                fontWeight: 'bold',
+                width: '16px',
+                height: '16px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                {cartCount}
+              </span>
+            )}
+          </button>
+
           <Link to="/contact" style={{
             border: '1px solid #FFFFFF', color: '#FFFFFF', padding: '8px 20px',
             textDecoration: 'none', fontFamily: 'Space Grotesk, sans-serif',
@@ -80,11 +122,46 @@ export default function SiteHeader() {
           </Link>
         </div>
 
-        {/* Mobile Menu Button */}
-        <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}
-          style={{ background: 'none', border: 'none', color: '#AAAAAA', cursor: 'pointer', padding: '4px' }}>
-          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        {/* Mobile Menu Button & Cart */}
+        <div className="md:hidden flex items-center gap-4">
+          <button 
+            onClick={() => setIsCartOpen(true)}
+            style={{ 
+              position: 'relative', 
+              background: 'none', 
+              border: 'none', 
+              cursor: 'pointer',
+              color: '#FFFFFF',
+              display: 'flex'
+            }}
+          >
+            <ShoppingCart size={20} />
+            {cartCount > 0 && (
+              <span style={{
+                position: 'absolute',
+                top: '-8px',
+                right: '-8px',
+                backgroundColor: '#D4AF37',
+                color: '#0A0A0A',
+                fontSize: '10px',
+                fontWeight: 'bold',
+                width: '16px',
+                height: '16px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                {cartCount}
+              </span>
+            )}
+          </button>
+
+          <button onClick={() => setMobileOpen(!mobileOpen)}
+            style={{ background: 'none', border: 'none', color: '#AAAAAA', cursor: 'pointer', padding: '4px' }}>
+            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </header>
 
       {/* Mobile Menu */}
@@ -111,6 +188,8 @@ export default function SiteHeader() {
           ))}
         </nav>
       </div>
+
+      <CartDrawer />
     </>
   );
 }

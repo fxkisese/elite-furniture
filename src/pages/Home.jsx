@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import ProductCard from '@/components/products/ProductCard';
-import { ChevronRight, CheckCircle, Star } from 'lucide-react';
+import { ChevronRight, CheckCircle } from 'lucide-react';
 
 const TESTIMONIALS = [
   { name: 'Amina W.', role: 'Homeowner, Karen', text: 'Excellent service and beautiful furniture. The sofa we ordered fits perfectly in our living room.' },

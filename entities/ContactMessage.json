@@ -1,0 +1,26 @@
+{
+  "name": "ContactMessage",
+    "type": "object",
+      "properties": {
+    "name": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "read": {
+      "type": "boolean",
+        "default": false
+    }
+  },
+  "required": [
+    "name",
+    "message"
+  ]
+}

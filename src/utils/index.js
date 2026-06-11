@@ -1,3 +1,3 @@
-export function noop() {
-  return undefined;
+export function createPageUrl(pageName) {
+    return '/' + pageName.replace(/ /g, '-');
 }

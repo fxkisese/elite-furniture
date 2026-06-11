@@ -1,0 +1,36 @@
+{
+  "name": "CustomOrderRequest",
+    "type": "object",
+      "properties": {
+    "name": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "furniture_type": {
+      "type": "string"
+    },
+    "measurements": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+        "enum": [
+          "new",
+          "in_review",
+          "quoted",
+          "completed"
+        ],
+          "default": "new"
+    }
+  },
+  "required": [
+    "name",
+    "phone",
+    "furniture_type"
+  ]
+}

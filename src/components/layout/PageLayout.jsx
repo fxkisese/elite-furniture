@@ -1,13 +1,16 @@
-import React from 'react';
 import SiteHeader from './SiteHeader';
 import SiteFooter from './SiteFooter';
+import WhatsAppButton from './WhatsAppButton';
 
-export default function PageLayout({ children }) {
+export default function PageLayout({ children, activeProduct = null }) {
   return (
-    <div className="page-layout" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
       <SiteHeader />
-      <main style={{ flex: 1, paddingTop: '0' }}>{children}</main>
+      <main style={{ paddingTop: '70px' }}>
+        {children}
+      </main>
       <SiteFooter />
+      <WhatsAppButton activeProduct={activeProduct} />
     </div>
   );
 }

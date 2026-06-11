@@ -1,8 +1,14 @@
-// Import base44 SDK for database operations
-import * as base44SDK from '@base44/sdk';
+import { createClient } from '@base44/sdk';
+import { appParams } from '@/lib/app-params';
 
-// Get the base44 instance (it might be default or a named export)
-const base44 = base44SDK.default || base44SDK;
+const { appId, token, functionsVersion, appBaseUrl } = appParams;
 
-// Export the base44 instance for use throughout the app
-export { base44 };
+//Create a client with authentication required
+export const base44 = createClient({
+  appId,
+  token,
+  functionsVersion,
+  serverUrl: '',
+  requiresAuth: false,
+  appBaseUrl
+});
