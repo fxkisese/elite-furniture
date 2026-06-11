@@ -98,42 +98,42 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Dark Contact Form */}
-          <div className="bg-zinc-950 text-zinc-50 p-8 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -mr-20 -mt-20"></div>
+          {/* Light Contact Form */}
+          <div className="bg-white border-2 border-[#D4AF37] text-gray-900 p-8 md:p-12 rounded-3xl shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37]/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
             
-            <h2 className="text-3xl font-bold mb-2 relative z-10">Send us a message</h2>
-            <p className="text-zinc-400 mb-8 relative z-10">Fill out the form below and we'll get back to you shortly.</p>
+            <h2 className="text-3xl font-bold mb-2 relative z-10 text-gray-900">Send us a message</h2>
+            <p className="text-gray-600 mb-8 relative z-10">Fill out the form below and we'll get back to you shortly.</p>
             
             <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2 flex flex-col">
-                  <label htmlFor="name" className="text-sm font-medium text-zinc-300">Full Name</label>
-                  <input id="name" name="name" required placeholder="John Doe" className="flex h-10 w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-50 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50" />
+                  <label htmlFor="name" className="text-sm font-medium text-gray-900">Full Name</label>
+                  <input id="name" name="name" required placeholder="John Doe" className="flex h-11 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black disabled:cursor-not-allowed disabled:opacity-50" />
                 </div>
                 <div className="space-y-2 flex flex-col">
-                  <label htmlFor="email" className="text-sm font-medium text-zinc-300">Email Address</label>
-                  <input id="email" name="email" type="email" required placeholder="john@example.com" className="flex h-10 w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-50 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50" />
+                  <label htmlFor="email" className="text-sm font-medium text-gray-900">Email Address</label>
+                  <input id="email" name="email" type="email" required placeholder="john@example.com" className="flex h-11 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black disabled:cursor-not-allowed disabled:opacity-50" />
                 </div>
               </div>
               
               <div className="space-y-2 flex flex-col">
-                <label htmlFor="phone" className="text-sm font-medium text-zinc-300">Phone Number (Optional)</label>
-                <input id="phone" name="phone" type="tel" placeholder="+254 700 000 000" className="flex h-10 w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-50 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50" />
+                <label htmlFor="phone" className="text-sm font-medium text-gray-900">Phone Number (Optional)</label>
+                <input id="phone" name="phone" type="tel" placeholder="+254 700 000 000" className="flex h-11 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black disabled:cursor-not-allowed disabled:opacity-50" />
               </div>
               
               <div className="space-y-2 flex flex-col">
-                <label htmlFor="message" className="text-sm font-medium text-zinc-300">Message</label>
+                <label htmlFor="message" className="text-sm font-medium text-gray-900">Message</label>
                 <textarea 
                   id="message" 
                   name="message"
                   required 
                   placeholder="How can we help you?" 
-                  className="flex min-h-[150px] w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-50 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 resize-y" 
+                  className="flex min-h-[150px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black disabled:cursor-not-allowed disabled:opacity-50 resize-y" 
                 />
               </div>
               
-              <button type="submit" disabled={loading} className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8 py-2 w-full text-lg">
+              <button type="submit" disabled={loading} className="inline-flex items-center justify-center rounded-md text-sm font-bold transition-colors disabled:opacity-50 bg-black text-white hover:bg-gray-800 h-12 px-8 py-2 w-full text-lg">
                 {loading ? 'Sending...' : (
                   <>
                     Send Message
