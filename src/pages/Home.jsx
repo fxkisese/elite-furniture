@@ -73,7 +73,7 @@ export default function Home() {
                 src={src}
                 alt="Luxury furniture slide"
                 style={{
-                  width: '100%', height: '100%', objectFit: 'cover',
+                  width: '100%', height: '100%', objectFit: 'contain',
                   filter: 'grayscale(15%)',
                   transition: 'transform 8s ease-out',
                   transform: idx === currentSlideIdx ? 'scale(1.05)' : 'scale(1)',
