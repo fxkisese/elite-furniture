@@ -57,10 +57,11 @@ export default function Home() {
     <PageLayout>
       {/* Hero Section */}
       <section style={{ position: 'relative', height: 'calc(100vh - 70px)', overflow: 'hidden', minHeight: '600px', marginTop: '70px' }}>
-        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', backgroundColor: '#0A0A0A' }}>
+          {/* Blurred Background Layer */}
           {heroSlides.map((src, idx) => (
             <div
-              key={idx}
+              key={`blur-${idx}`}
               style={{
                 position: 'absolute',
                 inset: 0,
@@ -71,21 +72,48 @@ export default function Home() {
             >
               <img
                 src={src}
-                alt="Luxury furniture slide"
+                alt=""
                 style={{
-                  width: '100%', height: '100%', objectFit: 'contain',
-                  filter: 'grayscale(15%)',
-                  transition: 'transform 8s ease-out',
-                  transform: idx === currentSlideIdx ? 'scale(1.05)' : 'scale(1)',
+                  width: '100%', height: '100%', objectFit: 'cover',
+                  filter: 'blur(40px) brightness(0.3)',
+                  transform: 'scale(1.1)',
                 }}
               />
             </div>
           ))}
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.4) 50%, rgba(10,10,10,0.05) 100%)', zIndex: 1 }} />
+
+          {/* Sharp Contained Image on the Right */}
+          {heroSlides.map((src, idx) => (
+            <div
+              key={`sharp-${idx}`}
+              style={{
+                position: 'absolute',
+                top: 0, bottom: 0, right: 0,
+                width: '60%', /* Takes up the right 60% of the screen */
+                opacity: idx === currentSlideIdx ? 1 : 0,
+                transition: 'opacity 1.5s ease-in-out, transform 8s ease-out',
+                transform: idx === currentSlideIdx ? 'scale(1.02)' : 'scale(1)',
+                zIndex: 1,
+              }}
+            >
+              <img
+                src={src}
+                alt="Luxury furniture slide"
+                style={{
+                  width: '100%', height: '100%', objectFit: 'contain',
+                  objectPosition: 'right center',
+                  padding: '2rem 4rem 2rem 0', // padding so it doesn't touch the edges
+                }}
+              />
+            </div>
+          ))}
+
+          {/* Gradient Overlay for Text */}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(15,15,15,0.95) 0%, rgba(15,15,15,0.8) 40%, rgba(15,15,15,0) 100%)', zIndex: 2, pointerEvents: 'none' }} />
         </div>
 
         <div style={{
-          position: 'relative', zIndex: 1, height: '100%',
+          position: 'relative', zIndex: 10, height: '100%',
           display: 'flex', alignItems: 'center',
           maxWidth: '1200px', margin: '0 auto', padding: '0 2rem',
         }}>
