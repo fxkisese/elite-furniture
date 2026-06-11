@@ -42,48 +42,48 @@ export default function ResetPassword() {
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link to="/" className="inline-block">
-          <div className="text-3xl font-black tracking-tight text-primary">ELITE</div>
-          <div className="text-xs tracking-[0.2em] text-muted-foreground uppercase font-medium mt-1">Furniture</div>
+          <div className="text-3xl font-black tracking-tight text-gray-900">ELITE</div>
+          <div className="text-xs tracking-[0.2em] text-gray-500 uppercase font-medium mt-1">Furniture</div>
         </Link>
-        <h2 className="mt-8 text-center text-3xl font-bold tracking-tight text-foreground">Set new password</h2>
-        <p className="mt-2 text-center text-sm text-muted-foreground">
+        <h2 className="mt-8 text-center text-3xl font-bold tracking-tight text-gray-900">Set new password</h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
           Please enter your new password below.
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-card py-8 px-4 shadow-xl sm:rounded-xl sm:px-10 border border-muted">
+        <div className="bg-white py-8 px-4 shadow-xl sm:rounded-2xl sm:px-10 border border-gray-200">
           <form className="space-y-6" onSubmit={handleUpdate}>
             <div className="space-y-2 flex flex-col">
-              <label htmlFor="password" className="text-sm font-medium">New Password</label>
+              <label htmlFor="password" className="text-sm font-medium text-gray-900">New Password</label>
               <input
                 id="password"
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="flex h-11 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A570]"
               />
             </div>
 
             <div className="space-y-2 flex flex-col">
-              <label htmlFor="confirmPassword" className="text-sm font-medium">Confirm New Password</label>
+              <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-900">Confirm New Password</label>
               <input
                 id="confirmPassword"
                 type="password"
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="flex h-11 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A570]"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center rounded-md text-sm font-bold transition-colors bg-black text-white hover:bg-gray-800 h-11 w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Updating...' : 'Update password'}
+              {loading ? 'Updating password...' : 'Update password'}
             </button>
           </form>
         </div>
