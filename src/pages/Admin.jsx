@@ -51,6 +51,7 @@ const IconLogout = (p) => <svg {...ic} {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2
 const IconPlus = (p) => <svg {...ic} {...p}><path d="M12 5v14M5 12h14" /></svg>;
 const IconSearch = (p) => <svg {...ic} {...p}><circle cx="11" cy="11" r="7" /><path d="M21 21 16.7 16.7" /></svg>;
 const IconTrash = (p) => <svg {...ic} {...p}><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V6h12Z" /></svg>;
+const IconImage = (p) => <svg {...ic} {...p}><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>;
 
 /* Signature joint/tenon mark — used for active nav state */
 function JointTab() {
@@ -694,6 +695,40 @@ function ReportsPage({ sales, credit, expenses }) {
   );
 }
 
+function HeroSlidesPage({ heroSlides, handleDeleteItem, handleUploadSlide, uploadingImg }) {
+  return (
+    <div>
+      <PageHeader eyebrow="Marketing" title="Hero Slides" action={
+        <label className="cg-btn-primary" style={{ cursor: uploadingImg ? 'wait' : 'pointer' }}>
+          <IconPlus /> {uploadingImg ? 'Uploading...' : 'Upload Slide'}
+          <input type="file" accept="image/*" onChange={handleUploadSlide} style={{ display: 'none' }} disabled={uploadingImg} />
+        </label>
+      } />
+      <div style={cardStyle}>
+        <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+          <thead><tr style={{ background: COLORS.surface2 }}>
+            <th style={thStyle}>Preview</th><th style={thStyle}>Added</th><th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
+          </tr></thead>
+          <tbody>
+            {heroSlides.map((h) => (
+              <tr key={h.id} className="cg-table-row">
+                <td style={tdStyle}>
+                  <img src={h.image} alt="Slide" style={{ width: 160, height: 90, objectFit: 'cover', borderRadius: 4 }} />
+                </td>
+                <td style={{ ...tdStyle, color: COLORS.muted }}>{new Date(h.created_at).toLocaleDateString()}</td>
+                <td style={{ ...tdStyle, textAlign: 'right' }}>
+                  <button className="cg-icon-btn" onClick={() => handleDeleteItem('hero_slides', h.id)} aria-label="Delete"><IconTrash /></button>
+                </td>
+              </tr>
+            ))}
+            {heroSlides.length === 0 && <tr><td colSpan={3}><EmptyRow text="No slides added yet. Upload one above." /></td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- Layout ---------- */
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: IconGauge },
@@ -704,6 +739,7 @@ const NAV_ITEMS = [
   { id: 'reports', label: 'Reports', icon: IconChart },
   { id: 'messages', label: 'Messages', icon: IconChat },
   { id: 'quotes', label: 'Quotes', icon: IconDoc },
+  { id: 'hero', label: 'Hero Slides', icon: IconImage },
 ];
 
 function Sidebar({ activeTab, setActiveTab }) {
@@ -763,11 +799,13 @@ export default function Admin() {
   const [sales, setSales] = useState([]);
   const [credit, setCredit] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [heroSlides, setHeroSlides] = useState([]);
 
   // Dashboard State
   const [activeTab, setActiveTab] = useState('dashboard');
   const [branch, setBranch] = useState('All Branches');
   const [modal, setModal] = useState(null);
+  const [uploadingSlide, setUploadingSlide] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -779,7 +817,7 @@ export default function Admin() {
     try {
       const [
         { data: pData }, { data: mData }, { data: qData },
-        { data: sData }, { data: cData }, { data: eData }
+        { data: sData }, { data: cData }, { data: eData }, { data: hData }
       ] = await Promise.all([
         supabase.from('products').select('*').order('created_at', { ascending: false }),
         supabase.from('messages').select('*').order('created_at', { ascending: false }),
@@ -787,6 +825,7 @@ export default function Admin() {
         supabase.from('sales').select('*').order('created_at', { ascending: false }),
         supabase.from('credit').select('*').order('created_at', { ascending: false }),
         supabase.from('expenses').select('*').order('created_at', { ascending: false }),
+        supabase.from('hero_slides').select('*').order('created_at', { ascending: false }),
       ]);
       setProducts(pData || []);
       setMessages(mData || []);
@@ -794,10 +833,49 @@ export default function Admin() {
       setSales(sData || []);
       setCredit(cData || []);
       setExpenses(eData || []);
+      setHeroSlides(hData || []);
     } catch (err) {
       console.error(err);
       toast.error('Failed to load data from Supabase');
     }
+  };
+
+  const handleUploadSlide = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingSlide(true);
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1920;
+        const MAX_HEIGHT = 1080;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+        } else {
+          if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const dataUrl = canvas.toDataURL('image/webp', 0.85);
+        
+        const { error } = await supabase.from('hero_slides').insert([{ image: dataUrl }]);
+        if (error) { toast.error('Error uploading slide'); console.error(error); }
+        else { toast.success('Slide added'); loadData(); }
+        setUploadingSlide(false);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleCreateProduct = async (data) => {
@@ -891,6 +969,7 @@ export default function Admin() {
           {activeTab === 'reports' && <ReportsPage sales={sales} credit={credit} expenses={expenses} />}
           {activeTab === 'messages' && <MessagesPage messages={messages} />}
           {activeTab === 'quotes' && <QuotesPage quotes={quotes} />}
+          {activeTab === 'hero' && <HeroSlidesPage heroSlides={heroSlides} handleDeleteItem={handleDeleteItem} handleUploadSlide={handleUploadSlide} uploadingImg={uploadingSlide} />}
         </main>
       </div>
 

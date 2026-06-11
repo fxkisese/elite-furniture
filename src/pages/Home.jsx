@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import ProductCard from '@/components/products/ProductCard';
 import { ChevronRight, CheckCircle } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 const TESTIMONIALS = [
   { name: 'Amina W.', role: 'Homeowner, Karen', text: 'Excellent service and beautiful furniture. The sofa we ordered fits perfectly in our living room.' },
@@ -21,32 +22,66 @@ const TRUST_POINTS = [
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
+  const [heroSlides, setHeroSlides] = useState([]);
+  const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
 
   useEffect(() => {
-    // Fetch products logic would go here
-    // For now, just set placeholder data
-    setProducts([]);
+    async function loadData() {
+      try {
+        const { data: pData } = await supabase.from('products').select('*').eq('featured', true).limit(5);
+        setProducts(pData || []);
+        
+        const { data: hData } = await supabase.from('hero_slides').select('image').order('created_at', { ascending: false });
+        if (hData && hData.length > 0) {
+          setHeroSlides(hData.map(d => d.image));
+        } else {
+          setHeroSlides(['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1600&q=90']);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    loadData();
     
-    const timer = setInterval(() => setTestimonialIdx(i => (i + 1) % TESTIMONIALS.length), 4000);
-    return () => clearInterval(timer);
+    const testTimer = setInterval(() => setTestimonialIdx(i => (i + 1) % TESTIMONIALS.length), 4000);
+    return () => clearInterval(testTimer);
   }, []);
+
+  useEffect(() => {
+    if (heroSlides.length <= 1) return;
+    const heroTimer = setInterval(() => setCurrentSlideIdx(i => (i + 1) % heroSlides.length), 5000);
+    return () => clearInterval(heroTimer);
+  }, [heroSlides]);
 
   return (
     <PageLayout>
       {/* Hero Section */}
       <section style={{ position: 'relative', height: 'calc(100vh - 70px)', overflow: 'hidden', minHeight: '600px', marginTop: '70px' }}>
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-          <img
-            src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1600&q=90"
-            alt="Luxury furniture"
-            style={{
-              width: '100%', height: '100%', objectFit: 'cover',
-              filter: 'grayscale(30%)',
-              transition: 'transform 8s ease',
-            }}
-            onLoad={e => e.currentTarget.style.transform = 'scale(1.02)'}
-          />
-          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(10,10,10,0.72)' }} />
+          {heroSlides.map((src, idx) => (
+            <div
+              key={idx}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                opacity: idx === currentSlideIdx ? 1 : 0,
+                transition: 'opacity 1.5s ease-in-out',
+                zIndex: 0,
+              }}
+            >
+              <img
+                src={src}
+                alt="Luxury furniture slide"
+                style={{
+                  width: '100%', height: '100%', objectFit: 'cover',
+                  filter: 'grayscale(15%)',
+                  transition: 'transform 8s ease-out',
+                  transform: idx === currentSlideIdx ? 'scale(1.05)' : 'scale(1)',
+                }}
+              />
+            </div>
+          ))}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.4) 50%, rgba(10,10,10,0.05) 100%)', zIndex: 1 }} />
         </div>
 
         <div style={{
