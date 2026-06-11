@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import ProductCard from '@/components/products/ProductCard';
-import { ChevronRight, CheckCircle } from 'lucide-react';
+import { ChevronRight, CheckCircle, Lock, Truck, Headphones, Gem } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 const TESTIMONIALS = [
@@ -55,8 +55,44 @@ export default function Home() {
 
   return (
     <PageLayout>
+      {/* Top Features Banner */}
+      <div className="bg-white py-4 border-b border-gray-100 hidden md:block">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-4 gap-4 text-center divide-x divide-gray-100">
+            <div className="flex items-center justify-center space-x-4 px-2">
+              <Lock strokeWidth={1.5} className="w-10 h-10 text-red-600" />
+              <div className="text-left">
+                <p className="font-bold text-red-600 text-[15px]">Secure Payments</p>
+                <p className="text-sm text-gray-500">Payment After Delivery</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center space-x-4 px-2">
+              <Truck strokeWidth={1.5} className="w-10 h-10 text-red-600" />
+              <div className="text-left">
+                <p className="font-bold text-red-600 text-[15px]">Fast Delivery</p>
+                <p className="text-sm text-gray-500">Done Countrywide</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center space-x-4 px-2">
+              <Headphones strokeWidth={1.5} className="w-10 h-10 text-red-600" />
+              <div className="text-left">
+                <p className="font-bold text-red-600 text-[15px]">24 - 7 Support</p>
+                <p className="text-sm text-gray-500">Customer support</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center space-x-4 px-2">
+              <Gem strokeWidth={1.5} className="w-10 h-10 text-red-600" />
+              <div className="text-left">
+                <p className="font-bold text-red-600 text-[15px]">High Quality</p>
+                <p className="text-sm text-gray-500">Best Quality Products</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Hero Section */}
-      <section style={{ position: 'relative', height: 'calc(100vh - 70px)', overflow: 'hidden', minHeight: '600px', marginTop: '70px' }}>
+      <section style={{ position: 'relative', height: 'calc(100vh - 100px)', overflow: 'hidden', minHeight: '600px' }}>
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', backgroundColor: '#0A0A0A' }}>
           {/* Blurred Background Layer */}
           {heroSlides.map((src, idx) => (
