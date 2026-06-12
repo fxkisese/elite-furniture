@@ -65,12 +65,14 @@ export default function FeaturedCollection({ products = [], whatsappNumber, allP
         onClose={() => setQuickViewProduct(null)}
         onAddToCart={onAddToCart}
         whatsappNumber={whatsappNumber}
+        onGalleryOpen={setGalleryProduct}
       />
       
       <GalleryModal 
         images={galleryProduct?.images || []} 
         isOpen={!!galleryProduct} 
         onClose={() => setGalleryProduct(null)} 
+        initialIndex={galleryProduct?.initialIndex || 0}
       />
     </section>
   );

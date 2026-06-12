@@ -5,7 +5,7 @@ import Badge from './Badge';
 import { formatPrice } from '@/lib/utils';
 import './showroom.css';
 
-export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, whatsappNumber }) {
+export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, whatsappNumber, onGalleryOpen }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -56,12 +56,14 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart, 
             <Badge key={i} type={badge} />
           ))}
 
-          <div className="flex-1 relative flex items-center justify-center p-8">
+          <div className="flex-1 relative flex items-center justify-center p-8 group">
             {images[currentIndex] ? (
               <img 
                 src={images[currentIndex]} 
                 alt={product.name} 
-                className="max-w-full max-h-[50vh] object-contain mix-blend-multiply drop-shadow-xl"
+                onClick={() => onGalleryOpen && onGalleryOpen({ ...product, initialIndex: currentIndex })}
+                title="Click to open zoomable gallery"
+                className="max-w-full max-h-[50vh] object-contain mix-blend-multiply drop-shadow-xl cursor-pointer hover:scale-[1.02] transition-transform"
               />
             ) : (
               <span className="text-[var(--sc-ash)]">No Image</span>
