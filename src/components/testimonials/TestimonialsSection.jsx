@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, Quote, PenLine } from "lucide-react";
 import { testimonialsData, reviewSummary } from "./testimonialsData";
+import ReviewFormModal from "./ReviewFormModal";
+import { supabase } from "@/lib/supabase";
 import "./testimonials.css";
 
 /* -----------------------------------------------------------------------
@@ -86,11 +88,42 @@ export default function TestimonialsSection({
   const [activeIdx, setActiveIdx] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [liveReviews, setLiveReviews] = useState(reviews);
+  const [liveSummary, setLiveSummary] = useState(summary);
   const timerRef = useRef(null);
   const progressRef = useRef(null);
   const touchStartX = useRef(0);
 
-  const total = reviews.length;
+  /* -- Load approved reviews from Supabase -- */
+  useEffect(() => {
+    async function loadReviews() {
+      try {
+        const { data, error } = await supabase
+          .from("reviews")
+          .select("*")
+          .eq("approved", true)
+          .order("created_at", { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          setLiveReviews(data);
+          // Compute live summary
+          const avg = data.reduce((sum, r) => sum + r.rating, 0) / data.length;
+          setLiveSummary({
+            averageRating: Math.round(avg * 10) / 10,
+            totalReviews: data.length,
+            source: "Reviews",
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load reviews:", err);
+        // Falls back to testimonialsData
+      }
+    }
+    loadReviews();
+  }, []);
+
+  const total = liveReviews.length;
 
   /* -- Navigation helpers -- */
   const goTo = useCallback(
@@ -146,7 +179,27 @@ export default function TestimonialsSection({
     }
   };
 
-  const review = reviews[activeIdx];
+  const review = liveReviews[activeIdx];
+
+  const handleReviewSuccess = () => {
+    // Refresh reviews after submission
+    setTimeout(async () => {
+      const { data } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("approved", true)
+        .order("created_at", { ascending: false });
+      if (data && data.length > 0) {
+        setLiveReviews(data);
+        const avg = data.reduce((sum, r) => sum + r.rating, 0) / data.length;
+        setLiveSummary({
+          averageRating: Math.round(avg * 10) / 10,
+          totalReviews: data.length,
+          source: "Reviews",
+        });
+      }
+    }, 1000);
+  };
 
   return (
     <section
@@ -166,8 +219,11 @@ export default function TestimonialsSection({
 
       <div style={{ maxWidth: 800, margin: "0 auto", position: "relative", zIndex: 1 }}>
 
-        {/* Eyebrow */}
-        <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+        {/* Eyebrow + Write a Review button */}
+        <div style={{
+          textAlign: "center", marginBottom: "3rem",
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 16,
+        }}>
           <span
             className="tm-body-font"
             style={{
@@ -177,6 +233,27 @@ export default function TestimonialsSection({
           >
             Client Testimonials
           </span>
+          <button
+            onClick={() => { setIsPaused(true); setShowReviewForm(true); }}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              padding: "10px 24px",
+              backgroundColor: "transparent",
+              border: "1px solid #2A2A2A",
+              color: "#D4AF37",
+              fontSize: 10, fontWeight: 700,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              cursor: "pointer",
+              borderRadius: 4,
+              fontFamily: "Inter, sans-serif",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#D4AF37"; e.currentTarget.style.backgroundColor = "rgba(212,175,55,0.08)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#2A2A2A"; e.currentTarget.style.backgroundColor = "transparent"; }}
+          >
+            <PenLine size={14} /> Write a Review
+          </button>
         </div>
 
         {/* Quote icon */}
@@ -274,7 +351,7 @@ export default function TestimonialsSection({
 
           {/* Dots (dash style) */}
           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            {reviews.map((_, i) => (
+            {liveReviews.map((_, i) => (
               <button
                 key={i}
                 onClick={() => goTo(i)}
@@ -322,7 +399,7 @@ export default function TestimonialsSection({
         )}
 
         {/* Summary row */}
-        {summary && (
+        {liveSummary && (
           <div
             className="tm-count-up"
             style={{
@@ -337,7 +414,7 @@ export default function TestimonialsSection({
                 className="tm-body-font"
                 style={{ color: "#FFFFFF", fontWeight: 700, fontSize: 18 }}
               >
-                {summary.averageRating}
+                {liveSummary.averageRating}
               </span>
             </div>
             <div style={{ width: 1, height: 20, backgroundColor: "#2A2A2A" }} />
@@ -347,13 +424,20 @@ export default function TestimonialsSection({
             >
               Based on{" "}
               <span style={{ color: "#FFFFFF", fontWeight: 600 }}>
-                {summary.totalReviews}
+                {liveSummary.totalReviews}
               </span>{" "}
-              {summary.source}
+              {liveSummary.source}
             </span>
           </div>
         )}
       </div>
+
+      {/* Review Form Modal */}
+      <ReviewFormModal
+        isOpen={showReviewForm}
+        onClose={() => { setShowReviewForm(false); setIsPaused(false); }}
+        onSuccess={handleReviewSuccess}
+      />
     </section>
   );
 }

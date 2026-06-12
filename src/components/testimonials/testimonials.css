@@ -72,6 +72,12 @@
   backdrop-filter: blur(8px);
 }
 
+/* -- Modal animations (also used by ReviewFormModal) -- */
+@keyframes sc-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sc-scale-in { from { opacity: 0; transform: scale(0.96) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.sc-fade-in { animation: sc-fade-in 0.25s ease; }
+.sc-scale-in { animation: sc-scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+
 /* -- Progress bar for autoplay -- */
 .tm-progress-bar {
   background: linear-gradient(90deg, var(--tm-gold) 0%, var(--tm-gold-soft) 100%);
