@@ -20,7 +20,7 @@ export default function FeaturedCollection({
   products = [],
   onAddToCart,
   allProductsHref = "/shop",
-  whatsappNumber = "254700000000",
+  whatsappNumber = "254793816450",
 }) {
   const [gallery, setGallery] = useState(null); // { images, index, name }
   const [quickViewProduct, setQuickViewProduct] = useState(null);

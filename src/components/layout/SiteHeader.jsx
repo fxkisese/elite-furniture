@@ -72,7 +72,7 @@ export default function SiteHeader() {
 
         {/* Right: Phone + Cart + CTA */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }} className="hidden md:flex">
-          <a href="tel:+254700000000" style={{ color: '#D4AF37', display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}>
+          <a href="tel:+254793816450" style={{ color: '#D4AF37', display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}>
             <Phone size={16} color="#D4AF37" />
           </a>
           

@@ -232,7 +232,7 @@ export default function Home() {
           reviews: p.review_count || 0,
           badges: p.badge ? [p.badge] : []
         }))}
-        whatsappNumber="254700000000"
+        whatsappNumber="254793816450"
         allProductsHref="/products"
         onAddToCart={addToCart}
       />

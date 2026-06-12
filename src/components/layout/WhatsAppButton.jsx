@@ -1,7 +1,7 @@
 import React from 'react';
 
 export default function WhatsAppButton() {
-  const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '1234567890';
+  const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '254793816450';
   const message = encodeURIComponent('Hello, I would like to know more about Elite Furniture products.');
   const href = `https://wa.me/${phoneNumber}?text=${message}`;
 

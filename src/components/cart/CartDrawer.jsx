@@ -34,7 +34,7 @@ export default function CartDrawer() {
 
     const encodedMessage = encodeURIComponent(message);
     // Replace with the actual phone number used by the store
-    const phoneNumber = "254700000000"; 
+    const phoneNumber = "254793816450"; 
     window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
   };
 

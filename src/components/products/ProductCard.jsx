@@ -35,7 +35,7 @@ export default function ProductCard({ product }) {
   const handleWhatsApp = (e) => {
     e.stopPropagation();
     const message = `Hello, I'm interested in the ${title} from Furniture Elite Space.`;
-    window.open(`https://wa.me/254700000000?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/254793816450?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const openGallery = (e) => {

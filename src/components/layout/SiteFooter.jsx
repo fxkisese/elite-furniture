@@ -77,8 +77,8 @@ export default function SiteFooter() {
           <div>
             <div className="label-upper" style={{ color: '#AAAAAA', marginBottom: '1.5rem' }}>CONTACT</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <a href="tel:+254700000000" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', color: '#777777', textDecoration: 'none', fontSize: '13px' }}>
-                <Phone size={14} /> +254 700 000 000
+              <a href="tel:+254793816450" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', color: '#777777', textDecoration: 'none', fontSize: '13px' }}>
+                <Phone size={14} /> 0793 816 450
               </a>
               <a href="mailto:info@furnitureelitespace.co.ke" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', color: '#777777', textDecoration: 'none', fontSize: '13px' }}>
                 <Mail size={14} /> info@furnitureelitespace.co.ke

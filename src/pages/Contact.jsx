@@ -119,7 +119,7 @@ export default function Contact() {
               
               <div className="space-y-2 flex flex-col">
                 <label htmlFor="phone" className="text-sm font-medium text-gray-900">Phone Number (Optional)</label>
-                <input id="phone" name="phone" type="tel" placeholder="+254 700 000 000" className="flex h-11 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black disabled:cursor-not-allowed disabled:opacity-50" />
+                <input id="phone" name="phone" type="tel" placeholder="+254 793 816 450" className="flex h-11 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black disabled:cursor-not-allowed disabled:opacity-50" />
               </div>
               
               <div className="space-y-2 flex flex-col">
