@@ -148,7 +148,12 @@ function Modal({ title, onClose, children }) {
 
 /* ---------- Forms ---------- */
 function ProductForm({ onSubmit, onCancel }) {
-  const [v, set, setValues] = useForm({ name: '', category: 'Living Room', subcategory: '', price: '', description: '', in_stock: true, featured: false, image: '' });
+  const [v, set, setValues] = useForm({ 
+    name: '', category: 'Living Room', subcategory: '', 
+    price: '', discount_price: '', 
+    description: '', in_stock: true, featured: false, 
+    image: '', images: [], badge: '', rating: 5.0, review_count: 0 
+  });
   const [uploadingImg, setUploadingImg] = useState(false);
 
   const handleImageUpload = async (e) => {
@@ -183,8 +188,12 @@ function ProductForm({ onSubmit, onCancel }) {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         
-        const dataUrl = canvas.toDataURL('image/webp', 0.7);
-        setValues((prev) => ({ ...prev, image: dataUrl }));
+        const dataUrl = canvas.toDataURL('image/webp', 0.8);
+        setValues((prev) => {
+          const newImages = [...(prev.images || []), dataUrl];
+          // We set the primary 'image' to the first one uploaded for backward compatibility
+          return { ...prev, images: newImages, image: newImages[0] || '' };
+        });
         setUploadingImg(false);
       };
       img.src = event.target.result;
@@ -192,8 +201,24 @@ function ProductForm({ onSubmit, onCancel }) {
     reader.readAsDataURL(file);
   };
 
+  const removeImage = (index) => {
+    setValues((prev) => {
+      const newImages = prev.images.filter((_, i) => i !== index);
+      return { ...prev, images: newImages, image: newImages[0] || '' };
+    });
+  };
+
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, price: Number(v.price) || null }); }}>
+    <form onSubmit={(e) => { 
+      e.preventDefault(); 
+      onSubmit({ 
+        ...v, 
+        price: Number(v.price) || null,
+        discount_price: Number(v.discount_price) || null,
+        rating: Number(v.rating) || 5.0,
+        review_count: Number(v.review_count) || 0
+      }); 
+    }}>
       <div className="space-y-4">
         <div><label style={labelStyle}>Product name *</label><input style={inputStyle} className="cg-input" value={v.name} onChange={set('name')} required placeholder="e.g. Chesterfield Sofa Set" /></div>
         
@@ -211,8 +236,9 @@ function ProductForm({ onSubmit, onCancel }) {
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
-          <div><label style={labelStyle}>Price (KSh)</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.price} onChange={set('price')} placeholder="Leave blank for POA" /></div>
+        <div className="grid grid-cols-3 gap-4">
+          <div><label style={labelStyle}>Regular Price (KSh)</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.price} onChange={set('price')} placeholder="Leave blank for POA" /></div>
+          <div><label style={labelStyle}>Discount Price</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.discount_price} onChange={set('discount_price')} placeholder="Optional" /></div>
           <div>
             <label style={labelStyle}>Status</label>
             <select style={inputStyle} className="cg-input" value={v.in_stock ? 'In Stock' : 'Out of Stock'} onChange={(e) => setValues(prev => ({ ...prev, in_stock: e.target.value === 'In Stock' }))}>
@@ -222,18 +248,40 @@ function ProductForm({ onSubmit, onCancel }) {
           </div>
         </div>
 
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label style={labelStyle}>Badge</label>
+            <select style={inputStyle} className="cg-input" value={v.badge || ''} onChange={set('badge')}>
+              <option value="">None</option>
+              <option value="New">New</option>
+              <option value="Best Seller">Best Seller</option>
+              <option value="Sale">Sale</option>
+              <option value="Limited Stock">Limited Stock</option>
+            </select>
+          </div>
+          <div><label style={labelStyle}>Rating (1-5)</label><input style={inputStyle} className="cg-input" type="number" min="1" max="5" step="0.1" value={v.rating} onChange={set('rating')} /></div>
+          <div><label style={labelStyle}>Review Count</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.review_count} onChange={set('review_count')} /></div>
+        </div>
+
         <div>
           <label style={labelStyle}>Description</label>
           <textarea style={{...inputStyle, resize: 'none'}} rows={3} className="cg-input" value={v.description} onChange={set('description')} />
         </div>
 
         <div>
-          <label style={labelStyle}>Product Image</label>
-          <div className="flex items-center gap-4">
-            {v.image && <img src={v.image} alt="preview" style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: 4, border: `1px solid ${COLORS.border}` }} />}
-            <label style={{ cursor: uploadingImg ? 'wait' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 12px', border: `1px solid ${COLORS.border}`, borderRadius: 6, fontSize: 13 }}>
-              <Upload size={14} /> {uploadingImg ? 'Uploading...' : 'Upload Image'}
+          <label style={labelStyle}>Product Images (Upload Multiple)</label>
+          <div className="flex items-center gap-4 flex-wrap">
+            {(v.images && v.images.length > 0 ? v.images : (v.image ? [v.image] : [])).map((imgUrl, i) => (
+              <div key={i} className="relative group">
+                <img src={imgUrl} alt={`preview-${i}`} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: 4, border: `1px solid ${COLORS.border}` }} />
+                <button type="button" onClick={() => removeImage(i)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                </button>
+              </div>
+            ))}
+            <label style={{ cursor: uploadingImg ? 'wait' : 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 60, height: 60, border: `1px dashed ${COLORS.border}`, borderRadius: 6 }}>
               <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} disabled={uploadingImg} />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={COLORS.muted} strokeWidth="1.5"><path d="M12 5v14M5 12h14"/></svg>
             </label>
           </div>
         </div>
