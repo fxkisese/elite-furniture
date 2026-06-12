@@ -1,0 +1,87 @@
+/* ==========================================================================
+   Testimonials — Dark section styles
+   Matches the black / white / gold showroom palette
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600;700&display=swap');
+
+/* -- Tokens (inherit from showroom where possible) -- */
+:root {
+  --tm-bg:        #0A0A0A;
+  --tm-surface:   #141414;
+  --tm-border:    #1E1E1E;
+  --tm-ink:       #0b0b0c;
+  --tm-paper:     #FFFFFF;
+  --tm-gold:      #D4AF37;
+  --tm-gold-soft: #efe3c8;
+  --tm-ash:       #555555;
+  --tm-muted:     #888888;
+}
+
+/* -- Quote typography -- */
+.tm-quote-font {
+  font-family: 'Fraunces', Georgia, serif;
+}
+.tm-body-font {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* -- Carousel slide transition -- */
+@keyframes tm-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tm-fade-in {
+  animation: tm-fade-in 0.5s ease-out;
+}
+
+/* -- Star shimmer on hover -- */
+@keyframes tm-star-shimmer {
+  0%   { filter: brightness(1); }
+  50%  { filter: brightness(1.4); }
+  100% { filter: brightness(1); }
+}
+.tm-star-shimmer:hover {
+  animation: tm-star-shimmer 0.6s ease;
+}
+
+/* -- Dot indicator pulse for active -- */
+@keyframes tm-dot-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+
+/* -- Summary bar counter animation -- */
+@keyframes tm-count-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tm-count-up {
+  animation: tm-count-up 0.6s ease-out;
+}
+
+/* -- Avatar ring glow -- */
+.tm-avatar-ring {
+  box-shadow: 0 0 0 2px var(--tm-gold), 0 0 12px rgba(212, 175, 55, 0.25);
+}
+
+/* -- Google logo badge -- */
+.tm-google-badge {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(8px);
+}
+
+/* -- Progress bar for autoplay -- */
+.tm-progress-bar {
+  background: linear-gradient(90deg, var(--tm-gold) 0%, var(--tm-gold-soft) 100%);
+  transition: width 0.1s linear;
+}
+
+/* -- Reduced motion -- */
+@media (prefers-reduced-motion: reduce) {
+  .tm-fade-in, .tm-star-shimmer, .tm-count-up {
+    animation: none !important;
+    transition: none !important;
+  }
+}

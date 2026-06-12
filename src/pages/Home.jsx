@@ -2,15 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import FeaturedCollection from '@/components/showroom-components/FeaturedCollection';
+import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import { useCart } from '@/lib/CartContext';
 import { ChevronRight, CheckCircle, Lock, Truck, Headphones, Gem } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-const TESTIMONIALS = [
-  { name: 'Amina W.', role: 'Homeowner, Karen', text: 'Excellent service and beautiful furniture. The sofa we ordered fits perfectly in our living room.' },
-  { name: 'David K.', role: 'Office Manager, Westlands', text: 'Delivered exactly what we ordered, on time. The quality exceeds the price point.' },
-  { name: 'Grace M.', role: 'Airbnb Host, Kileleshwa', text: 'My guests consistently compliment the furniture. Furniture Elite Space never disappoints.' },
-];
+
 
 const TRUST_POINTS = [
   'Quality Craftsmanship',
@@ -22,7 +19,6 @@ const TRUST_POINTS = [
 
 export default function Home() {
   const [products, setProducts] = useState([]);
-  const [testimonialIdx, setTestimonialIdx] = useState(0);
   const [heroSlides, setHeroSlides] = useState([]);
   const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
   const { addToCart } = useCart();
@@ -44,9 +40,6 @@ export default function Home() {
       }
     }
     loadData();
-    
-    const testTimer = setInterval(() => setTestimonialIdx(i => (i + 1) % TESTIMONIALS.length), 4000);
-    return () => clearInterval(testTimer);
   }, []);
 
   useEffect(() => {
@@ -302,57 +295,7 @@ export default function Home() {
       <div style={{ borderBottom: '1px solid #2A2A2A' }} />
 
       {/* Testimonials */}
-      <section style={{ backgroundColor: '#0A0A0A', padding: '6rem 2rem' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '10px', letterSpacing: '0.3em', color: '#555555', textTransform: 'uppercase', marginBottom: '3rem', textAlign: 'center' }}>
-            CLIENT TESTIMONIALS
-          </div>
-
-          <div style={{ maxWidth: '700px', margin: '0 auto', textAlign: 'center' }}>
-            <div style={{
-              fontFamily: 'Space Grotesk, sans-serif',
-              fontSize: 'clamp(1.2rem, 3vw, 1.8rem)',
-              fontWeight: 300,
-              letterSpacing: '-0.02em',
-              color: '#FFFFFF',
-              lineHeight: 1.5,
-              marginBottom: '2rem',
-              minHeight: '100px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'opacity 0.5s ease',
-            }}>
-              "{TESTIMONIALS[testimonialIdx].text}"
-            </div>
-
-            <div style={{ marginBottom: '2.5rem' }}>
-              <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: '13px', color: '#FFFFFF', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>
-                {TESTIMONIALS[testimonialIdx].name}
-              </div>
-              <div style={{ fontSize: '11px', color: '#555555', letterSpacing: '0.1em' }}>
-                {TESTIMONIALS[testimonialIdx].role}
-              </div>
-            </div>
-
-            {/* Dots */}
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-              {TESTIMONIALS.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setTestimonialIdx(i)}
-                  style={{
-                    width: i === testimonialIdx ? '24px' : '8px',
-                    height: '2px',
-                    backgroundColor: i === testimonialIdx ? '#FFFFFF' : '#333333',
-                    border: 'none', cursor: 'pointer',
-                    transition: 'width 0.3s ease, background 0.3s ease',
-                    padding: 0,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      <TestimonialsSection />
 
       {/* CTA Banner */}
       <section style={{
