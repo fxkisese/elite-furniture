@@ -119,12 +119,7 @@ export default function Home() {
           display: 'flex', alignItems: 'center',
           maxWidth: '1200px', margin: '0 auto', padding: '0 2rem',
         }}>
-          <div style={{ maxWidth: '700px' }}>
-            <div style={{
-              fontFamily: 'Space Grotesk, sans-serif',
-              fontSize: '11px',
-              letterSpacing: '0.35em',
-              textTransform: 'uppercase',
+
           <div style={{ maxWidth: '600px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '1.5rem' }}>
               <div style={{ width: '40px', height: '1px', backgroundColor: '#555' }} />
