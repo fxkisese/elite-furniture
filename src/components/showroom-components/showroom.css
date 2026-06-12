@@ -1,0 +1,80 @@
+:root {
+  --sc-ink: #0b0b0c;     /* near-black */
+  --sc-paper: #ffffff;   /* white */
+  --sc-stone: #f6f4f0;   /* image background */
+  --sc-gold: #D4AF37;    /* accent - updated to Elite Furniture Gold */
+  --sc-gold-soft: #efe3c8;
+  --sc-ash: #767371;     /* muted text */
+  --sc-line: #e8e4dd;    /* borders */
+}
+
+/* Animations */
+@keyframes sc-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.sc-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: sc-shimmer 2s infinite linear;
+}
+
+@keyframes sc-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.sc-pulse-anim {
+  animation: sc-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Custom Scrollbar for Thumbnails */
+.sc-scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.sc-scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Gallery Frame Animation */
+.sc-hover-frame::before,
+.sc-hover-frame::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid transparent;
+  transition: all 0.4s ease-in-out;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.sc-hover-frame::before {
+  top: 16px;
+  left: 16px;
+  border-top-color: var(--sc-gold);
+  border-left-color: var(--sc-gold);
+  opacity: 0;
+  transform: translate(-8px, -8px);
+}
+
+.sc-hover-frame::after {
+  bottom: 16px;
+  right: 16px;
+  border-bottom-color: var(--sc-gold);
+  border-right-color: var(--sc-gold);
+  opacity: 0;
+  transform: translate(8px, 8px);
+}
+
+.group:hover .sc-hover-frame::before {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+.group:hover .sc-hover-frame::after {
+  opacity: 1;
+  transform: translate(0, 0);
+}

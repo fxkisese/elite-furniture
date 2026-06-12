@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
-import ProductCard from '@/components/products/ProductCard';
+import FeaturedCollection from '@/components/showroom-components/FeaturedCollection';
+import { useCart } from '@/lib/CartContext';
 import { ChevronRight, CheckCircle, Lock, Truck, Headphones, Gem } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -24,6 +25,7 @@ export default function Home() {
   const [testimonialIdx, setTestimonialIdx] = useState(0);
   const [heroSlides, setHeroSlides] = useState([]);
   const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     async function loadData() {
@@ -229,64 +231,23 @@ export default function Home() {
       <div style={{ borderBottom: '2px solid #D4AF37' }} />
 
       {/* Featured Products */}
-      <section style={{ backgroundColor: '#FFFFFF', padding: '5rem 2rem' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{
-            display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
-            marginBottom: '2.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #EEEEEE',
-            flexWrap: 'wrap', gap: '1rem',
-          }}>
-            <div>
-              <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '11px', letterSpacing: '0.2em', color: '#D4AF37', textTransform: 'uppercase', fontWeight: 600, marginBottom: '0.5rem' }}>
-                SELECTED PIECES
-              </div>
-              <h2 style={{
-                fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700,
-                fontSize: 'clamp(1.5rem, 3vw, 2rem)', letterSpacing: '-0.03em', color: '#0A0A0A',
-                margin: 0,
-              }}>
-                FEATURED COLLECTION
-              </h2>
-            </div>
-            <Link to="/products" style={{
-              color: '#0A0A0A', textDecoration: 'none',
-              fontFamily: 'Space Grotesk, sans-serif', fontSize: '11px',
-              fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase',
-              display: 'flex', alignItems: 'center', gap: '6px',
-              borderBottom: '2px solid #D4AF37', paddingBottom: '2px',
-            }}>
-              ALL PRODUCTS <ChevronRight size={12} />
-            </Link>
-          </div>
-
-          {products.length === 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem' }}>
-              {['L-Shape Sectional Sofa', '3-Seater Chesterfield Sofa', 'King Platform Bed', '8-Seater Dining Set', 'Executive Office Desk'].map((name, i) => (
-                <ProductCard key={i} product={{
-                  id: i, name,
-                  category: ['Living Room', 'Living Room', 'Bedroom', 'Dining', 'Office'][i],
-                  subcategory: ['SOFAS', 'SOFAS', 'BEDS', 'DINING SETS', 'EXECUTIVE DESKS'][i],
-                  price: [95000, 72000, 68000, 110000, 52000][i],
-                  description: ['Contemporary L-shaped sectional with premium fabric upholstery. Available in...', 'Classic Chesterfield design with deep-button tufting and rolled arms. Premium leather...', 'Low-profile king platform bed with upholstered headboard. Solid wood slats...', 'Solid oak dining table with 8 upholstered chairs. Extendable design from 180cm to...', 'L-shaped executive desk with built-in cable tray, lockable drawers, and integrated pow...'][i],
-                  image: [
-                    'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80',
-                    'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80',
-                    'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=80',
-                    'https://images.unsplash.com/photo-1449247709967-d4461a6a6103?w=600&q=80',
-                    'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600&q=80',
-                  ][i],
-                }} />
-              ))}
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem' }}>
-              {products.map(p => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      <FeaturedCollection 
+        products={products.map(p => ({
+          id: p.id,
+          category: p.category,
+          name: p.name,
+          description: p.description,
+          images: p.images && p.images.length > 0 ? p.images : (p.image ? [p.image] : []),
+          price: p.discount_price || p.price,
+          originalPrice: p.discount_price ? p.price : null,
+          rating: p.rating || 5.0,
+          reviews: p.review_count || 0,
+          badges: p.badge ? [p.badge] : []
+        }))}
+        whatsappNumber="254700000000"
+        allProductsHref="/products"
+        onAddToCart={addToCart}
+      />
 
       {/* Section Divider */}
       <div style={{ borderBottom: '1px solid #2A2A2A' }} />
