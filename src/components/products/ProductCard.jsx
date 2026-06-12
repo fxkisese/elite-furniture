@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { formatPrice } from '@/lib/utils';
-import { Heart, ShoppingCart, MessageCircle, Maximize2, Star } from 'lucide-react';
+import { Heart, ShoppingCart, MessageCircle, Maximize2, Star, Award } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import ProductGalleryModal from './ProductGalleryModal';
 
@@ -64,9 +64,15 @@ export default function ProductCard({ product }) {
           {/* Top Overlays */}
           <div className="absolute top-4 left-4 flex flex-col gap-2 z-10 pointer-events-none">
             {badge && (
-              <span className="bg-[#0A0A0A] text-white px-3 py-1 rounded-sm text-[10px] font-bold tracking-widest uppercase shadow-md inline-block w-max">
-                {badge}
-              </span>
+              badge === 'Best Seller' ? (
+                <span className="bg-[#D4AF37] text-[#0A0A0A] px-3 py-1 rounded-sm text-[10px] font-bold tracking-widest uppercase shadow-md inline-flex items-center gap-1 w-max">
+                  <Award className="w-3 h-3" /> {badge}
+                </span>
+              ) : (
+                <span className="bg-[#0A0A0A] text-white px-3 py-1 rounded-sm text-[10px] font-bold tracking-widest uppercase shadow-md inline-block w-max">
+                  {badge}
+                </span>
+              )
             )}
             {hasDiscount && (
               <span className="bg-red-600 text-white px-3 py-1 rounded-sm text-[10px] font-bold tracking-widest uppercase shadow-md inline-block w-max">
