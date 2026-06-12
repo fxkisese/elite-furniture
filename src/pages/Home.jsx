@@ -297,6 +297,37 @@ export default function Home() {
       {/* Testimonials */}
       <TestimonialsSection />
 
+      {/* Section Divider */}
+      <div style={{ borderBottom: '1px solid #2A2A2A' }} />
+
+      {/* Location Map */}
+      <section style={{ backgroundColor: '#0A0A0A', padding: '6rem 2rem' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '10px', letterSpacing: '0.3em', color: '#555555', textTransform: 'uppercase', marginBottom: '3rem', textAlign: 'center' }}>
+            VISIT OUR SHOWROOM
+          </div>
+          <div style={{
+            width: '100%',
+            height: '400px',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            border: '1px solid #1E1E1E',
+            backgroundColor: '#111',
+          }}>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d127641.05063065673!2d36.74411135!3d-1.2920659000000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1172d84d49a7%3A0xf7cf0254b297924c!2sNairobi%2C%20Kenya!5e0!3m2!1sen!2sus!4v1718000000000!5m2!1sen!2sus"
+              width="100%"
+              height="100%"
+              style={{ border: 0, filter: 'grayscale(100%) invert(92%) contrast(83%)' }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Elite Furniture Showroom Location"
+            ></iframe>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Banner */}
       <section style={{
         backgroundColor: '#FFFFFF', padding: '7rem 2rem',
