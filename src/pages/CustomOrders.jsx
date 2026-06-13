@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import PageLayout from '@/components/layout/PageLayout';
-import { CheckCircle2, ArrowRight, Plus, Trash2, Package, PenLine, ImageOff } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Plus, Trash2, Package, PenLine, ImageOff, X, Search } from 'lucide-react';
 import { cn, formatPrice } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
@@ -258,6 +258,7 @@ export default function CustomOrders() {
                       index={idx}
                       item={item}
                       total={itemTotal(item)}
+                      catalog={catalog}
                       catalogByCategory={catalogByCategory}
                       onSourceChange={(source) => handleSourceChange(item.id, source)}
                       onCatalogPick={(productId) => handleCatalogPick(item.id, productId)}
@@ -315,7 +316,8 @@ export default function CustomOrders() {
   );
 }
 
-function QuoteItemRow({ index, item, total, catalogByCategory, onSourceChange, onCatalogPick, onChange, onRemove, canRemove }) {
+function QuoteItemRow({ index, item, total, catalog, catalogByCategory, onSourceChange, onCatalogPick, onChange, onRemove, canRemove }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const inputClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
@@ -366,21 +368,27 @@ function QuoteItemRow({ index, item, total, catalogByCategory, onSourceChange, o
           {item.source === 'catalog' ? (
             <div className="space-y-2 flex flex-col">
               <label className="text-sm font-medium">Item *</label>
-              <select
-                value={item.productId}
-                onChange={(e) => onCatalogPick(e.target.value)}
-                required
-                className={cn(inputClass, "cursor-pointer")}
-              >
-                <option value="">Select a product from our catalogue...</option>
-                {Object.entries(catalogByCategory).map(([cat, products]) => (
-                  <optgroup key={cat} label={cat}>
-                    {products.map(p => (
-                      <option key={p.id} value={p.id}>{p.title || p.name}</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
+              {item.productId ? (
+                <div className="flex items-center justify-between h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm">
+                  <span className="font-medium text-gray-900 truncate">{item.name}</span>
+                  <button type="button" onClick={() => setIsModalOpen(true)} className="text-xs font-bold text-[#D4AF37] hover:text-black">CHANGE</button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(true)}
+                  className="flex items-center justify-center h-10 w-full rounded-md border-2 border-dashed border-gray-300 bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-600 hover:border-[#D4AF37] hover:text-[#0A0A0A] hover:bg-white transition-all"
+                >
+                  <Search className="w-4 h-4 mr-2" /> Browse Catalog
+                </button>
+              )}
+              
+              <ProductSelectorModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                catalog={catalog}
+                onSelect={onCatalogPick}
+              />
             </div>
           ) : (
             <div className="space-y-2 flex flex-col">
@@ -455,3 +463,90 @@ function QuoteItemRow({ index, item, total, catalogByCategory, onSourceChange, o
     </div>
   );
 }
+
+function ProductSelectorModal({ isOpen, onClose, catalog, onSelect }) {
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('All');
+
+  if (!isOpen) return null;
+
+  const categories = ['All', ...new Set(catalog.map(p => p.category || 'Other'))];
+
+  const filtered = catalog.filter(p => {
+    if (category !== 'All' && (p.category || 'Other') !== category) return false;
+    if (search && !((p.title || p.name || '').toLowerCase().includes(search.toLowerCase()))) return false;
+    return true;
+  });
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 md:p-6 border-b">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Select a Product</h2>
+            <p className="text-sm text-gray-500">Browse our catalogue to add items to your quote</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Filters */}
+        <div className="p-5 border-b bg-gray-50 flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              placeholder="Search catalog by name..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="flex h-11 w-full rounded-md border border-gray-300 bg-white pl-9 pr-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A570]"
+            />
+          </div>
+          <select
+            value={category}
+            onChange={e => setCategory(e.target.value)}
+            className="flex h-11 items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A570] sm:w-[220px]"
+          >
+            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+
+        {/* Grid */}
+        <div className="p-5 md:p-6 overflow-y-auto flex-1 bg-gray-50/30">
+          {filtered.length === 0 ? (
+            <div className="text-center py-16 flex flex-col items-center">
+              <Package className="w-12 h-12 text-gray-300 mb-4" />
+              <p className="text-lg font-bold text-gray-900">No products found</p>
+              <p className="text-gray-500">Try adjusting your search or category filter.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {filtered.map(product => (
+                <button
+                  key={product.id}
+                  onClick={() => { onSelect(product.id); onClose(); }}
+                  className="group flex flex-col text-left bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-[#D4AF37] hover:shadow-lg transition-all"
+                >
+                  <div className="aspect-square bg-gray-100 overflow-hidden relative">
+                    {(product.imageUrl || product.image) ? (
+                      <img src={product.imageUrl || product.image} alt={product.title || product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-300"><ImageOff className="w-8 h-8" /></div>
+                    )}
+                  </div>
+                  <div className="p-4 flex flex-col flex-1">
+                    <span className="text-[10px] text-gray-500 font-bold tracking-wider uppercase mb-1">{product.category || 'Other'}</span>
+                    <span className="font-semibold text-sm text-gray-900 line-clamp-2 mb-2 flex-1 group-hover:text-[#D4AF37] transition-colors">{product.title || product.name}</span>
+                    <span className="font-black text-sm">{formatPrice(product.price)}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
