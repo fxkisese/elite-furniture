@@ -42,9 +42,12 @@ const emptyItem = () => ({
 });
 
 export default function CustomOrders() {
-  const [success, setSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [timeline, setTimeline] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [discountType, setDiscountType] = useState('percentage');
+  const [discountValue, setDiscountValue] = useState('');
+  const [deliveryFee, setDeliveryFee] = useState('');
   const [items, setItems] = useState([emptyItem()]);
   const [catalog, setCatalog] = useState(FALLBACK_CATALOG);
 
@@ -112,9 +115,24 @@ export default function CustomOrders() {
     return qty * price;
   };
 
-  const grandTotal = useMemo(
+  const itemsSubtotal = useMemo(
     () => items.reduce((sum, item) => sum + itemTotal(item), 0),
     [items]
+  );
+
+  const discountAmount = useMemo(() => {
+    const val = Number(discountValue) || 0;
+    if (discountType === 'percentage') {
+      return itemsSubtotal * (val / 100);
+    }
+    return val;
+  }, [itemsSubtotal, discountType, discountValue]);
+
+  const deliveryAmount = Number(deliveryFee) || 0;
+
+  const grandTotal = useMemo(
+    () => Math.max(0, itemsSubtotal - discountAmount + deliveryAmount),
+    [itemsSubtotal, discountAmount, deliveryAmount]
   );
 
   const handleSubmit = async (e) => {
@@ -146,15 +164,20 @@ export default function CustomOrders() {
       `${idx + 1}. ${it.name} x${it.quantity}${it.dimensions ? ` (${it.dimensions})` : ''} \u2014 ${formatPrice(it.price_per_item)} each = ${formatPrice(it.total)}${it.description ? `\n   Description: ${it.description}` : ''}`
     ).join('\n');
 
-    const notes = `Timeline: ${timeline || 'Not specified'}\nGrand Total: ${formatPrice(grandTotal)}\n\nItems:\n${itemsSummary}`;
+    const notesStr = `Timeline: ${timeline || 'Not specified'}\nSubtotal: ${formatPrice(itemsSubtotal)}\nDiscount: -${formatPrice(discountAmount)}\nDelivery: ${formatPrice(deliveryAmount)}\nGrand Total: ${formatPrice(grandTotal)}\n\nItems:\n${itemsSummary}`;
 
     const data = {
       name: form.get('name'),
       email: form.get('email'),
       phone: form.get('phone'),
       items: quoteItems,
+      subtotal: itemsSubtotal,
+      discount_type: discountType,
+      discount_value: Number(discountValue) || 0,
+      discount_amount: discountAmount,
+      delivery_fee: deliveryAmount,
       grand_total: grandTotal,
-      notes: notes,
+      notes: notesStr,
     };
 
     const { error } = await supabase.from('quotes').insert([data]);
@@ -221,9 +244,9 @@ export default function CustomOrders() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="p-8 md:p-12">
-            <form onSubmit={handleSubmit} className="space-y-12">
+        <form onSubmit={handleSubmit} className="grid lg:grid-cols-[1fr_380px] gap-8 items-start">
+          <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <div className="p-8 md:p-12 space-y-12">
 
               {/* Contact Details */}
               <section className="space-y-6">
@@ -277,11 +300,7 @@ export default function CustomOrders() {
                   <Plus className="w-4 h-4" /> Add Another Item
                 </button>
 
-                {/* Grand Total */}
-                <div className="flex items-center justify-between bg-[#0A0A0A] text-white rounded-xl px-6 py-5">
-                  <span className="font-bold tracking-widest uppercase text-sm">Estimated Grand Total</span>
-                  <span className="text-2xl font-black text-[#D4AF37]">{formatPrice(grandTotal)}</span>
-                </div>
+
               </section>
 
               {/* Logistics */}
@@ -299,18 +318,94 @@ export default function CustomOrders() {
                 </div>
               </section>
 
-              <div className="pt-6">
+            </div>
+          </div>
+
+          {/* Sticky Summary Card */}
+          <div className="sticky top-24 rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden flex flex-col">
+            <div className="bg-[#0A0A0A] text-white px-6 py-4">
+              <h3 className="font-bold tracking-widest uppercase text-sm">Order Summary</h3>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {/* Add discount support */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700">Add Discount</label>
+                <div className="flex gap-2">
+                  <select 
+                    value={discountType} 
+                    onChange={(e) => setDiscountType(e.target.value)}
+                    className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm w-[130px] shrink-0"
+                  >
+                    <option value="percentage">Percentage (%)</option>
+                    <option value="fixed">Fixed Amount (Ksh)</option>
+                  </select>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={discountValue}
+                    onChange={(e) => setDiscountValue(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700">Delivery Fee (Ksh)</label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={deliveryFee}
+                  onChange={(e) => setDeliveryFee(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+              </div>
+
+              <div className="h-px bg-gray-200" />
+
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between text-gray-600">
+                  <span>Quantity:</span>
+                  <span className="font-medium text-gray-900">{items.reduce((acc, it) => acc + (Number(it.quantity) || 0), 0)}</span>
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>Unit Price:</span>
+                  <span className="font-medium text-gray-900">{formatPrice(itemsSubtotal)}</span>
+                </div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-green-600 font-medium">
+                    <span>Discount:</span>
+                    <span>-{formatPrice(discountAmount)}</span>
+                  </div>
+                )}
+                {deliveryAmount > 0 && (
+                  <div className="flex justify-between text-gray-600">
+                    <span>Delivery:</span>
+                    <span className="font-medium text-gray-900">{formatPrice(deliveryAmount)}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="h-px bg-gray-200" />
+
+              <div className="flex justify-between items-center">
+                <span className="font-bold text-gray-900">Total:</span>
+                <span className="text-2xl font-black text-[#D4AF37]">{formatPrice(grandTotal)}</span>
+              </div>
+
+              <div className="pt-4">
                 <button type="submit" disabled={loading} className="inline-flex items-center justify-center rounded-xl text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-14 w-full text-lg">
                   {loading ? 'Submitting Quote...' : 'Submit Quote Request'}
                 </button>
-                <p className="text-center text-sm text-muted-foreground mt-4">
+                <p className="text-center text-xs text-muted-foreground mt-4">
                   Prices shown are estimates. Our team will confirm final pricing, including any custom work, before the deposit is requested.
                 </p>
               </div>
-
-            </form>
+            </div>
           </div>
-        </div>
+        </form>
       </div>
     </PageLayout>
   );
