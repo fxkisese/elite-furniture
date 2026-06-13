@@ -45,8 +45,6 @@ export default function CustomOrders() {
   const [timeline, setTimeline] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [discountType, setDiscountType] = useState('percentage');
-  const [discountValue, setDiscountValue] = useState('');
   const [deliveryFee, setDeliveryFee] = useState('');
   const [items, setItems] = useState([emptyItem()]);
   const [catalog, setCatalog] = useState(FALLBACK_CATALOG);
@@ -120,19 +118,11 @@ export default function CustomOrders() {
     [items]
   );
 
-  const discountAmount = useMemo(() => {
-    const val = Number(discountValue) || 0;
-    if (discountType === 'percentage') {
-      return itemsSubtotal * (val / 100);
-    }
-    return val;
-  }, [itemsSubtotal, discountType, discountValue]);
-
   const deliveryAmount = Number(deliveryFee) || 0;
 
   const grandTotal = useMemo(
-    () => Math.max(0, itemsSubtotal - discountAmount + deliveryAmount),
-    [itemsSubtotal, discountAmount, deliveryAmount]
+    () => Math.max(0, itemsSubtotal + deliveryAmount),
+    [itemsSubtotal, deliveryAmount]
   );
 
   const handleSubmit = async (e) => {
@@ -164,7 +154,7 @@ export default function CustomOrders() {
       `${idx + 1}. ${it.name} x${it.quantity}${it.dimensions ? ` (${it.dimensions})` : ''} \u2014 ${formatPrice(it.price_per_item)} each = ${formatPrice(it.total)}${it.description ? `\n   Description: ${it.description}` : ''}`
     ).join('\n');
 
-    const notesStr = `Timeline: ${timeline || 'Not specified'}\nSubtotal: ${formatPrice(itemsSubtotal)}\nDiscount: -${formatPrice(discountAmount)}\nDelivery: ${formatPrice(deliveryAmount)}\nGrand Total: ${formatPrice(grandTotal)}\n\nItems:\n${itemsSummary}`;
+    const notesStr = `Timeline: ${timeline || 'Not specified'}\nSubtotal: ${formatPrice(itemsSubtotal)}\nDelivery: ${formatPrice(deliveryAmount)}\nGrand Total: ${formatPrice(grandTotal)}\n\nItems:\n${itemsSummary}`;
 
     const data = {
       name: form.get('name'),
@@ -172,9 +162,6 @@ export default function CustomOrders() {
       phone: form.get('phone'),
       items: quoteItems,
       subtotal: itemsSubtotal,
-      discount_type: discountType,
-      discount_value: Number(discountValue) || 0,
-      discount_amount: discountAmount,
       delivery_fee: deliveryAmount,
       grand_total: grandTotal,
       notes: notesStr,
@@ -328,29 +315,6 @@ export default function CustomOrders() {
             </div>
             
             <div className="p-6 space-y-6">
-              {/* Add discount support */}
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-gray-700">Add Discount</label>
-                <div className="flex gap-2">
-                  <select 
-                    value={discountType} 
-                    onChange={(e) => setDiscountType(e.target.value)}
-                    className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm w-[130px] shrink-0"
-                  >
-                    <option value="percentage">Percentage (%)</option>
-                    <option value="fixed">Fixed Amount (Ksh)</option>
-                  </select>
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    value={discountValue}
-                    onChange={(e) => setDiscountValue(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  />
-                </div>
-              </div>
-
               <div className="space-y-3">
                 <label className="text-sm font-medium text-gray-700">Delivery Fee (Ksh)</label>
                 <input
@@ -374,12 +338,6 @@ export default function CustomOrders() {
                   <span>Unit Price:</span>
                   <span className="font-medium text-gray-900">{formatPrice(itemsSubtotal)}</span>
                 </div>
-                {discountAmount > 0 && (
-                  <div className="flex justify-between text-green-600 font-medium">
-                    <span>Discount:</span>
-                    <span>-{formatPrice(discountAmount)}</span>
-                  </div>
-                )}
                 {deliveryAmount > 0 && (
                   <div className="flex justify-between text-gray-600">
                     <span>Delivery:</span>
