@@ -286,22 +286,15 @@ export default function CustomOrders() {
               {/* Logistics */}
               <section className="space-y-6">
                 <h2 className="text-2xl font-bold border-b pb-2">3. Delivery Timeline</h2>
-                <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3">
-                  {TIMELINES.map(time => (
-                    <button
-                      key={time}
-                      type="button"
-                      onClick={() => setTimeline(time)}
-                      className={cn(
-                        "px-4 py-3 rounded-xl border text-sm font-semibold transition-all text-center",
-                        timeline === time
-                          ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-md"
-                          : "bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37]"
-                      )}
-                    >
-                      {time}
-                    </button>
-                  ))}
+                <div className="space-y-2 flex flex-col">
+                  <label htmlFor="timeline" className="text-sm font-medium">When do you need this delivered? (Optional)</label>
+                  <input
+                    id="timeline"
+                    value={timeline}
+                    onChange={(e) => setTimeline(e.target.value)}
+                    placeholder="e.g. ASAP, By end of next month, Flexible"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  />
                 </div>
               </section>
 
