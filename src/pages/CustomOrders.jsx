@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import PageLayout from '@/components/layout/PageLayout';
-import { CheckCircle2, ArrowRight, Plus, Trash2, Package, PenLine, ImageOff, X, Search } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Plus, Trash2, Package, PenLine, ImageOff, X, Search, Upload } from 'lucide-react';
 import { cn, formatPrice } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
@@ -318,7 +318,43 @@ export default function CustomOrders() {
 
 function QuoteItemRow({ index, item, total, catalog, catalogByCategory, onSourceChange, onCatalogPick, onChange, onRemove, canRemove }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [uploadingImg, setUploadingImg] = useState(false);
   const inputClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingImg(true);
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+        } else {
+          if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const dataUrl = canvas.toDataURL('image/webp', 0.8);
+        onChange({ image: dataUrl });
+        setUploadingImg(false);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-5 md:p-6">
@@ -352,14 +388,36 @@ function QuoteItemRow({ index, item, total, catalog, catalogByCategory, onSource
 
       <div className="grid md:grid-cols-[100px_1fr] gap-5">
         {/* Image preview */}
-        <div className="w-full md:w-[100px] aspect-square rounded-lg bg-white border border-gray-200 overflow-hidden flex items-center justify-center shrink-0">
-          {item.image ? (
-            <img src={item.image} alt={item.name} className="w-full h-full object-contain p-2" />
-          ) : (
-            <div className="flex flex-col items-center justify-center text-gray-300 gap-1">
-              <ImageOff className="w-6 h-6" />
-              <span className="text-[10px] font-medium">No image</span>
-            </div>
+        <div className="flex flex-col gap-2 shrink-0 w-full md:w-[100px]">
+          <div className="w-full aspect-square rounded-lg bg-white border border-gray-200 overflow-hidden flex items-center justify-center relative group">
+            {item.image ? (
+              <img src={item.image} alt={item.name} className="w-full h-full object-contain p-2" />
+            ) : (
+              <div className="flex flex-col items-center justify-center text-gray-300 gap-1">
+                <ImageOff className="w-6 h-6" />
+                <span className="text-[10px] font-medium">No image</span>
+              </div>
+            )}
+            
+            {item.source === 'custom' && (
+              <label className={cn(
+                "absolute inset-0 bg-black/60 text-white flex flex-col items-center justify-center transition-opacity cursor-pointer",
+                uploadingImg ? "opacity-100 cursor-wait" : "opacity-0 group-hover:opacity-100"
+              )}>
+                {uploadingImg ? (
+                  <span className="text-[10px] font-medium animate-pulse">Uploading...</span>
+                ) : (
+                  <>
+                    <Upload className="w-5 h-5 mb-1 text-[#D4AF37]" />
+                    <span className="text-[10px] font-medium text-center leading-tight">Upload<br/>Ref Image</span>
+                  </>
+                )}
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploadingImg} />
+              </label>
+            )}
+          </div>
+          {item.source === 'custom' && item.image && (
+            <button type="button" onClick={() => onChange({ image: '' })} className="text-[10px] text-red-500 hover:text-red-700 font-semibold text-center transition-colors">Remove Image</button>
           )}
         </div>
 

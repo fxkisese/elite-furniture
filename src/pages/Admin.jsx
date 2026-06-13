@@ -18,19 +18,19 @@ const SUBCATEGORIES = {
 
 /* ---------- Design tokens ---------- */
 const COLORS = {
-  bg: '#18120D',
-  surface: '#221A14',
-  surface2: '#2C2219',
-  border: '#3B2E22',
-  text: '#F3E9DC',
-  muted: '#A4937D',
-  gold: '#D4AF37', // Updated to match Elite Furniture gold
+  bg: '#fafafa',
+  surface: '#ffffff',
+  surface2: '#f3f4f6',
+  border: '#e5e7eb',
+  text: '#111827',
+  muted: '#6b7280',
+  gold: '#D4AF37',
   goldSoft: 'rgba(212,175,55,0.14)',
-  green: '#8CA882',
-  amber: '#D08C45',
-  rust: '#C15B43',
+  green: '#10b981',
+  amber: '#f59e0b',
+  rust: '#ef4444',
 };
-const fontDisplay = "'Space Grotesk', sans-serif";
+const fontDisplay = "'Inter', sans-serif";
 const fontBody = "'Inter', sans-serif";
 const fontMono = "'JetBrains Mono', monospace";
 const BRANCHES = ['Nairobi', 'Mombasa'];
@@ -73,12 +73,12 @@ function LogoMark() {
 }
 
 /* ---------- Shared styles ---------- */
-const inputStyle = { width: '100%', background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 6, padding: '9px 12px', color: COLORS.text, fontFamily: fontBody, fontSize: 14, outline: 'none' };
-const labelStyle = { display: 'block', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: COLORS.muted, marginBottom: 6, fontWeight: 600 };
-const cardStyle = { background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 8, overflow: 'hidden' };
-const thStyle = { textAlign: 'left', padding: '12px 16px', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: COLORS.muted, fontWeight: 600, borderBottom: `1px solid ${COLORS.border}` };
+const inputStyle = { width: '100%', background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: '9px 12px', color: COLORS.text, fontFamily: fontBody, fontSize: 14, outline: 'none' };
+const labelStyle = { display: 'block', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: COLORS.muted, marginBottom: 6, fontWeight: 700 };
+const cardStyle = { background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' };
+const thStyle = { textAlign: 'left', padding: '12px 16px', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: COLORS.muted, fontWeight: 700, borderBottom: `1px solid ${COLORS.border}` };
 const tdStyle = { padding: '14px 16px', borderBottom: `1px solid ${COLORS.border}`, color: COLORS.text, fontSize: 14 };
-const sectionTitleStyle = { fontFamily: fontDisplay, fontSize: 18, fontWeight: 600, color: COLORS.text, marginBottom: 12 };
+const sectionTitleStyle = { fontFamily: fontDisplay, fontSize: 18, fontWeight: 700, color: COLORS.text, marginBottom: 12 };
 const rowItemStyle = { padding: '12px 16px', borderBottom: `1px solid ${COLORS.border}` };
 
 function useForm(initial) {
@@ -990,9 +990,9 @@ export default function Admin() {
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
         * { box-sizing: border-box; }
         select { -webkit-appearance: none; appearance: none; }
-        .cg-btn-primary { background:${COLORS.gold}; color:${COLORS.bg}; font-weight:600; padding:10px 18px; border-radius:6px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-size:13px; letter-spacing:0.04em; transition:background .15s; font-family:'Inter',sans-serif; }
-        .cg-btn-primary:hover { background:#E2C15D; }
-        .cg-btn-secondary { background:transparent; color:${COLORS.text}; border:1px solid ${COLORS.border}; padding:9px 16px; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-size:13px; transition: all .15s; font-family:'Inter',sans-serif; }
+        .cg-btn-primary { background:#0A0A0A; color:#FFFFFF; font-weight:600; padding:10px 18px; border-radius:8px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-size:13px; letter-spacing:0.04em; transition:all .15s; font-family:'Inter',sans-serif; }
+        .cg-btn-primary:hover { background:${COLORS.gold}; color:#0A0A0A; }
+        .cg-btn-secondary { background:transparent; color:${COLORS.text}; border:1px solid ${COLORS.border}; padding:9px 16px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-size:13px; transition: all .15s; font-family:'Inter',sans-serif; }
         .cg-btn-secondary:hover { border-color:${COLORS.gold}; color:${COLORS.gold}; }
         .cg-nav-item:hover { background:${COLORS.surface2} !important; color:${COLORS.text} !important; }
         .cg-input { transition: border-color .15s; }
