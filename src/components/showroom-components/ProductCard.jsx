@@ -49,7 +49,7 @@ export default function ProductCard({
     : 0;
 
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-    `Hi, I'm interested in the "${name}" (Ksh ${price.toLocaleString()}). Is it available?`
+    `Hi, I'm interested in the "${name}" (Ksh ${(Number(price) || 0).toLocaleString()}). Is it available?`
   )}`;
 
   return (
@@ -143,11 +143,11 @@ export default function ProductCard({
         <div className="flex items-center gap-2 flex-wrap pt-1">
           {hasDiscount && (
             <span className="text-sm line-through text-[var(--sc-ash)]">
-              Ksh {originalPrice.toLocaleString()}
+              Ksh {(Number(originalPrice) || 0).toLocaleString()}
             </span>
           )}
           <span className="sc-font-display text-xl text-[var(--sc-ink)]">
-            Ksh {price.toLocaleString()}
+            Ksh {(Number(price) || 0).toLocaleString()}
           </span>
           {hasDiscount && (
             <span className="text-[11px] font-semibold bg-[var(--sc-gold)] text-[var(--sc-ink)] px-2 py-0.5 rounded-full">
