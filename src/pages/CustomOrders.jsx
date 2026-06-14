@@ -154,16 +154,24 @@ export default function CustomOrders() {
       `${idx + 1}. ${it.name} x${it.quantity}${it.dimensions ? ` (${it.dimensions})` : ''} \u2014 ${formatPrice(it.price_per_item)} each = ${formatPrice(it.total)}${it.description ? `\n   Description: ${it.description}` : ''}`
     ).join('\n');
 
+    // Build the furniture_type field from item names
+    const furnitureType = quoteItems.map(it => `${it.name} x${it.quantity}`).join(', ');
+
+    // Build the measurements field from item dimensions
+    const measurementsStr = quoteItems
+      .filter(it => it.dimensions)
+      .map(it => `${it.name}: ${it.dimensions}`)
+      .join('; ') || null;
+
     const notesStr = `Timeline: ${timeline || 'Not specified'}\nSubtotal: ${formatPrice(itemsSubtotal)}\nDelivery: ${formatPrice(deliveryAmount)}\nGrand Total: ${formatPrice(grandTotal)}\n\nItems:\n${itemsSummary}`;
 
+    // Map to the actual quotes table schema columns
     const data = {
       name: form.get('name'),
-      email: form.get('email'),
+      email: form.get('email') || null,
       phone: form.get('phone'),
-      items: quoteItems,
-      subtotal: itemsSubtotal,
-      delivery_fee: deliveryAmount,
-      grand_total: grandTotal,
+      furniture_type: furnitureType,
+      measurements: measurementsStr,
       notes: notesStr,
     };
 

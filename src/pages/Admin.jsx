@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { sendOrderToAdminWhatsApp } from '@/utils/whatsapp';
 
 /* ---------- Constants ---------- */
 const ADMIN_USER = 'admin';
@@ -47,6 +48,7 @@ const IconReceipt = (p) => <svg {...ic} {...p}><path d="M5 3h14v18l-2-1.5L15 21l
 const IconChart = (p) => <svg {...ic} {...p}><rect x="4" y="11" width="3.5" height="9" /><rect x="10.25" y="6" width="3.5" height="14" /><rect x="16.5" y="14" width="3.5" height="6" /></svg>;
 const IconChat = (p) => <svg {...ic} {...p}><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.4 8.5 8.5 0 0 1-4-1L3 20l1.1-3.3a8.4 8.4 0 0 1-1-4A8.4 8.4 0 0 1 11.6 4 8.4 8.4 0 0 1 21 11.5Z" /></svg>;
 const IconDoc = (p) => <svg {...ic} {...p}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" /><path d="M14 2v6h6" /><path d="M9 13h6M9 17h6M9 9h2" /></svg>;
+const IconOrders = (p) => <svg {...ic} {...p}><path d="M16 3H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Z" /><path d="M10 7h4M10 11h4M10 15h2" /></svg>;
 const IconLogout = (p) => <svg {...ic} {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17 21 12 16 7" /><path d="M21 12H9" /></svg>;
 const IconPlus = (p) => <svg {...ic} {...p}><path d="M12 5v14M5 12h14" /></svg>;
 const IconSearch = (p) => <svg {...ic} {...p}><circle cx="11" cy="11" r="7" /><path d="M21 21 16.7 16.7" /></svg>;
@@ -147,14 +149,19 @@ function Modal({ title, onClose, children }) {
 }
 
 /* ---------- Forms ---------- */
+const TRANSPORT_METHODS = ['Truck', 'Pickup Van', 'Courier', 'Manual Arrangement'];
+const DELIVERY_REGIONS = ['Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Nyeri'];
+
 function ProductForm({ onSubmit, onCancel }) {
   const [v, set, setValues] = useForm({ 
     name: '', category: 'Living Room', subcategory: '', 
     price: '', discount_price: '', 
     description: '', in_stock: true, featured: false, 
-    image: '', images: [], badge: '', rating: 5.0, review_count: 0 
+    image: '', images: [], badge: '', rating: 5.0, review_count: 0,
+    delivery_nairobi: '600', transport_method: '', delivery_outside: '{}'
   });
   const [uploadingImg, setUploadingImg] = useState(false);
+  const [outsidePrices, setOutsidePrices] = useState({});
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -191,7 +198,6 @@ function ProductForm({ onSubmit, onCancel }) {
         const dataUrl = canvas.toDataURL('image/webp', 0.8);
         setValues((prev) => {
           const newImages = [...(prev.images || []), dataUrl];
-          // We set the primary 'image' to the first one uploaded for backward compatibility
           return { ...prev, images: newImages, image: newImages[0] || '' };
         });
         setUploadingImg(false);
@@ -208,6 +214,15 @@ function ProductForm({ onSubmit, onCancel }) {
     });
   };
 
+  const updateOutsidePrice = (region, price) => {
+    setOutsidePrices(prev => {
+      const updated = { ...prev };
+      if (price === '' || price === undefined) { delete updated[region]; }
+      else { updated[region] = Number(price) || 0; }
+      return updated;
+    });
+  };
+
   return (
     <form onSubmit={(e) => { 
       e.preventDefault(); 
@@ -216,7 +231,10 @@ function ProductForm({ onSubmit, onCancel }) {
         price: Number(v.price) || null,
         discount_price: Number(v.discount_price) || null,
         rating: Number(v.rating) || 5.0,
-        review_count: Number(v.review_count) || 0
+        review_count: Number(v.review_count) || 0,
+        delivery_nairobi: Number(v.delivery_nairobi) || 600,
+        delivery_outside: JSON.stringify(outsidePrices),
+        transport_method: v.transport_method || null,
       }); 
     }}>
       <div className="space-y-4">
@@ -261,6 +279,43 @@ function ProductForm({ onSubmit, onCancel }) {
           </div>
           <div><label style={labelStyle}>Rating (1-5)</label><input style={inputStyle} className="cg-input" type="number" min="1" max="5" step="0.1" value={v.rating} onChange={set('rating')} /></div>
           <div><label style={labelStyle}>Review Count</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.review_count} onChange={set('review_count')} /></div>
+        </div>
+
+        {/* Delivery Pricing Section */}
+        <div style={{ background: '#f9fafb', border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: 16 }}>
+          <div style={{ ...labelStyle, fontSize: 12, color: COLORS.gold, marginBottom: 12 }}>🚛 DELIVERY PRICING</div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label style={labelStyle}>Nairobi Delivery (KSh)</label>
+              <input style={inputStyle} className="cg-input" type="number" min="0" value={v.delivery_nairobi} onChange={set('delivery_nairobi')} placeholder="600" />
+            </div>
+            <div>
+              <label style={labelStyle}>Transport Method</label>
+              <select style={inputStyle} className="cg-input" value={v.transport_method} onChange={set('transport_method')}>
+                <option value="">Select...</option>
+                {TRANSPORT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+            </div>
+          </div>
+          <div style={{ marginTop: 12 }}>
+            <label style={labelStyle}>Outside Nairobi Delivery Prices</label>
+            <div className="grid grid-cols-3 gap-3" style={{ marginTop: 6 }}>
+              {DELIVERY_REGIONS.map(region => (
+                <div key={region}>
+                  <label style={{ fontSize: 11, color: COLORS.muted, display: 'block', marginBottom: 3 }}>{region}</label>
+                  <input
+                    style={{ ...inputStyle, fontSize: 12 }}
+                    className="cg-input"
+                    type="number"
+                    min="0"
+                    placeholder="KSh"
+                    value={outsidePrices[region] || ''}
+                    onChange={(e) => updateOutsidePrice(region, e.target.value)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div>
@@ -777,9 +832,81 @@ function HeroSlidesPage({ heroSlides, handleDeleteItem, handleUploadSlide, uploa
   );
 }
 
+/* ---------- Orders Page ---------- */
+function OrdersPage({ orders, handleUpdateOrderStatus, handleResendWhatsApp }) {
+  const ORDER_STATUSES = ['new', 'confirmed', 'processing', 'delivered'];
+  const statusColors = { new: COLORS.amber, confirmed: COLORS.green, processing: COLORS.gold, delivered: '#10b981' };
+  const paymentColors = { paid: COLORS.green, pending: COLORS.amber, failed: COLORS.rust };
+
+  return (
+    <div>
+      <PageHeader eyebrow="Customer orders" title="Orders" />
+      {orders.length === 0 ? (
+        <div style={{ ...cardStyle, padding: '48px 16px', textAlign: 'center', color: COLORS.muted, fontSize: 13 }}>No orders yet.</div>
+      ) : (
+        <div style={cardStyle}>
+          <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+            <thead><tr style={{ background: COLORS.surface2 }}>
+              <th style={thStyle}>Order #</th><th style={thStyle}>Customer</th><th style={thStyle}>Items</th>
+              <th style={thStyle}>Total</th><th style={thStyle}>Payment</th><th style={thStyle}>Delivery</th>
+              <th style={thStyle}>Status</th><th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
+            </tr></thead>
+            <tbody>
+              {orders.map((o) => (
+                <tr key={o.id} className="cg-table-row">
+                  <td style={{ ...tdStyle, fontFamily: fontMono, fontSize: 12 }}>{o.order_number}</td>
+                  <td style={tdStyle}>
+                    <div style={{ fontWeight: 500 }}>{o.customer_name}</div>
+                    <div style={{ fontSize: 11, color: COLORS.muted }}>{o.customer_phone}</div>
+                  </td>
+                  <td style={{ ...tdStyle, fontSize: 12, color: COLORS.muted, maxWidth: 200 }}>
+                    {(o.items || []).map((it, i) => <div key={i}>{it.name} ×{it.quantity}</div>)}
+                  </td>
+                  <td style={{ ...tdStyle, fontFamily: fontMono, fontWeight: 500 }}>{fmt(o.grand_total)}</td>
+                  <td style={tdStyle}>
+                    <Badge color={paymentColors[o.payment_status] || COLORS.muted}>{(o.payment_status || 'pending').toUpperCase()}</Badge>
+                    <div style={{ fontSize: 10, color: COLORS.muted, marginTop: 2 }}>{(o.payment_method || '').toUpperCase()}</div>
+                  </td>
+                  <td style={{ ...tdStyle, fontSize: 12, color: COLORS.muted }}>
+                    <div>{o.delivery_location}</div>
+                    <div style={{ fontSize: 10 }}>{fmt(o.delivery_fee)} fee</div>
+                  </td>
+                  <td style={tdStyle}>
+                    <select
+                      style={{ ...inputStyle, fontSize: 11, padding: '4px 8px', width: 'auto', minWidth: 110 }}
+                      className="cg-input"
+                      value={o.order_status || 'new'}
+                      onChange={(e) => handleUpdateOrderStatus(o.id, e.target.value)}
+                    >
+                      {ORDER_STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                    </select>
+                  </td>
+                  <td style={{ ...tdStyle, textAlign: 'right' }}>
+                    <div className="flex justify-end gap-1">
+                      <button
+                        className="cg-icon-btn"
+                        style={{ color: '#25D366' }}
+                        onClick={() => handleResendWhatsApp(o)}
+                        title="Send to WhatsApp"
+                      >
+                        <IconChat />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ---------- Layout ---------- */
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: IconGauge },
+  { id: 'orders', label: 'Orders', icon: IconOrders },
   { id: 'products', label: 'Products', icon: IconBox },
   { id: 'sales', label: 'Sales', icon: IconBanknote },
   { id: 'credit', label: 'Credit Book', icon: IconCard },
@@ -848,6 +975,7 @@ export default function Admin() {
   const [credit, setCredit] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [heroSlides, setHeroSlides] = useState([]);
+  const [orders, setOrders] = useState([]);
 
   // Dashboard State
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -865,7 +993,8 @@ export default function Admin() {
     try {
       const [
         { data: pData }, { data: mData }, { data: qData },
-        { data: sData }, { data: cData }, { data: eData }, { data: hData }
+        { data: sData }, { data: cData }, { data: eData }, { data: hData },
+        { data: oData }
       ] = await Promise.all([
         supabase.from('products').select('*').order('created_at', { ascending: false }),
         supabase.from('messages').select('*').order('created_at', { ascending: false }),
@@ -874,6 +1003,7 @@ export default function Admin() {
         supabase.from('credit').select('*').order('created_at', { ascending: false }),
         supabase.from('expenses').select('*').order('created_at', { ascending: false }),
         supabase.from('hero_slides').select('*').order('created_at', { ascending: false }),
+        supabase.from('orders').select('*').order('created_at', { ascending: false }),
       ]);
       setProducts(pData || []);
       setMessages(mData || []);
@@ -882,6 +1012,7 @@ export default function Admin() {
       setCredit(cData || []);
       setExpenses(eData || []);
       setHeroSlides(hData || []);
+      setOrders(oData || []);
     } catch (err) {
       console.error(err);
       toast.error('Failed to load data from Supabase');
@@ -976,6 +1107,17 @@ export default function Admin() {
   const openModal = (type) => setModal(type);
   const openPayment = (id) => setModal({ type: 'payment', id });
 
+  const handleUpdateOrderStatus = async (id, status) => {
+    const { error } = await supabase.from('orders').update({ order_status: status }).eq('id', id);
+    if (error) toast.error('Error updating order status');
+    else { toast.success(`Order marked as ${status}`); loadData(); }
+  };
+
+  const handleResendWhatsApp = (order) => {
+    sendOrderToAdminWhatsApp(order);
+    toast.success('WhatsApp message opened');
+  };
+
   if (isLoadingAuth) {
     return <div className="min-h-screen bg-background flex items-center justify-center text-foreground font-mono">Loading...</div>;
   }
@@ -1010,6 +1152,7 @@ export default function Admin() {
         <TopBar branch={branch} setBranch={setBranch} onLogout={signOut} />
         <main style={{ flex: 1, padding: 32, overflowX: 'auto' }}>
           {activeTab === 'dashboard' && <DashboardPage products={products} sales={sales} credit={credit} expenses={expenses} />}
+          {activeTab === 'orders' && <OrdersPage orders={orders} handleUpdateOrderStatus={handleUpdateOrderStatus} handleResendWhatsApp={handleResendWhatsApp} />}
           {activeTab === 'products' && <ProductsPage products={products} handleDeleteProduct={handleDeleteProduct} openModal={openModal} />}
           {activeTab === 'sales' && <SalesPage sales={sales} handleDeleteItem={handleDeleteItem} openModal={openModal} />}
           {activeTab === 'credit' && <CreditPage credit={credit} handleDeleteItem={handleDeleteItem} openModal={openModal} openPayment={openPayment} />}

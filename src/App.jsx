@@ -8,6 +8,7 @@ import { CartProvider } from '@/lib/CartContext';
 import Home from '@/pages/Home';
 import Products from '@/pages/Products';
 import CustomOrders from '@/pages/CustomOrders';
+import Checkout from '@/pages/Checkout';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import Login from '@/pages/Login';
@@ -26,6 +27,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<Products />} />
               <Route path="/custom-orders" element={<CustomOrders />} />
+              <Route path="/checkout" element={<Checkout />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/login" element={<Login />} />
@@ -42,4 +44,4 @@ function App() {
   )
 }
 
-export default App
+export default App

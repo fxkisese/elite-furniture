@@ -14,7 +14,10 @@ CREATE TABLE IF NOT EXISTS public.products (
     description TEXT,
     in_stock BOOLEAN DEFAULT true,
     featured BOOLEAN DEFAULT false,
-    image TEXT
+    image TEXT,
+    delivery_nairobi NUMERIC DEFAULT 600,
+    delivery_outside TEXT,
+    transport_method TEXT
 );
 
 -- RLS: Anyone can read products, only authenticated admins can modify
@@ -133,3 +136,35 @@ CREATE POLICY "Anyone can insert quotes." ON public.quotes FOR INSERT WITH CHECK
 CREATE POLICY "Auth users can view quotes." ON public.quotes FOR SELECT USING (auth.role() = 'authenticated');
 CREATE POLICY "Auth users can update quotes." ON public.quotes FOR UPDATE USING (auth.role() = 'authenticated');
 CREATE POLICY "Auth users can delete quotes." ON public.quotes FOR DELETE USING (auth.role() = 'authenticated');
+
+
+-- ==========================================
+-- 7. Orders Table (Checkout / Payments)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.orders (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    order_number TEXT NOT NULL,
+    customer_name TEXT NOT NULL,
+    customer_email TEXT,
+    customer_phone TEXT NOT NULL,
+    delivery_location TEXT NOT NULL,
+    delivery_address TEXT,
+    delivery_fee NUMERIC DEFAULT 0,
+    items JSONB NOT NULL,
+    subtotal NUMERIC NOT NULL,
+    grand_total NUMERIC NOT NULL,
+    payment_method TEXT NOT NULL,
+    payment_status TEXT DEFAULT 'pending',
+    payment_reference TEXT,
+    order_status TEXT DEFAULT 'new',
+    notes TEXT,
+    whatsapp_sent BOOLEAN DEFAULT false
+);
+
+-- RLS: Anyone can insert orders, authenticated admins can read/modify
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can insert orders." ON public.orders FOR INSERT WITH CHECK (true);
+CREATE POLICY "Anyone can read orders." ON public.orders FOR SELECT USING (true);
+CREATE POLICY "Auth users can update orders." ON public.orders FOR UPDATE USING (auth.role() = 'authenticated');
+CREATE POLICY "Auth users can delete orders." ON public.orders FOR DELETE USING (auth.role() = 'authenticated');

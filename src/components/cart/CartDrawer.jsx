@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/lib/CartContext';
 import { 
   Sheet, 
@@ -9,10 +10,14 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingCart, CreditCard } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
+import { formatCartForWhatsApp } from '@/utils/whatsapp';
+
+const ADMIN_WHATSAPP = import.meta.env.VITE_ADMIN_WHATSAPP || '254793816450';
 
 export default function CartDrawer() {
+  const navigate = useNavigate();
   const { 
     cartItems, 
     isCartOpen, 
@@ -22,20 +27,16 @@ export default function CartDrawer() {
     cartTotal 
   } = useCart();
 
+  const handleCheckout = () => {
+    setIsCartOpen(false);
+    navigate('/checkout');
+  };
+
   const handleWhatsAppCheckout = () => {
     if (cartItems.length === 0) return;
-
-    let message = "Hello! I would like to place an order for the following items:\n\n";
-    cartItems.forEach((item, index) => {
-      message += `${index + 1}. ${item.title || item.name} (x${item.quantity}) - ${formatPrice((item.price || 0) * item.quantity)}\n`;
-    });
-    message += `\n*Total Estimated Price:* ${formatPrice(cartTotal)}\n\n`;
-    message += "Please let me know the availability and delivery options. Thank you!";
-
+    const message = formatCartForWhatsApp(cartItems, cartTotal);
     const encodedMessage = encodeURIComponent(message);
-    // Replace with the actual phone number used by the store
-    const phoneNumber = "254793816450"; 
-    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+    window.open(`https://wa.me/${ADMIN_WHATSAPP}?text=${encodedMessage}`, '_blank');
   };
 
   return (
@@ -132,13 +133,21 @@ export default function CartDrawer() {
                 <span className="font-bold text-lg">{formatPrice(cartTotal)}</span>
               </div>
               <p className="text-xs text-gray-500 mb-4">
-                Delivery and taxes calculated during checkout on WhatsApp.
+                Delivery fees calculated at checkout.
               </p>
               <Button 
-                onClick={handleWhatsAppCheckout}
-                className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold h-12 text-base shadow-sm"
+                onClick={handleCheckout}
+                className="w-full bg-[#0A0A0A] hover:bg-[#D4AF37] hover:text-[#0A0A0A] text-white font-bold h-12 text-base shadow-sm mb-2 transition-colors"
               >
-                Send Order via WhatsApp
+                <CreditCard className="w-4 h-4 mr-2" />
+                Proceed to Checkout
+              </Button>
+              <Button 
+                onClick={handleWhatsAppCheckout}
+                variant="outline"
+                className="w-full border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white font-semibold h-10 text-sm transition-colors"
+              >
+                Or Order via WhatsApp
               </Button>
             </div>
           </>
@@ -147,3 +156,4 @@ export default function CartDrawer() {
     </Sheet>
   );
 }
+
