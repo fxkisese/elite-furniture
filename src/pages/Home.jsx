@@ -328,6 +328,19 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Section Divider */}
+      <div style={{ borderBottom: '1px solid #2A2A2A' }} />
+
+      {/* Instagram Feed */}
+      <section style={{ backgroundColor: '#111', padding: '4rem 2rem' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '10px', letterSpacing: '0.3em', color: '#555555', textTransform: 'uppercase', marginBottom: '2rem' }}>
+            FOLLOW US ON INSTAGRAM
+          </div>
+          <div className="elfsight-app-edc7aee4-0d29-4445-bc20-ed0bcc8ef3c8" data-elfsight-app-lazy></div>
+        </div>
+      </section>
+
       {/* CTA Banner */}
       <section style={{
         backgroundColor: '#FFFFFF', padding: '7rem 2rem',
