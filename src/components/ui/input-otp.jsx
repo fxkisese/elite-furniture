@@ -1,4 +1,6 @@
-﻿import * as React from "react"
+"use client"
+
+import * as React from "react"
 import { OTPInput, OTPInputContext } from "input-otp"
 import { Minus } from "lucide-react"
 
@@ -23,7 +25,7 @@ const InputOTPSlot = React.forwardRef(({ index, className, ...props }, ref) => {
   const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index]
 
   return (
-    (<div
+    <div
       ref={ref}
       className={cn(
         "relative flex h-9 w-9 items-center justify-center border-y border-r border-input text-sm shadow-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
@@ -38,7 +40,7 @@ const InputOTPSlot = React.forwardRef(({ index, className, ...props }, ref) => {
           <div className="h-4 w-px animate-caret-blink bg-foreground duration-1000" />
         </div>
       )}
-    </div>)
+    </div>
   );
 })
 InputOTPSlot.displayName = "InputOTPSlot"
