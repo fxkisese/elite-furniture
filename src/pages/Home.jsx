@@ -51,112 +51,32 @@ export default function Home() {
   return (
     <PageLayout>
       {/* Hero Section */}
-      <section style={{ position: 'relative', height: 'calc(100vh - 70px)', overflow: 'hidden', minHeight: '600px' }}>
-        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', backgroundColor: '#0A0A0A' }}>
-          {/* Blurred Background Layer */}
-          {heroSlides.map((src, idx) => (
-            <div
-              key={`blur-${idx}`}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                opacity: idx === currentSlideIdx ? 1 : 0,
-                transition: 'opacity 1.5s ease-in-out',
-                zIndex: 0,
-              }}
-            >
-              <img
-                src={src}
-                alt=""
-                style={{
-                  width: '100%', height: '100%', objectFit: 'cover',
-                  filter: 'blur(40px) brightness(0.3)',
-                  transform: 'scale(1.1)',
-                }}
-              />
+      <section className="relative h-[calc(100vh-70px)] min-h-[600px] flex flex-col md:flex-row overflow-hidden bg-[#0A0A0A]">
+        
+        {/* Left Side (Text content) */}
+        <div className="relative z-10 w-full md:w-[55%] h-full flex flex-col justify-center px-6 md:px-16 lg:px-24 pt-12 md:pt-0">
+          <div className="max-w-[600px]">
+            <div className="flex items-center gap-[15px] mb-6">
+              <div className="w-[40px] h-[1px] bg-[#555]" />
+              <span className="text-[#888] tracking-[0.2em] text-[11px] uppercase">NAIROBI, KENYA</span>
             </div>
-          ))}
-
-          {/* Sharp Contained Image on the Right */}
-          {heroSlides.map((src, idx) => (
-            <div
-              key={`sharp-${idx}`}
-              style={{
-                position: 'absolute',
-                top: 0, bottom: 0, right: 0,
-                width: '60%', /* Takes up the right 60% of the screen */
-                opacity: idx === currentSlideIdx ? 1 : 0,
-                transition: 'opacity 1.5s ease-in-out, transform 8s ease-out',
-                transform: idx === currentSlideIdx ? 'scale(1.02)' : 'scale(1)',
-                zIndex: 1,
-              }}
-            >
-              <img
-                src={src}
-                alt="Luxury furniture slide"
-                style={{
-                  width: '100%', height: '100%', objectFit: 'contain',
-                  objectPosition: 'right center',
-                  padding: '2rem 4rem 2rem 0', // padding so it doesn't touch the edges
-                }}
-              />
-            </div>
-          ))}
-
-          {/* Gradient Overlay for Text */}
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(15,15,15,0.95) 0%, rgba(15,15,15,0.8) 40%, rgba(15,15,15,0) 100%)', zIndex: 2, pointerEvents: 'none' }} />
-        </div>
-
-        <div style={{
-          position: 'relative', zIndex: 10, height: '100%',
-          display: 'flex', alignItems: 'center',
-          maxWidth: '1200px', margin: '0 auto', padding: '0 2rem',
-        }}>
-
-          <div style={{ maxWidth: '600px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '1.5rem' }}>
-              <div style={{ width: '40px', height: '1px', backgroundColor: '#555' }} />
-              <span style={{ color: '#888', letterSpacing: '0.2em', fontSize: '11px', textTransform: 'uppercase' }}>NAIROBI, KENYA</span>
-            </div>
-            <h1 style={{
-              fontSize: 'clamp(2.5rem, 4vw, 4rem)',
-              fontWeight: 800,
-              lineHeight: 1.1,
-              color: '#FFFFFF',
-              letterSpacing: '-0.02em',
-              marginBottom: '1.5rem',
-            }}>
-              FURNITURE THAT MAKES EVERY <span style={{ color: '#D4AF37' }}>SPACE</span> EXCEPTIONAL
+            <h1 className="text-[clamp(2.5rem,4vw,4rem)] font-extrabold text-[#FFFFFF] leading-[1.1] tracking-[-0.02em] mb-6">
+              FURNITURE THAT MAKES EVERY <span className="text-[#D4AF37]">SPACE</span> EXCEPTIONAL
             </h1>
-            <p style={{
-              fontSize: '16px',
-              lineHeight: 1.6,
-              color: '#AAAAAA',
-              marginBottom: '3rem',
-              maxWidth: '85%',
-            }}>
+            <p className="text-[#AAAAAA] text-[16px] leading-[1.6] mb-12 max-w-[85%]">
               Discover stylish, durable, and affordable furniture tailored to your lifestyle and business needs.
             </p>
             
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <Link to="/products" style={{
-                backgroundColor: '#D4AF37', color: '#0A0A0A',
-                padding: '16px 32px', fontSize: '12px', fontWeight: 600,
-                letterSpacing: '0.15em', textDecoration: 'none',
-                display: 'flex', alignItems: 'center', gap: '10px',
-                transition: 'background 0.3s ease',
-              }}
+            <div className="flex flex-wrap gap-4">
+              <Link to="/products" 
+                className="bg-[#D4AF37] text-[#0A0A0A] px-[32px] py-[16px] text-[12px] font-semibold tracking-[0.15em] uppercase transition-colors duration-300 flex items-center gap-[10px]"
                 onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f2c94c'}
                 onMouseLeave={e => e.currentTarget.style.backgroundColor = '#D4AF37'}
               >
                 SHOP FURNITURE <ChevronRight size={14} />
               </Link>
-              <Link to="/contact" style={{
-                border: '1px solid #FFFFFF', color: '#FFFFFF',
-                padding: '16px 32px', fontSize: '12px', fontWeight: 600,
-                letterSpacing: '0.15em', textDecoration: 'none',
-                transition: 'background 0.3s ease, color 0.3s ease',
-              }}
+              <Link to="/contact" 
+                className="border border-[#FFFFFF] text-[#FFFFFF] px-[32px] py-[16px] text-[12px] font-semibold tracking-[0.15em] uppercase transition-all duration-300"
                 onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FFFFFF'; e.currentTarget.style.color = '#0A0A0A'; }}
                 onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#FFFFFF'; }}
               >
@@ -166,13 +86,61 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Right Side (Image Carousel) */}
+        <div className="relative w-full md:w-[45%] h-full min-h-[400px] flex items-center justify-center bg-[#F4F4F4] overflow-hidden">
+          {/* Decorative subtle circles in background */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] aspect-square rounded-full border border-[#E5E5E5]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] aspect-square rounded-full border border-[#E5E5E5]" />
+
+          {heroSlides.map((src, idx) => (
+            <div
+              key={`hero-img-${idx}`}
+              className="absolute inset-0 flex items-center justify-center p-8 md:p-16"
+              style={{
+                opacity: idx === currentSlideIdx ? 1 : 0,
+                transform: idx === currentSlideIdx ? 'scale(1)' : 'scale(0.98)',
+                transition: 'opacity 1.5s ease-in-out, transform 1.5s ease-in-out',
+                zIndex: idx === currentSlideIdx ? 10 : 0,
+              }}
+            >
+              <img
+                src={src}
+                alt="Luxury furniture slide"
+                style={{
+                  width: '100%', height: '100%', objectFit: 'contain',
+                  /* mix-blend-multiply completely removes white/light backgrounds from images, integrating them flawlessly */
+                  mixBlendMode: 'multiply',
+                  filter: 'contrast(1.05) drop-shadow(0 25px 25px rgba(0,0,0,0.15))',
+                  transform: idx === currentSlideIdx ? 'scale(1.02)' : 'scale(1)',
+                  transition: 'transform 8s ease-out',
+                }}
+              />
+            </div>
+          ))}
+
+          {/* Slide Indicators */}
+          <div className="absolute bottom-8 right-8 md:right-12 flex gap-3 z-20">
+            {heroSlides.map((_, idx) => (
+              <button
+                key={`indicator-${idx}`}
+                onClick={() => setCurrentSlideIdx(idx)}
+                className="h-1.5 rounded-full transition-all duration-500"
+                style={{
+                  width: idx === currentSlideIdx ? '32px' : '8px',
+                  backgroundColor: idx === currentSlideIdx ? '#D4AF37' : '#CCCCCC',
+                }}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </div>
 
         {/* Scroll indicator */}
         <div style={{
           position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-        }}>
-          <span style={{ color: '#555555', fontSize: '9px', letterSpacing: '0.3em' }}>SCROLL</span>
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', zIndex: 20
+        }} className="hidden md:flex">
+          <span style={{ color: '#888888', fontSize: '9px', letterSpacing: '0.3em' }}>SCROLL</span>
           <div style={{ width: '1px', height: '40px', backgroundColor: '#2A2A2A', position: 'relative', overflow: 'hidden' }}>
             <div style={{
               position: 'absolute', top: 0, left: 0, width: '100%', height: '50%',
