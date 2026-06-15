@@ -52,11 +52,11 @@ export default function Home() {
     <PageLayout>
       {/* Hero Section */}
       <section style={{ position: 'relative', height: 'calc(100vh - 60px)', overflow: 'hidden', minHeight: '600px' }}>
-        {/* Blurred Background Layer */}
+        {/* Full-Cover Background Layer */}
         <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', backgroundColor: '#050505' }}>
           {heroSlides.map((src, idx) => (
             <img
-              key={`blur-${idx}`}
+              key={`bg-${idx}`}
               src={src}
               alt=""
               style={{
@@ -64,28 +64,25 @@ export default function Home() {
                 inset: 0,
                 width: '100%', height: '100%',
                 objectFit: 'cover',
-                filter: 'blur(30px) brightness(0.2)',
+                filter: 'grayscale(30%)',
                 opacity: idx === currentSlideIdx ? 1 : 0,
-                transition: 'opacity 1.5s ease-in-out',
-                transform: 'scale(1.1)',
+                transition: 'opacity 1.5s ease-in-out, transform 8s ease-out',
+                transform: idx === currentSlideIdx ? 'scale(1.02)' : 'scale(1)',
                 zIndex: 0,
               }}
             />
           ))}
+          {/* Dark Overlay */}
+          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(10,10,10,0.72)', zIndex: 1 }} />
         </div>
 
-        {/* Text Gradient Overlay for Readability */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.7) 45%, rgba(10,10,10,0) 100%)', zIndex: 2, pointerEvents: 'none' }} />
-
-        {/* Main Layout Container */}
+        {/* Text Content */}
         <div style={{
           position: 'relative', zIndex: 10, height: '100%',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '3rem',
-          maxWidth: '1300px', margin: '0 auto', padding: '0 3rem',
+          display: 'flex', alignItems: 'center',
+          maxWidth: '1200px', margin: '0 auto', padding: '0 2rem',
         }}>
-
-          {/* Left Text Content */}
-          <div style={{ maxWidth: '540px', flexShrink: 0, zIndex: 10 }}>
+          <div style={{ maxWidth: '700px' }}>
             <div style={{
               fontFamily: 'Space Grotesk, sans-serif',
               fontSize: '11px',
@@ -104,7 +101,7 @@ export default function Home() {
             <h1 style={{
               fontFamily: 'Space Grotesk, sans-serif',
               fontWeight: 700,
-              fontSize: 'clamp(2.5rem, 5vw, 4.2rem)',
+              fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
               letterSpacing: '-0.04em',
               color: '#FFFFFF',
               lineHeight: 1.05,
@@ -157,52 +154,6 @@ export default function Home() {
               </Link>
             </div>
           </div>
-
-          {/* Right 3D Showcase */}
-          <div style={{ flexGrow: 1, height: '85%', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', zIndex: 1 }}>
-            {heroSlides.map((src, idx) => (
-              <div
-                key={`slide-wrapper-${idx}`}
-                style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: '50%',
-                  display: 'flex',
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  borderRadius: '24px',
-                  opacity: idx === currentSlideIdx ? 1 : 0,
-                  transform: idx === currentSlideIdx 
-                    ? 'translateY(-50%) perspective(1400px) rotateY(-8deg) rotateX(2deg) scale(1.02)' 
-                    : 'translateY(-50%) perspective(1400px) rotateY(10deg) rotateX(0deg) scale(0.95)',
-                  transition: 'all 1.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
-                  boxShadow: '0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.15)',
-                  overflow: 'hidden',
-                }}
-              >
-                <img
-                  src={src}
-                  alt="Luxury furniture"
-                  style={{
-                    display: 'block',
-                    width: 'auto',
-                    height: 'auto',
-                    maxWidth: '100%',
-                    maxHeight: '100%',
-                    objectFit: 'contain',
-                    filter: 'contrast(1.1) saturate(1.1) brightness(1.05)',
-                  }}
-                />
-                {/* Glossy Overlay inside the card */}
-                <div style={{
-                  position: 'absolute', inset: 0,
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 100%)',
-                  pointerEvents: 'none',
-                }} />
-              </div>
-            ))}
-          </div>
-
         </div>
 
         {/* Slide Dots */}
