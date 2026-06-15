@@ -63,17 +63,17 @@ export default function Home() {
                 position: 'absolute',
                 inset: 0,
                 width: '100%', height: '100%',
-                objectFit: 'cover',
-                filter: 'grayscale(30%)',
+                objectFit: 'contain',
+                objectPosition: 'center',
+                filter: 'grayscale(20%)',
                 opacity: idx === currentSlideIdx ? 1 : 0,
-                transition: 'opacity 1.5s ease-in-out, transform 8s ease-out',
-                transform: idx === currentSlideIdx ? 'scale(1.02)' : 'scale(1)',
+                transition: 'opacity 1.5s ease-in-out',
                 zIndex: 0,
               }}
             />
           ))}
           {/* Dark Overlay */}
-          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(10,10,10,0.72)', zIndex: 1 }} />
+          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(10,10,10,0.65)', zIndex: 1 }} />
         </div>
 
         {/* Text Content */}
