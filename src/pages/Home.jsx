@@ -51,126 +51,148 @@ export default function Home() {
   return (
     <PageLayout>
       {/* Hero Section */}
-      <section style={{ position: 'relative', height: 'calc(100vh - 70px)', overflow: 'hidden', minHeight: '600px' }}>
-        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', backgroundColor: '#0A0A0A' }}>
-          {/* Blurred Background Layer */}
+      <section style={{ position: 'relative', height: 'calc(100vh - 60px)', overflow: 'hidden', minHeight: '600px' }}>
+        {/* Full-Cover Slide Images */}
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
           {heroSlides.map((src, idx) => (
             <div
-              key={`blur-${idx}`}
+              key={`slide-${idx}`}
               style={{
                 position: 'absolute',
                 inset: 0,
                 opacity: idx === currentSlideIdx ? 1 : 0,
                 transition: 'opacity 1.5s ease-in-out',
-                zIndex: 0,
               }}
             >
               <img
                 src={src}
-                alt=""
+                alt="Luxury furniture"
                 style={{
-                  width: '100%', height: '100%', objectFit: 'cover',
-                  filter: 'blur(40px) brightness(0.3)',
-                  transform: 'scale(1.1)',
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  filter: 'grayscale(20%)',
+                  transform: idx === currentSlideIdx ? 'scale(1.04)' : 'scale(1)',
+                  transition: 'transform 8s ease',
                 }}
               />
             </div>
           ))}
 
-          {/* Sharp Contained Image on the Right */}
-          {heroSlides.map((src, idx) => (
-            <div
-              key={`sharp-${idx}`}
-              style={{
-                position: 'absolute',
-                top: 0, bottom: 0, right: 0,
-                width: '60%', /* Takes up the right 60% of the screen */
-                opacity: idx === currentSlideIdx ? 1 : 0,
-                transition: 'opacity 1.5s ease-in-out, transform 8s ease-out',
-                transform: idx === currentSlideIdx ? 'scale(1.02)' : 'scale(1)',
-                zIndex: 1,
-              }}
-            >
-              <img
-                src={src}
-                alt="Luxury furniture slide"
-                style={{
-                  width: '100%', height: '100%', objectFit: 'contain',
-                  objectPosition: 'right center',
-                  padding: '2rem 4rem 2rem 0', // padding so it doesn't touch the edges
-                }}
-              />
-            </div>
-          ))}
-
-          {/* Gradient Overlay for Text */}
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(15,15,15,0.95) 0%, rgba(15,15,15,0.8) 40%, rgba(15,15,15,0) 100%)', zIndex: 2, pointerEvents: 'none' }} />
+          {/* Dark Overlay */}
+          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(10,10,10,0.68)' }} />
         </div>
 
+        {/* Text Content */}
         <div style={{
-          position: 'relative', zIndex: 10, height: '100%',
+          position: 'relative', zIndex: 1, height: '100%',
           display: 'flex', alignItems: 'center',
           maxWidth: '1200px', margin: '0 auto', padding: '0 2rem',
         }}>
-
-          <div style={{ maxWidth: '600px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '1.5rem' }}>
-              <div style={{ width: '40px', height: '1px', backgroundColor: '#555' }} />
-              <span style={{ color: '#888', letterSpacing: '0.2em', fontSize: '11px', textTransform: 'uppercase' }}>NAIROBI, KENYA</span>
-            </div>
-            <h1 style={{
-              fontSize: 'clamp(2.5rem, 4vw, 4rem)',
-              fontWeight: 800,
-              lineHeight: 1.1,
-              color: '#FFFFFF',
-              letterSpacing: '-0.02em',
+          <div style={{ maxWidth: '700px' }}>
+            <div style={{
+              fontFamily: 'Space Grotesk, sans-serif',
+              fontSize: '11px',
+              letterSpacing: '0.35em',
+              textTransform: 'uppercase',
+              color: '#888888',
               marginBottom: '1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
             }}>
-              FURNITURE THAT MAKES EVERY <span style={{ color: '#D4AF37' }}>SPACE</span> EXCEPTIONAL
+              <span style={{ display: 'inline-block', width: '40px', height: '1px', backgroundColor: '#555555' }} />
+              NAIROBI, KENYA
+            </div>
+
+            <h1 style={{
+              fontFamily: 'Space Grotesk, sans-serif',
+              fontWeight: 700,
+              fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+              letterSpacing: '-0.04em',
+              color: '#FFFFFF',
+              lineHeight: 1.05,
+              marginBottom: '2.5rem',
+            }}>
+              PREMIUM<br />
+              <span style={{ color: '#D4AF37', fontWeight: 300 }}>FURNITURE</span><br />
+              FOR MODERN<br />KENYAN HOMES
             </h1>
+
             <p style={{
-              fontSize: '16px',
-              lineHeight: 1.6,
-              color: '#AAAAAA',
-              marginBottom: '3rem',
-              maxWidth: '85%',
+              color: '#888888',
+              fontSize: '15px',
+              lineHeight: 1.8,
+              marginBottom: '3.5rem',
+              maxWidth: '460px',
             }}>
-              Discover stylish, durable, and affordable furniture tailored to your lifestyle and business needs.
+              Elegant, durable, and affordable furniture solutions crafted for homes, offices, and businesses across Kenya.
             </p>
-            
+
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
               <Link to="/products" style={{
-                backgroundColor: '#D4AF37', color: '#0A0A0A',
-                padding: '16px 32px', fontSize: '12px', fontWeight: 600,
-                letterSpacing: '0.15em', textDecoration: 'none',
-                display: 'flex', alignItems: 'center', gap: '10px',
-                transition: 'background 0.3s ease',
+                backgroundColor: '#FFFFFF', color: '#0A0A0A',
+                padding: '14px 32px', textDecoration: 'none',
+                fontFamily: 'Space Grotesk, sans-serif',
+                fontSize: '11px', fontWeight: 600,
+                letterSpacing: '0.2em', textTransform: 'uppercase',
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                transition: 'background 0.2s ease, color 0.2s ease',
               }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f2c94c'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#D4AF37'}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#333333'; e.currentTarget.style.color = '#FFFFFF'; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFFFFF'; e.currentTarget.style.color = '#0A0A0A'; }}
               >
-                SHOP FURNITURE <ChevronRight size={14} />
+                VIEW COLLECTION <ChevronRight size={14} />
               </Link>
-              <Link to="/contact" style={{
-                border: '1px solid #FFFFFF', color: '#FFFFFF',
-                padding: '16px 32px', fontSize: '12px', fontWeight: 600,
-                letterSpacing: '0.15em', textDecoration: 'none',
-                transition: 'background 0.3s ease, color 0.3s ease',
+              <Link to="/custom-orders" style={{
+                backgroundColor: 'transparent', color: '#FFFFFF',
+                border: '1px solid #FFFFFF', padding: '14px 32px',
+                textDecoration: 'none',
+                fontFamily: 'Space Grotesk, sans-serif',
+                fontSize: '11px', fontWeight: 600,
+                letterSpacing: '0.2em', textTransform: 'uppercase',
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                transition: 'background 0.2s ease, color 0.2s ease',
               }}
                 onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FFFFFF'; e.currentTarget.style.color = '#0A0A0A'; }}
                 onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#FFFFFF'; }}
               >
-                REQUEST FREE QUOTE
+                GET A QUOTE
               </Link>
             </div>
           </div>
         </div>
 
+        {/* Slide Dots */}
+        {heroSlides.length > 1 && (
+          <div style={{
+            position: 'absolute', bottom: '2rem', right: '2rem', zIndex: 2,
+            display: 'flex', gap: '8px', alignItems: 'center',
+          }}>
+            {heroSlides.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentSlideIdx(idx)}
+                style={{
+                  width: idx === currentSlideIdx ? '28px' : '8px',
+                  height: '8px',
+                  borderRadius: idx === currentSlideIdx ? '4px' : '50%',
+                  backgroundColor: idx === currentSlideIdx ? '#D4AF37' : 'rgba(255,255,255,0.4)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  transition: 'all 0.4s ease',
+                }}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Scroll indicator */}
         <div style={{
           position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)',
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+          zIndex: 2,
         }}>
           <span style={{ color: '#555555', fontSize: '9px', letterSpacing: '0.3em' }}>SCROLL</span>
           <div style={{ width: '1px', height: '40px', backgroundColor: '#2A2A2A', position: 'relative', overflow: 'hidden' }}>
