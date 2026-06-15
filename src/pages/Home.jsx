@@ -81,9 +81,6 @@ export default function Home() {
               key={`slide-wrapper-${idx}`}
               style={{
                 position: 'absolute',
-                width: 'calc(100% - 4rem)',
-                height: 'calc(100% - 6rem)',
-                maxWidth: '1400px',
                 borderRadius: '24px',
                 opacity: idx === currentSlideIdx ? 1 : 0,
                 transform: idx === currentSlideIdx 
@@ -92,17 +89,20 @@ export default function Home() {
                 transition: 'all 1.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
                 boxShadow: '0 30px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.15)',
                 overflow: 'hidden',
+                display: 'flex',
               }}
             >
               <img
                 src={src}
                 alt="Luxury furniture"
                 style={{
-                  width: '100%', height: '100%',
-                  objectFit: 'cover',
+                  display: 'block',
+                  width: 'auto',
+                  height: 'auto',
+                  maxWidth: 'calc(100vw - 4rem)',
+                  maxHeight: 'calc(100vh - 160px)',
+                  objectFit: 'contain',
                   filter: 'contrast(1.15) saturate(1.2) brightness(1.05)',
-                  transform: idx === currentSlideIdx ? 'scale(1)' : 'scale(1.05)',
-                  transition: 'transform 8s ease',
                 }}
               />
               {/* Glossy Overlay inside the card */}
