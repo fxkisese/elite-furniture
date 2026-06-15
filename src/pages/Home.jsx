@@ -74,57 +74,18 @@ export default function Home() {
           ))}
         </div>
 
-        {/* 3D Glossy Foreground Images (Fit Fully) */}
-        <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {heroSlides.map((src, idx) => (
-            <div
-              key={`slide-wrapper-${idx}`}
-              style={{
-                position: 'absolute',
-                borderRadius: '24px',
-                opacity: idx === currentSlideIdx ? 1 : 0,
-                transform: idx === currentSlideIdx 
-                  ? 'perspective(1400px) rotateY(-4deg) rotateX(2deg) scale(1.02)' 
-                  : 'perspective(1400px) rotateY(10deg) rotateX(0deg) scale(0.95)',
-                transition: 'all 1.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
-                boxShadow: '0 30px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.15)',
-                overflow: 'hidden',
-                display: 'flex',
-              }}
-            >
-              <img
-                src={src}
-                alt="Luxury furniture"
-                style={{
-                  display: 'block',
-                  width: 'auto',
-                  height: 'auto',
-                  maxWidth: 'calc(100vw - 4rem)',
-                  maxHeight: 'calc(100vh - 160px)',
-                  objectFit: 'contain',
-                  filter: 'contrast(1.15) saturate(1.2) brightness(1.05)',
-                }}
-              />
-              {/* Glossy Overlay inside the card */}
-              <div style={{
-                position: 'absolute', inset: 0,
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 100%)',
-                pointerEvents: 'none',
-              }} />
-            </div>
-          ))}
-        </div>
-
         {/* Text Gradient Overlay for Readability */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.5) 50%, rgba(10,10,10,0) 100%)', zIndex: 2, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.7) 45%, rgba(10,10,10,0) 100%)', zIndex: 2, pointerEvents: 'none' }} />
 
-        {/* Text Content */}
+        {/* Main Layout Container */}
         <div style={{
           position: 'relative', zIndex: 10, height: '100%',
-          display: 'flex', alignItems: 'center',
-          maxWidth: '1200px', margin: '0 auto', padding: '0 2rem',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '3rem',
+          maxWidth: '1300px', margin: '0 auto', padding: '0 3rem',
         }}>
-          <div style={{ maxWidth: '700px' }}>
+
+          {/* Left Text Content */}
+          <div style={{ maxWidth: '540px', flexShrink: 0, zIndex: 10 }}>
             <div style={{
               fontFamily: 'Space Grotesk, sans-serif',
               fontSize: '11px',
@@ -143,7 +104,7 @@ export default function Home() {
             <h1 style={{
               fontFamily: 'Space Grotesk, sans-serif',
               fontWeight: 700,
-              fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+              fontSize: 'clamp(2.5rem, 5vw, 4.2rem)',
               letterSpacing: '-0.04em',
               color: '#FFFFFF',
               lineHeight: 1.05,
@@ -196,6 +157,52 @@ export default function Home() {
               </Link>
             </div>
           </div>
+
+          {/* Right 3D Showcase */}
+          <div style={{ flexGrow: 1, height: '85%', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', zIndex: 1 }}>
+            {heroSlides.map((src, idx) => (
+              <div
+                key={`slide-wrapper-${idx}`}
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: '50%',
+                  display: 'flex',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  borderRadius: '24px',
+                  opacity: idx === currentSlideIdx ? 1 : 0,
+                  transform: idx === currentSlideIdx 
+                    ? 'translateY(-50%) perspective(1400px) rotateY(-8deg) rotateX(2deg) scale(1.02)' 
+                    : 'translateY(-50%) perspective(1400px) rotateY(10deg) rotateX(0deg) scale(0.95)',
+                  transition: 'all 1.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                  boxShadow: '0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.15)',
+                  overflow: 'hidden',
+                }}
+              >
+                <img
+                  src={src}
+                  alt="Luxury furniture"
+                  style={{
+                    display: 'block',
+                    width: 'auto',
+                    height: 'auto',
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    objectFit: 'contain',
+                    filter: 'contrast(1.1) saturate(1.1) brightness(1.05)',
+                  }}
+                />
+                {/* Glossy Overlay inside the card */}
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 100%)',
+                  pointerEvents: 'none',
+                }} />
+              </div>
+            ))}
+          </div>
+
         </div>
 
         {/* Slide Dots */}
