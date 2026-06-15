@@ -7,13 +7,11 @@ import { formatPrice } from '@/lib/utils';
 import { generateOrderNumber, sendOrderToAdminWhatsApp } from '@/utils/whatsapp';
 import { toast } from 'sonner';
 import {
-  MapPin, CreditCard, Smartphone, Bitcoin, Truck, ChevronRight,
-  CheckCircle2, Copy, ExternalLink, ArrowLeft, Package, ShieldCheck, Loader2
+  MapPin, CreditCard, Smartphone, Building2, Truck, ChevronRight,
+  CheckCircle2, Copy, ExternalLink, ArrowLeft, Package, ShieldCheck, Loader2, Banknote
 } from 'lucide-react';
 
-const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || '';
-const CRYPTO_WALLET = import.meta.env.VITE_CRYPTO_WALLET_ADDRESS || '';
-const CRYPTO_NETWORK = import.meta.env.VITE_CRYPTO_NETWORK || 'BEP20';
+const INTASEND_PUBLIC_KEY = import.meta.env.VITE_INTASEND_PUBLIC_KEY || '';
 const NAIROBI_DELIVERY_FEE = 600;
 
 const DELIVERY_ZONES = [
@@ -22,16 +20,24 @@ const DELIVERY_ZONES = [
 ];
 
 const PAYMENT_METHODS = [
-  { id: 'card', label: 'Card Payment', subtitle: 'Visa / Mastercard', icon: CreditCard, color: '#4F46E5' },
-  { id: 'mpesa', label: 'M-Pesa', subtitle: 'Pay via STK Push', icon: Smartphone, color: '#00A651' },
-  { id: 'crypto', label: 'Crypto (Binance)', subtitle: `${CRYPTO_NETWORK} Network`, icon: Bitcoin, color: '#F0B90B' },
+  { id: 'mpesa',    label: 'M-PESA',          subtitle: 'STK Push to your phone',          icon: Smartphone,  color: '#00A651' },
+  { id: 'card',     label: 'Card Payment',     subtitle: 'Visa / Mastercard',               icon: CreditCard,  color: '#4F46E5' },
+  { id: 'bank',     label: 'Bank Transfer',    subtitle: 'Pay directly to our bank account',icon: Building2,   color: '#0EA5E9' },
+  { id: 'cod',      label: 'Cash on Delivery', subtitle: 'Pay when your order arrives',     icon: Banknote,    color: '#D4AF37' },
 ];
+
+const BANK_DETAILS = {
+  bank: 'Equity Bank Kenya',
+  account: '0123456789',
+  name: 'Elite Furniture Ltd',
+  branch: 'Nairobi CBD',
+};
 
 export default function Checkout() {
   const navigate = useNavigate();
   const { cartItems, cartTotal, clearCart } = useCart();
 
-  const [step, setStep] = useState(1); // 1: Delivery, 2: Payment, 3: Confirmation
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
   // Step 1 — Delivery
@@ -44,29 +50,23 @@ export default function Checkout() {
 
   // Step 2 — Payment
   const [paymentMethod, setPaymentMethod] = useState('');
-  const [cryptoCopied, setCryptoCopied] = useState(false);
+  const [bankCopied, setBankCopied] = useState(false);
 
   // Step 3 — Confirmation
   const [order, setOrder] = useState(null);
 
-  // Calculate delivery fee
   const deliveryFee = useMemo(() => {
     if (deliveryZone === 'nairobi') return NAIROBI_DELIVERY_FEE;
-    // Outside Nairobi: sum up per-product delivery fees if available
     const outsideFees = cartItems.reduce((total, item) => {
       if (item.delivery_outside) {
         try {
           const outsidePrices = typeof item.delivery_outside === 'string'
             ? JSON.parse(item.delivery_outside)
             : item.delivery_outside;
-          // Use the first available outside fee, or a default
           const fees = Object.values(outsidePrices);
-          if (fees.length > 0) {
-            return total + (Number(fees[0]) || 0) * item.quantity;
-          }
+          if (fees.length > 0) return total + (Number(fees[0]) || 0) * item.quantity;
         } catch { /* fallback */ }
       }
-      // Default outside Nairobi fee per item
       return total + 1500 * item.quantity;
     }, 0);
     return outsideFees;
@@ -74,19 +74,16 @@ export default function Checkout() {
 
   const grandTotal = cartTotal + deliveryFee;
 
-  // Redirect if cart is empty
   useEffect(() => {
-    if (cartItems.length === 0 && !order) {
-      navigate('/products');
-    }
+    if (cartItems.length === 0 && !order) navigate('/products');
   }, [cartItems, order, navigate]);
 
-  // Load Paystack script
+  // Load IntaSend script
   useEffect(() => {
-    if (!document.getElementById('paystack-script')) {
+    if (!document.getElementById('intasend-script')) {
       const script = document.createElement('script');
-      script.id = 'paystack-script';
-      script.src = 'https://js.paystack.co/v1/inline.js';
+      script.id = 'intasend-script';
+      script.src = 'https://unpkg.com/intasend-inlinejs-sdk@3.0.3/build/intasend-inline.js';
       script.async = true;
       document.head.appendChild(script);
     }
@@ -138,18 +135,14 @@ export default function Checkout() {
         toast.error('Order placed but failed to save. Please contact us.');
       }
       setOrder(orderData);
-      
-      // Auto-forward to admin WhatsApp
       try {
         sendOrderToAdminWhatsApp(orderData);
-        // Mark whatsapp_sent
         if (data && data[0]) {
           await supabase.from('orders').update({ whatsapp_sent: true }).eq('id', data[0].id);
         }
       } catch (e) {
-        console.warn('WhatsApp forwarding opened in new tab', e);
+        console.warn('WhatsApp forward attempted', e);
       }
-
       clearCart();
       setStep(3);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -159,43 +152,59 @@ export default function Checkout() {
     }
   };
 
-  const handlePaystackPayment = (channel) => {
-    if (!window.PaystackPop) {
+  const handleIntaSendPayment = () => {
+    if (!window.IntaSend) {
       toast.error('Payment system is loading. Please try again in a moment.');
       return;
     }
     setLoading(true);
 
-    const handler = window.PaystackPop.setup({
-      key: PAYSTACK_PUBLIC_KEY,
-      email: customerEmail || `${customerPhone.replace(/\D/g, '')}@customer.elitefurniture.co.ke`,
-      amount: Math.round(grandTotal * 100), // Paystack uses kobo/cents
-      currency: 'KES',
-      channels: [channel], // 'card' or 'mobile_money'
-      metadata: {
-        customer_name: customerName,
-        customer_phone: customerPhone,
-        custom_fields: [
-          { display_name: 'Customer Name', variable_name: 'customer_name', value: customerName },
-          { display_name: 'Phone', variable_name: 'phone', value: customerPhone },
-        ],
-      },
-      callback: async (response) => {
-        const orderData = createOrderData(channel === 'card' ? 'card' : 'mpesa', 'paid', response.reference);
+    const email = customerEmail.trim() || `${customerPhone.replace(/\D/g, '')}@customer.elitefurniture.co.ke`;
+
+    const intasend = new window.IntaSend({
+      publicAPIKey: INTASEND_PUBLIC_KEY,
+      live: false, // Set to true in production
+    });
+
+    intasend
+      .on('COMPLETE', async (response) => {
+        const orderData = createOrderData(paymentMethod, 'paid', response.tracking_id || response.id);
         await saveAndComplete(orderData);
         setLoading(false);
-      },
-      onClose: () => {
+      })
+      .on('FAILED', () => {
         setLoading(false);
-        toast('Payment window closed. You can try again.');
-      },
-    });
-    handler.openIframe();
+        toast.error('Payment failed. Please try again.');
+      })
+      .on('IN-PROGRESS', () => {
+        toast('Payment processing...');
+      });
+
+    if (paymentMethod === 'mpesa') {
+      intasend.run({
+        amount: Math.round(grandTotal),
+        currency: 'KES',
+        email,
+        phone_number: customerPhone.replace(/\D/g, '').replace(/^0/, '254'),
+        method: 'M-PESA',
+        comment: `Elite Furniture Order - ${customerName}`,
+      });
+    } else if (paymentMethod === 'card') {
+      intasend.run({
+        amount: Math.round(grandTotal),
+        currency: 'KES',
+        email,
+        phone_number: customerPhone.replace(/\D/g, '').replace(/^0/, '254'),
+        method: 'CARD-PAYMENT',
+        comment: `Elite Furniture Order - ${customerName}`,
+      });
+    }
   };
 
-  const handleCryptoPayment = async () => {
+  const handleOfflinePayment = async () => {
     setLoading(true);
-    const orderData = createOrderData('crypto', 'pending', null);
+    const status = paymentMethod === 'cod' ? 'pending' : 'awaiting_payment';
+    const orderData = createOrderData(paymentMethod, status, null);
     await saveAndComplete(orderData);
     setLoading(false);
   };
@@ -205,24 +214,23 @@ export default function Checkout() {
       toast.error('Please select a payment method.');
       return;
     }
-    if (paymentMethod === 'card') {
-      handlePaystackPayment('card');
-    } else if (paymentMethod === 'mpesa') {
-      handlePaystackPayment('mobile_money');
-    } else if (paymentMethod === 'crypto') {
-      handleCryptoPayment();
+    if (paymentMethod === 'mpesa' || paymentMethod === 'card') {
+      handleIntaSendPayment();
+    } else {
+      handleOfflinePayment();
     }
   };
 
-  const copyWalletAddress = () => {
-    navigator.clipboard.writeText(CRYPTO_WALLET);
-    setCryptoCopied(true);
-    toast.success('Wallet address copied!');
-    setTimeout(() => setCryptoCopied(false), 3000);
+  const copyBankDetails = () => {
+    navigator.clipboard.writeText(BANK_DETAILS.account);
+    setBankCopied(true);
+    toast.success('Account number copied!');
+    setTimeout(() => setBankCopied(false), 3000);
   };
 
   // ——— Success Screen ———
   if (step === 3 && order) {
+    const isOffline = order.payment_method === 'bank' || order.payment_method === 'cod';
     return (
       <PageLayout>
         <div className="container mx-auto px-4 py-16 max-w-2xl">
@@ -250,37 +258,56 @@ export default function Checkout() {
               ))}
               <div className="h-px bg-gray-200" />
               <div className="flex justify-between text-sm text-gray-600">
-                <span>Subtotal</span>
-                <span>{formatPrice(order.subtotal)}</span>
+                <span>Subtotal</span><span>{formatPrice(order.subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-600">
-                <span>Delivery ({order.delivery_location})</span>
-                <span>{formatPrice(order.delivery_fee)}</span>
+                <span>Delivery ({order.delivery_location})</span><span>{formatPrice(order.delivery_fee)}</span>
               </div>
               <div className="h-px bg-gray-200" />
               <div className="flex justify-between items-center">
-                <span className="font-bold text-gray-900">Total Paid</span>
+                <span className="font-bold text-gray-900">Total {order.payment_method === 'cod' ? 'Due on Delivery' : 'Paid'}</span>
                 <span className="text-xl font-black text-[#D4AF37]">{formatPrice(order.grand_total)}</span>
               </div>
             </div>
           </div>
 
-          {order.payment_method === 'crypto' && (
-            <div className="rounded-2xl border-2 border-yellow-300 bg-yellow-50 p-6 mb-8">
+          {/* Bank Transfer Instructions */}
+          {order.payment_method === 'bank' && (
+            <div className="rounded-2xl border-2 border-blue-200 bg-blue-50 p-6 mb-8">
               <div className="flex items-start gap-3">
-                <Bitcoin className="w-6 h-6 text-yellow-600 mt-0.5 shrink-0" />
-                <div>
-                  <h4 className="font-bold text-yellow-800 mb-1">Crypto Payment Pending</h4>
-                  <p className="text-sm text-yellow-700 mb-3">
-                    Please send <span className="font-bold">{formatPrice(order.grand_total)}</span> equivalent in crypto to the wallet below. The admin will confirm receipt and process your order.
-                  </p>
-                  <div className="bg-white rounded-lg border border-yellow-200 p-3 flex items-center gap-2">
-                    <code className="text-xs font-mono flex-1 break-all text-gray-800">{CRYPTO_WALLET}</code>
-                    <button onClick={copyWalletAddress} className="p-2 hover:bg-yellow-100 rounded-md transition-colors shrink-0">
-                      <Copy className="w-4 h-4" />
-                    </button>
+                <Building2 className="w-6 h-6 text-blue-600 mt-0.5 shrink-0" />
+                <div className="flex-1">
+                  <h4 className="font-bold text-blue-800 mb-2">Complete Your Bank Transfer</h4>
+                  <p className="text-sm text-blue-700 mb-4">Please transfer <strong>{formatPrice(order.grand_total)}</strong> to the account below and use your order number as the reference.</p>
+                  <div className="bg-white rounded-xl border border-blue-200 p-4 space-y-2 text-sm">
+                    <div className="flex justify-between"><span className="text-gray-500">Bank</span><span className="font-semibold">{BANK_DETAILS.bank}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Account Name</span><span className="font-semibold">{BANK_DETAILS.name}</span></div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Account No.</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold">{BANK_DETAILS.account}</span>
+                        <button onClick={copyBankDetails} className="p-1.5 hover:bg-blue-50 rounded-md transition-colors">
+                          {bankCopied ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-gray-400" />}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex justify-between"><span className="text-gray-500">Branch</span><span className="font-semibold">{BANK_DETAILS.branch}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Reference</span><span className="font-mono font-bold text-[#D4AF37]">#{order.order_number}</span></div>
                   </div>
-                  <p className="text-xs text-yellow-600 mt-2">Network: {CRYPTO_NETWORK}</p>
+                  <p className="text-xs text-blue-600 mt-3">After payment, send your proof of payment via WhatsApp and we'll confirm your order within 2 hours.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* COD Notice */}
+          {order.payment_method === 'cod' && (
+            <div className="rounded-2xl border-2 border-yellow-200 bg-yellow-50 p-6 mb-8">
+              <div className="flex items-start gap-3">
+                <Banknote className="w-6 h-6 text-yellow-600 mt-0.5 shrink-0" />
+                <div>
+                  <h4 className="font-bold text-yellow-800 mb-1">Cash on Delivery Confirmed</h4>
+                  <p className="text-sm text-yellow-700">Please have <strong>{formatPrice(order.grand_total)}</strong> ready when your order arrives. Our team will contact you to confirm delivery time.</p>
                 </div>
               </div>
             </div>
@@ -339,6 +366,7 @@ export default function Checkout() {
         <div className="grid lg:grid-cols-[1fr_380px] gap-8 items-start">
           {/* Left Panel */}
           <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+
             {/* STEP 1 — Delivery */}
             {step === 1 && (
               <form onSubmit={handleDeliverySubmit}>
@@ -348,65 +376,37 @@ export default function Checkout() {
                   </h2>
                 </div>
                 <div className="p-6 md:p-8 space-y-6">
-                  {/* Contact */}
                   <div>
                     <h3 className="text-lg font-bold mb-4 text-gray-900">Contact Information</h3>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">Full Name *</label>
-                        <input
-                          value={customerName}
-                          onChange={e => setCustomerName(e.target.value)}
-                          required
-                          placeholder="John Doe"
-                          className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-shadow"
-                        />
+                        <input value={customerName} onChange={e => setCustomerName(e.target.value)} required placeholder="John Doe"
+                          className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-shadow" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">Phone Number *</label>
-                        <input
-                          value={customerPhone}
-                          onChange={e => setCustomerPhone(e.target.value)}
-                          required
-                          type="tel"
-                          placeholder="+254 700 000 000"
-                          className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-shadow"
-                        />
+                        <input value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} required type="tel" placeholder="+254 700 000 000"
+                          className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-shadow" />
                       </div>
                       <div className="space-y-2 md:col-span-2">
                         <label className="text-sm font-medium text-gray-700">Email Address</label>
-                        <input
-                          value={customerEmail}
-                          onChange={e => setCustomerEmail(e.target.value)}
-                          type="email"
-                          placeholder="john@example.com"
-                          className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-shadow"
-                        />
+                        <input value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} type="email" placeholder="john@example.com"
+                          className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-shadow" />
                       </div>
                     </div>
                   </div>
 
                   <div className="h-px bg-gray-100" />
 
-                  {/* Delivery Zone */}
                   <div>
                     <h3 className="text-lg font-bold mb-4 text-gray-900">Delivery Location</h3>
                     <div className="grid sm:grid-cols-2 gap-3">
                       {DELIVERY_ZONES.map(zone => (
-                        <button
-                          key={zone.id}
-                          type="button"
-                          onClick={() => setDeliveryZone(zone.id)}
-                          className={`p-4 rounded-xl border-2 text-left transition-all ${
-                            deliveryZone === zone.id
-                              ? 'border-[#D4AF37] bg-[#faf7f0] shadow-sm'
-                              : 'border-gray-200 hover:border-gray-300 bg-white'
-                          }`}
-                        >
+                        <button key={zone.id} type="button" onClick={() => setDeliveryZone(zone.id)}
+                          className={`p-4 rounded-xl border-2 text-left transition-all ${deliveryZone === zone.id ? 'border-[#D4AF37] bg-[#faf7f0] shadow-sm' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>
                           <div className="flex items-start gap-3">
-                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 shrink-0 transition-colors ${
-                              deliveryZone === zone.id ? 'border-[#D4AF37]' : 'border-gray-300'
-                            }`}>
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 shrink-0 transition-colors ${deliveryZone === zone.id ? 'border-[#D4AF37]' : 'border-gray-300'}`}>
                               {deliveryZone === zone.id && <div className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]" />}
                             </div>
                             <div>
@@ -421,34 +421,22 @@ export default function Checkout() {
                     </div>
                   </div>
 
-                  {/* Delivery Address */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Delivery Address / Landmark</label>
-                    <textarea
-                      value={deliveryAddress}
-                      onChange={e => setDeliveryAddress(e.target.value)}
-                      placeholder="e.g. Kilimani, Rose Avenue Apartments, Gate 3"
-                      rows={2}
-                      className="flex w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-shadow resize-none"
-                    />
+                    <textarea value={deliveryAddress} onChange={e => setDeliveryAddress(e.target.value)}
+                      placeholder="e.g. Kilimani, Rose Avenue Apartments, Gate 3" rows={2}
+                      className="flex w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-shadow resize-none" />
                   </div>
 
-                  {/* Notes */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Order Notes (Optional)</label>
-                    <textarea
-                      value={notes}
-                      onChange={e => setNotes(e.target.value)}
-                      placeholder="Any special delivery instructions..."
-                      rows={2}
-                      className="flex w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-shadow resize-none"
-                    />
+                    <textarea value={notes} onChange={e => setNotes(e.target.value)}
+                      placeholder="Any special delivery instructions..." rows={2}
+                      className="flex w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-shadow resize-none" />
                   </div>
 
-                  <button
-                    type="submit"
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold bg-[#0A0A0A] text-white hover:bg-[#D4AF37] hover:text-[#0A0A0A] h-13 py-3.5 transition-colors"
-                  >
+                  <button type="submit"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold bg-[#0A0A0A] text-white hover:bg-[#D4AF37] hover:text-[#0A0A0A] h-13 py-3.5 transition-colors">
                     Continue to Payment <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -462,42 +450,28 @@ export default function Checkout() {
                   <h2 className="font-bold tracking-widest uppercase text-sm flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-[#D4AF37]" /> Payment Method
                   </h2>
-                  <button
-                    onClick={() => setStep(1)}
-                    className="text-xs text-gray-400 hover:text-white flex items-center gap-1 transition-colors"
-                  >
+                  <button onClick={() => setStep(1)} className="text-xs text-gray-400 hover:text-white flex items-center gap-1 transition-colors">
                     <ArrowLeft className="w-3 h-3" /> Back
                   </button>
                 </div>
                 <div className="p-6 md:p-8 space-y-6">
-                  <p className="text-sm text-gray-600">
-                    Select your preferred payment method. All payments are secure and encrypted.
-                  </p>
+                  <p className="text-sm text-gray-600">Select your preferred payment method. All online payments are secure and encrypted.</p>
 
                   <div className="space-y-3">
                     {PAYMENT_METHODS.map(method => {
                       const Icon = method.icon;
                       const isSelected = paymentMethod === method.id;
                       return (
-                        <button
-                          key={method.id}
-                          onClick={() => setPaymentMethod(method.id)}
-                          className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center gap-4 ${
-                            isSelected
-                              ? 'border-[#D4AF37] bg-[#faf7f0] shadow-sm'
-                              : 'border-gray-200 hover:border-gray-300 bg-white'
-                          }`}
-                        >
-                          <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: method.color + '15' }}>
+                        <button key={method.id} onClick={() => setPaymentMethod(method.id)}
+                          className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center gap-4 ${isSelected ? 'border-[#D4AF37] bg-[#faf7f0] shadow-sm' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: method.color + '18' }}>
                             <Icon className="w-6 h-6" style={{ color: method.color }} />
                           </div>
                           <div className="flex-1">
                             <div className="font-semibold text-sm text-gray-900">{method.label}</div>
                             <div className="text-xs text-gray-500">{method.subtitle}</div>
                           </div>
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                            isSelected ? 'border-[#D4AF37]' : 'border-gray-300'
-                          }`}>
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'border-[#D4AF37]' : 'border-gray-300'}`}>
                             {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-[#D4AF37]" />}
                           </div>
                         </button>
@@ -505,37 +479,41 @@ export default function Checkout() {
                     })}
                   </div>
 
-                  {/* Crypto wallet display */}
-                  {paymentMethod === 'crypto' && (
-                    <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-5 space-y-3">
-                      <div className="flex items-center gap-2 text-yellow-800">
-                        <Bitcoin className="w-5 h-5" />
-                        <span className="font-bold text-sm">Send Crypto to this Wallet</span>
+                  {/* Bank Transfer Preview */}
+                  {paymentMethod === 'bank' && (
+                    <div className="rounded-xl border border-blue-200 bg-blue-50 p-5 space-y-3">
+                      <div className="flex items-center gap-2 text-blue-800">
+                        <Building2 className="w-5 h-5" />
+                        <span className="font-bold text-sm">Bank Transfer Details</span>
                       </div>
-                      <div className="bg-white rounded-lg border border-yellow-200 p-3 flex items-center gap-2">
-                        <code className="text-xs font-mono flex-1 break-all text-gray-800">{CRYPTO_WALLET}</code>
-                        <button
-                          onClick={copyWalletAddress}
-                          className="p-2 hover:bg-yellow-100 rounded-md transition-colors shrink-0"
-                          title="Copy address"
-                        >
-                          {cryptoCopied ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-gray-500" />}
-                        </button>
+                      <div className="bg-white rounded-lg border border-blue-100 p-3 space-y-1.5 text-sm">
+                        <div className="flex justify-between"><span className="text-gray-500">Bank</span><span className="font-semibold">{BANK_DETAILS.bank}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">Account Name</span><span className="font-semibold">{BANK_DETAILS.name}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">Account No.</span><span className="font-mono font-bold">{BANK_DETAILS.account}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">Branch</span><span className="font-semibold">{BANK_DETAILS.branch}</span></div>
+                      </div>
+                      <p className="text-xs text-blue-700">Your order number will be your payment reference. Full details shown after placing the order.</p>
+                    </div>
+                  )}
+
+                  {/* COD Notice */}
+                  {paymentMethod === 'cod' && (
+                    <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-5">
+                      <div className="flex items-center gap-2 text-yellow-800 mb-2">
+                        <Banknote className="w-5 h-5" />
+                        <span className="font-bold text-sm">Cash on Delivery</span>
                       </div>
                       <p className="text-xs text-yellow-700">
-                        Network: <strong>{CRYPTO_NETWORK}</strong> · Send the exact amount in USDT, BNB, or BTC equivalent. The admin will verify the transaction and confirm your order.
+                        Pay <strong>{formatPrice(grandTotal)}</strong> in cash when your order is delivered. Available within Nairobi. Our team will call to confirm your delivery slot.
                       </p>
                     </div>
                   )}
 
-                  <button
-                    onClick={handlePayment}
-                    disabled={loading || !paymentMethod}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold bg-[#D4AF37] text-[#0A0A0A] hover:bg-[#b8903a] disabled:opacity-50 disabled:cursor-not-allowed h-13 py-3.5 transition-colors"
-                  >
+                  <button onClick={handlePayment} disabled={loading || !paymentMethod}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold bg-[#D4AF37] text-[#0A0A0A] hover:bg-[#b8903a] disabled:opacity-50 disabled:cursor-not-allowed h-13 py-3.5 transition-colors">
                     {loading ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</>
-                    ) : paymentMethod === 'crypto' ? (
+                    ) : (paymentMethod === 'bank' || paymentMethod === 'cod') ? (
                       <>Confirm & Place Order</>
                     ) : (
                       <>Pay {formatPrice(grandTotal)}</>
@@ -543,14 +521,14 @@ export default function Checkout() {
                   </button>
 
                   <p className="text-center text-xs text-gray-400 flex items-center justify-center gap-1">
-                    <ShieldCheck className="w-3 h-3" /> Your payment information is secure and encrypted
+                    <ShieldCheck className="w-3 h-3" /> Online payments secured by IntaSend
                   </p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Right Panel — Order Summary (Sticky) */}
+          {/* Right Panel — Order Summary */}
           <div className="sticky top-24 rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
             <div className="bg-[#0A0A0A] text-white px-6 py-4">
               <h3 className="font-bold tracking-widest uppercase text-sm flex items-center gap-2">
@@ -558,7 +536,6 @@ export default function Checkout() {
               </h3>
             </div>
             <div className="p-6 space-y-4">
-              {/* Items */}
               <div className="space-y-3 max-h-60 overflow-y-auto">
                 {cartItems.map(item => (
                   <div key={item.id} className="flex gap-3 items-center">
@@ -582,7 +559,6 @@ export default function Checkout() {
 
               <div className="h-px bg-gray-200" />
 
-              {/* Totals */}
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal ({cartItems.reduce((a, i) => a + i.quantity, 0)} items)</span>
