@@ -109,7 +109,7 @@ export default function Home() {
             }}>
               PREMIUM<br />
               <span style={{ color: '#D4AF37', fontWeight: 300 }}>FURNITURE</span><br />
-              FOR MODERN<br />KENYAN HOMES
+              FOR MODERN<br />KENYAN HOMES & OFFICES
             </h1>
 
             <p style={{
