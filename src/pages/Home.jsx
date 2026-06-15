@@ -67,7 +67,10 @@ export default function Home() {
                 objectPosition: 'center',
                 filter: 'grayscale(20%)',
                 opacity: idx === currentSlideIdx ? 1 : 0,
-                transition: 'opacity 1.5s ease-in-out',
+                transform: idx === currentSlideIdx ? 'translateX(0)' : 'translateX(-2%)',
+                transition: idx === currentSlideIdx 
+                  ? 'opacity 1.5s ease-in-out, transform 8s ease-out' 
+                  : 'opacity 1.5s ease-in-out, transform 0s',
                 zIndex: 0,
               }}
             />
