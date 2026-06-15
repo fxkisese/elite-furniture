@@ -52,40 +52,75 @@ export default function Home() {
     <PageLayout>
       {/* Hero Section */}
       <section style={{ position: 'relative', height: 'calc(100vh - 60px)', overflow: 'hidden', minHeight: '600px' }}>
-        {/* Full-Cover Slide Images */}
-        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+        {/* Blurred Background Layer */}
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', backgroundColor: '#050505' }}>
           {heroSlides.map((src, idx) => (
-            <div
-              key={`slide-${idx}`}
+            <img
+              key={`blur-${idx}`}
+              src={src}
+              alt=""
               style={{
                 position: 'absolute',
                 inset: 0,
+                width: '100%', height: '100%',
+                objectFit: 'cover',
+                filter: 'blur(30px) brightness(0.2)',
                 opacity: idx === currentSlideIdx ? 1 : 0,
                 transition: 'opacity 1.5s ease-in-out',
+                transform: 'scale(1.1)',
+                zIndex: 0,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* 3D Glossy Foreground Images (Fit Fully) */}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {heroSlides.map((src, idx) => (
+            <div
+              key={`slide-wrapper-${idx}`}
+              style={{
+                position: 'absolute',
+                width: 'calc(100% - 4rem)',
+                height: 'calc(100% - 6rem)',
+                maxWidth: '1400px',
+                borderRadius: '24px',
+                opacity: idx === currentSlideIdx ? 1 : 0,
+                transform: idx === currentSlideIdx 
+                  ? 'perspective(1400px) rotateY(-4deg) rotateX(2deg) scale(1.02)' 
+                  : 'perspective(1400px) rotateY(10deg) rotateX(0deg) scale(0.95)',
+                transition: 'all 1.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                boxShadow: '0 30px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.15)',
+                overflow: 'hidden',
               }}
             >
               <img
                 src={src}
                 alt="Luxury furniture"
                 style={{
-                  width: '100%',
-                  height: '100%',
+                  width: '100%', height: '100%',
                   objectFit: 'cover',
-                  filter: 'grayscale(20%)',
-                  transform: idx === currentSlideIdx ? 'scale(1.04)' : 'scale(1)',
+                  filter: 'contrast(1.15) saturate(1.2) brightness(1.05)',
+                  transform: idx === currentSlideIdx ? 'scale(1)' : 'scale(1.05)',
                   transition: 'transform 8s ease',
                 }}
               />
+              {/* Glossy Overlay inside the card */}
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 100%)',
+                pointerEvents: 'none',
+              }} />
             </div>
           ))}
-
-          {/* Dark Overlay */}
-          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(10,10,10,0.68)' }} />
         </div>
+
+        {/* Text Gradient Overlay for Readability */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.5) 50%, rgba(10,10,10,0) 100%)', zIndex: 2, pointerEvents: 'none' }} />
 
         {/* Text Content */}
         <div style={{
-          position: 'relative', zIndex: 1, height: '100%',
+          position: 'relative', zIndex: 10, height: '100%',
           display: 'flex', alignItems: 'center',
           maxWidth: '1200px', margin: '0 auto', padding: '0 2rem',
         }}>
