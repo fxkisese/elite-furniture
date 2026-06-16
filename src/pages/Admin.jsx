@@ -9,12 +9,13 @@ import { sendOrderToAdminWhatsApp } from '@/utils/whatsapp';
 /* ---------- Constants ---------- */
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'elitespace2024';
-const CATEGORIES = ['Living Room', 'Bedroom', 'Dining', 'Office'];
+const CATEGORIES = ['Living Room', 'Bedroom', 'Dining', 'Office', 'Combo Items'];
 const SUBCATEGORIES = {
   'Living Room': ['Sofas', 'Coffee Tables', 'TV Stands'],
   'Bedroom': ['Beds', 'Wardrobes', 'Dressers'],
   'Dining': ['Dining Sets', 'Sideboards'],
   'Office': ['Executive Desks', 'Office Chairs', 'Cabinets'],
+  'Combo Items': ['Living Room Combos', 'Bedroom Combos', 'Dining Combos', 'Office Combos'],
 };
 
 /* ---------- Design tokens ---------- */
@@ -156,7 +157,7 @@ const DELIVERY_REGIONS = ['Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Ny
 function ProductForm({ onSubmit, onCancel, initialData }) {
   const [v, set, setValues] = useForm(initialData || { 
     name: '', category: 'Living Room', subcategory: '', 
-    price: '', discount_price: '', 
+    price: '', discount_price: '', piece_price: '',
     description: '', size: '', in_stock: true, featured: false, 
     image: '', images: [], badge: '', rating: 5.0, review_count: 0,
     delivery_nairobi: '600', transport_method: '', delivery_outside: '{}'
@@ -241,6 +242,7 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
       onSubmit({ 
         ...v, 
         price: Number(v.price) || null,
+        piece_price: Number(v.piece_price) || null,
         discount_price: Number(v.discount_price) || null,
         rating: Number(v.rating) || 5.0,
         review_count: Number(v.review_count) || 0,
@@ -267,9 +269,12 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
         </div>
         
         <div className="grid grid-cols-3 gap-4">
-          <div><label style={labelStyle}>Regular Price (KSh)</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.price} onChange={set('price')} placeholder="Leave blank for POA" /></div>
+          <div><label style={labelStyle}>Combo/Regular Price (KSh)</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.price} onChange={set('price')} placeholder="Leave blank for POA" /></div>
+          <div><label style={labelStyle}>Price Per Piece (KSh)</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.piece_price || ''} onChange={set('piece_price')} placeholder="Optional" /></div>
           <div><label style={labelStyle}>Discount Price</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.discount_price} onChange={set('discount_price')} placeholder="Optional" /></div>
-          <div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
             <label style={labelStyle}>Status</label>
             <select style={inputStyle} className="cg-input" value={v.in_stock ? 'In Stock' : 'Out of Stock'} onChange={(e) => setValues(prev => ({ ...prev, in_stock: e.target.value === 'In Stock' }))}>
               <option value="In Stock">In Stock</option>

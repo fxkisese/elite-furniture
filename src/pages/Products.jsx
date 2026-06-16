@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import ProductCard from '@/components/products/ProductCard';
-import { Search, FilterX, Sofa, Bed, UtensilsCrossed, Briefcase, Package, Award, X, Tag, Sparkles } from 'lucide-react';
+import { Search, FilterX, Sofa, Bed, UtensilsCrossed, Briefcase, Package, Award, X, Tag, Sparkles, Layers } from 'lucide-react';
 import { cn, formatPrice } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 
@@ -34,6 +34,7 @@ const CATEGORIES = [
   { name: 'Dining Room', icon: UtensilsCrossed },
   { name: 'Office', icon: Briefcase },
   { name: 'Storage', icon: Package },
+  { name: 'Combo Items', icon: Layers },
 ];
 
 const isBestSeller = (p) => p?.badge === 'Best Seller' || p?.best_seller === true;

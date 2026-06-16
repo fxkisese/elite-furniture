@@ -38,6 +38,7 @@ export default function ProductCard({
     images = [],
     price,
     originalPrice,
+    piece_price,
     rating = 0,
     reviews = 0,
     badges = [],
@@ -156,8 +157,13 @@ export default function ProductCard({
           <span className="sc-font-display text-xl text-[var(--sc-ink)]">
             Ksh {(Number(price) || 0).toLocaleString()}
           </span>
+          {piece_price && (
+            <span className="text-sm text-[var(--sc-ash)] ml-1 border-l border-gray-300 pl-2">
+              Ksh {(Number(piece_price) || 0).toLocaleString()} / piece
+            </span>
+          )}
           {hasDiscount && (
-            <span className="text-[11px] font-semibold bg-[var(--sc-gold)] text-[var(--sc-ink)] px-2 py-0.5 rounded-full">
+            <span className="text-[11px] font-semibold bg-[var(--sc-gold)] text-[var(--sc-ink)] px-2 py-0.5 rounded-none">
               -{discountPercent}%
             </span>
           )}
