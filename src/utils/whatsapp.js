@@ -19,7 +19,8 @@ export function formatOrderForWhatsApp(order) {
   
   msg += `📦 *Order Items*\n`;
   items.forEach((item, idx) => {
-    msg += `${idx + 1}. ${item.name} × ${item.quantity} — ${formatPrice(item.price * item.quantity)}\n`;
+    const itemImage = item.imageUrl || item.image || "";
+    msg += `${idx + 1}. ${item.name} × ${item.quantity} — ${formatPrice(item.price * item.quantity)}${itemImage ? `\n   Image: ${itemImage}` : ""}\n`;
   });
   msg += `\n`;
   
@@ -64,7 +65,8 @@ export function sendOrderToAdminWhatsApp(order) {
 export function formatCartForWhatsApp(cartItems, cartTotal) {
   let message = "Hello! I would like to place an order for the following items:\n\n";
   cartItems.forEach((item, index) => {
-    message += `${index + 1}. ${item.title || item.name} (x${item.quantity}) - ${formatPrice((item.price || 0) * item.quantity)}\n`;
+    const itemImage = item.imageUrl || item.image || "";
+    message += `${index + 1}. ${item.title || item.name} (x${item.quantity}) - ${formatPrice((item.price || 0) * item.quantity)}${itemImage ? `\n   Image: ${itemImage}` : ""}\n`;
   });
   message += `\n*Total Estimated Price:* ${formatPrice(cartTotal)}\n\n`;
   message += "Please let me know the availability and delivery options. Thank you!";

@@ -142,13 +142,25 @@ export default function CartDrawer() {
                 <CreditCard className="w-4 h-4 mr-2" />
                 Proceed to Checkout
               </Button>
-              <Button 
-                onClick={handleWhatsAppCheckout}
-                variant="outline"
-                className="w-full border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white font-semibold h-10 text-sm transition-colors"
-              >
-                Or Order via WhatsApp
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleWhatsAppCheckout}
+                  variant="outline"
+                  className="flex-1 border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white font-semibold h-10 text-xs transition-colors px-2"
+                >
+                  Order via WhatsApp
+                </Button>
+                <Button 
+                  onClick={async () => {
+                    const { generateInvoicePDF } = await import('@/utils/invoiceGenerator');
+                    await generateInvoicePDF({ order_number: 'CART-INQUIRY' }, cartItems);
+                  }}
+                  variant="outline"
+                  className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold h-10 text-xs transition-colors px-2"
+                >
+                  Download Invoice
+                </Button>
+              </div>
             </div>
           </>
         )}

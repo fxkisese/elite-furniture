@@ -44,8 +44,9 @@ export default function ProductCard({
     ? Math.round((1 - price / originalPrice) * 100)
     : 0;
 
+  const currentImage = displayImages.length > 0 ? displayImages[0] : "";
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-    `Hi, I'm interested in the "${name}" (Ksh ${(Number(price) || 0).toLocaleString()}). Is it available?`
+    `Hi, I'm interested in the "${name}" (Ksh ${(Number(price) || 0).toLocaleString()}). Is it available?${currentImage ? `\n\nImage: ${currentImage}` : ""}`
   )}`;
 
   const prevImage = (e) => {

@@ -313,12 +313,21 @@ export default function Checkout() {
             </div>
           )}
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-col sm:flex-row">
             <button
               onClick={() => navigate('/products')}
               className="flex-1 inline-flex items-center justify-center rounded-xl text-sm font-semibold bg-[#0A0A0A] text-white hover:bg-gray-800 h-12 transition-colors"
             >
               Continue Shopping
+            </button>
+            <button
+              onClick={async () => {
+                const { generateInvoicePDF } = await import('@/utils/invoiceGenerator');
+                await generateInvoicePDF(order, order.items);
+              }}
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold bg-white border-2 border-gray-200 text-gray-800 hover:bg-gray-50 h-12 transition-colors"
+            >
+               Download Invoice
             </button>
             <button
               onClick={() => sendOrderToAdminWhatsApp(order)}

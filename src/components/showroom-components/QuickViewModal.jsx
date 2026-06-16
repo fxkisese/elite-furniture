@@ -31,8 +31,9 @@ export default function QuickViewModal({ product, onClose, onAddToCart, onOpenGa
   const hasDiscount = originalPrice && originalPrice > price;
   const discountPercent = hasDiscount ? Math.round((1 - price / originalPrice) * 100) : 0;
 
+  const currentImage = images.length > 0 ? images[0] : (product.image || "");
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-    `Hi, I'm interested in the "${name}" (Ksh ${price.toLocaleString()}). Is it available?`
+    `Hi, I'm interested in the "${name}" (Ksh ${price.toLocaleString()}). Is it available?${currentImage ? `\n\nImage: ${currentImage}` : ""}`
   )}`;
 
   return (

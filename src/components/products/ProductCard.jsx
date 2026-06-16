@@ -42,7 +42,8 @@ export default function ProductCard({ product }) {
 
   const handleWhatsApp = (e) => {
     e.stopPropagation();
-    const message = `Hello, I'm interested in the ${title} from Furniture Elite Space.`;
+    const currentImage = images.length > 0 ? images[0] : "";
+    const message = `Hello, I'm interested in the ${title} from Furniture Elite Space.${currentImage ? `\n\nImage: ${currentImage}` : ""}`;
     window.open(`https://wa.me/254793816450?text=${encodeURIComponent(message)}`, '_blank');
   };
 
