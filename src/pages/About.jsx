@@ -54,12 +54,10 @@ export default function About() {
           <h2 className="text-3xl font-bold mb-10 text-center">Our Core Values</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((v, i) => (
-              <div key={i} className="border-none shadow-md bg-card hover:shadow-xl transition-shadow duration-300 rounded-xl overflow-hidden">
-                <div className="p-8">
-                  <div className="text-5xl font-black text-primary/20 mb-4">{v.num}</div>
-                  <h3 className="text-xl font-bold mb-3">{v.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{v.desc}</p>
-                </div>
+              <div key={i} className="text-center p-6 bg-secondary/50 rounded-2xl border hover:shadow-lg transition-shadow duration-300">
+                <div className="text-5xl font-black text-primary/20 mb-4">{v.num}</div>
+                <h3 className="text-xl font-bold mb-3">{v.title}</h3>
+                <p className="text-sm font-medium text-muted-foreground leading-relaxed">{v.desc}</p>
               </div>
             ))}
           </div>
