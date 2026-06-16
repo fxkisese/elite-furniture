@@ -9,12 +9,13 @@ import { sendOrderToAdminWhatsApp } from '@/utils/whatsapp';
 /* ---------- Constants ---------- */
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'elitespace2024';
-const CATEGORIES = ['Living Room', 'Bedroom', 'Dining', 'Office', 'Combo Items'];
+const CATEGORIES = ['Living Room', 'Bedroom', 'Dining', 'Office', 'Storage', 'Combo Items'];
 const SUBCATEGORIES = {
   'Living Room': ['Sofas', 'Coffee Tables', 'TV Stands'],
   'Bedroom': ['Beds', 'Wardrobes', 'Dressers'],
   'Dining': ['Dining Sets', 'Sideboards'],
   'Office': ['Executive Desks', 'Office Chairs', 'Cabinets'],
+  'Storage': ['Shelving Units', 'Shoe Racks', 'Storage Cabinets'],
   'Combo Items': ['Living Room Combos', 'Bedroom Combos', 'Dining Combos', 'Office Combos'],
 };
 
@@ -295,15 +296,16 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
         
         <div className="grid grid-cols-2 gap-4">
           <div><label style={labelStyle}>Category *</label>
-            <select style={inputStyle} className="cg-input" value={v.category} onChange={set('category')} required>
-              {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-            </select>
+            <input list="category-list" style={inputStyle} className="cg-input" value={v.category} onChange={set('category')} required placeholder="Select or type..." />
+            <datalist id="category-list">
+              {CATEGORIES.map((c) => <option key={c} value={c} />)}
+            </datalist>
           </div>
           <div><label style={labelStyle}>Subcategory</label>
-            <select style={inputStyle} className="cg-input" value={v.subcategory} onChange={set('subcategory')} disabled={!v.category}>
-              <option value="">Select...</option>
-              {(SUBCATEGORIES[v.category] || []).map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+            <input list="subcategory-list" style={inputStyle} className="cg-input" value={v.subcategory} onChange={set('subcategory')} disabled={!v.category} placeholder="Select or type..." />
+            <datalist id="subcategory-list">
+              {(SUBCATEGORIES[v.category] || []).map(s => <option key={s} value={s} />)}
+            </datalist>
           </div>
         </div>
         
