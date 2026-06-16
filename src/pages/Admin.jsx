@@ -54,6 +54,7 @@ const IconPlus = (p) => <svg {...ic} {...p}><path d="M12 5v14M5 12h14" /></svg>;
 const IconSearch = (p) => <svg {...ic} {...p}><circle cx="11" cy="11" r="7" /><path d="M21 21 16.7 16.7" /></svg>;
 const IconTrash = (p) => <svg {...ic} {...p}><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V6h12Z" /></svg>;
 const IconImage = (p) => <svg {...ic} {...p}><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>;
+const IconEdit = (p) => <svg {...ic} {...p}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>;
 
 /* Signature joint/tenon mark — used for active nav state */
 function JointTab() {
@@ -152,8 +153,8 @@ function Modal({ title, onClose, children }) {
 const TRANSPORT_METHODS = ['Truck', 'Pickup Van', 'Courier', 'Manual Arrangement'];
 const DELIVERY_REGIONS = ['Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Nyeri'];
 
-function ProductForm({ onSubmit, onCancel }) {
-  const [v, set, setValues] = useForm({ 
+function ProductForm({ onSubmit, onCancel, initialData }) {
+  const [v, set, setValues] = useForm(initialData || { 
     name: '', category: 'Living Room', subcategory: '', 
     price: '', discount_price: '', 
     description: '', in_stock: true, featured: false, 
@@ -161,50 +162,61 @@ function ProductForm({ onSubmit, onCancel }) {
     delivery_nairobi: '600', transport_method: '', delivery_outside: '{}'
   });
   const [uploadingImg, setUploadingImg] = useState(false);
-  const [outsidePrices, setOutsidePrices] = useState({});
+  const [outsidePrices, setOutsidePrices] = useState(() => {
+    try {
+      return JSON.parse((initialData?.delivery_outside) || '{}') || {};
+    } catch {
+      return {};
+    }
+  });
 
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
     setUploadingImg(true);
     
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
-        let width = img.width;
-        let height = img.height;
+    const processFile = (file) => new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
 
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
           }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
 
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        
-        const dataUrl = canvas.toDataURL('image/webp', 0.8);
-        setValues((prev) => {
-          const newImages = [...(prev.images || []), dataUrl];
-          return { ...prev, images: newImages, image: newImages[0] || '' };
-        });
-        setUploadingImg(false);
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          resolve(canvas.toDataURL('image/webp', 0.8));
+        };
+        img.src = event.target.result;
       };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
+      reader.readAsDataURL(file);
+    });
+
+    const dataUrls = await Promise.all(files.map(processFile));
+
+    setValues((prev) => {
+      const newImages = [...(prev.images || []), ...dataUrls];
+      return { ...prev, images: newImages, image: newImages[0] || '' };
+    });
+    setUploadingImg(false);
   };
 
   const removeImage = (index) => {
@@ -335,7 +347,7 @@ function ProductForm({ onSubmit, onCancel }) {
               </div>
             ))}
             <label style={{ cursor: uploadingImg ? 'wait' : 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 60, height: 60, border: `1px dashed ${COLORS.border}`, borderRadius: 6 }}>
-              <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} disabled={uploadingImg} />
+              <input type="file" accept="image/*" multiple onChange={handleImageUpload} style={{ display: 'none' }} disabled={uploadingImg} />
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={COLORS.muted} strokeWidth="1.5"><path d="M12 5v14M5 12h14"/></svg>
             </label>
           </div>
@@ -556,6 +568,7 @@ function ProductsPage({ products, handleDeleteProduct, openModal }) {
                 <td style={{ ...tdStyle, fontFamily: fontMono }}>{fmt(p.price)}</td>
                 <td style={tdStyle}><Badge color={p.in_stock ? statusColor['In Stock'] : statusColor['Out of Stock']}>{p.in_stock ? 'In Stock' : 'Out of Stock'}</Badge></td>
                 <td style={{ ...tdStyle, textAlign: 'right' }}>
+                  <button className="cg-icon-btn" onClick={() => openModal({ type: 'edit_product', product: p })} aria-label="Edit" style={{ color: COLORS.gold, marginRight: 8 }}><IconEdit /></button>
                   <button className="cg-icon-btn" onClick={() => handleDeleteProduct(p.id)} aria-label="Delete"><IconTrash /></button>
                 </td>
               </tr>
@@ -1063,6 +1076,13 @@ export default function Admin() {
     else { toast.success('Product added'); loadData(); }
   };
 
+  const handleUpdateProduct = async (id, data) => {
+    const { id: _id, created_at, ...updateData } = data; // Ensure id/created_at aren't updated
+    const { error } = await supabase.from('products').update(updateData).eq('id', id);
+    if (error) toast.error('Error updating product');
+    else { toast.success('Product updated'); loadData(); }
+  };
+
   const handleDeleteProduct = async (id) => {
     if (!window.confirm('Delete this product?')) return;
     const { error } = await supabase.from('products').delete().eq('id', id);
@@ -1165,6 +1185,7 @@ export default function Admin() {
       </div>
 
       {modal === 'product' && <Modal title="Add product" onClose={closeModal}><ProductForm onSubmit={(p) => { handleCreateProduct(p); closeModal(); }} onCancel={closeModal} /></Modal>}
+      {modal?.type === 'edit_product' && <Modal title="Edit product" onClose={closeModal}><ProductForm initialData={modal.product} onSubmit={(p) => { handleUpdateProduct(modal.product.id, p); closeModal(); }} onCancel={closeModal} /></Modal>}
       {modal === 'sale' && <Modal title="Record sale" onClose={closeModal}><SaleForm onSubmit={(s) => { handleRecordSale(s); closeModal(); }} onCancel={closeModal} /></Modal>}
       {modal === 'credit' && <Modal title="Add credit sale" onClose={closeModal}><CreditForm onSubmit={(c) => { handleAddCredit(c); closeModal(); }} onCancel={closeModal} /></Modal>}
       {modal === 'expense' && <Modal title="Add expense" onClose={closeModal}><ExpenseForm onSubmit={(e) => { handleAddExpense(e); closeModal(); }} onCancel={closeModal} /></Modal>}
