@@ -268,13 +268,11 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
           </div>
         </div>
         
-        <div className="grid grid-cols-3 gap-4">
-          <div><label style={labelStyle}>Combo/Regular Price (KSh)</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.price} onChange={set('price')} placeholder="Leave blank for POA" /></div>
-          <div><label style={labelStyle}>Price Per Piece (KSh)</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.piece_price || ''} onChange={set('piece_price')} placeholder="Optional" /></div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div><label style={labelStyle}>Combo/Regular Price</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.price} onChange={set('price')} placeholder="Leave blank for POA" /></div>
+          <div><label style={labelStyle}>Price Per Piece</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.piece_price || ''} onChange={set('piece_price')} placeholder="Optional" /></div>
           <div><label style={labelStyle}>Discount Price</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.discount_price} onChange={set('discount_price')} placeholder="Optional" /></div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
+          <div>
             <label style={labelStyle}>Status</label>
             <select style={inputStyle} className="cg-input" value={v.in_stock ? 'In Stock' : 'Out of Stock'} onChange={(e) => setValues(prev => ({ ...prev, in_stock: e.target.value === 'In Stock' }))}>
               <option value="In Stock">In Stock</option>
