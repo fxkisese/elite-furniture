@@ -1166,12 +1166,11 @@ export default function Admin() {
       in_stock: in_stock !== undefined ? in_stock : true,
       featured: featured !== undefined ? featured : false,
       image: image || null,
-      images: images && images.length > 0 ? images : null,
       badge: badge || null,
-      rating: Number(rating) || 5.0,
-      review_count: Number(review_count) || 0,
-      delivery_nairobi: Number(delivery_nairobi) || 600,
-      delivery_outside: delivery_outside || '{}',
+      rating: rating ?? 5.0,
+      review_count: review_count ?? 0,
+      delivery_nairobi: delivery_nairobi ?? 600,
+      delivery_outside: delivery_outside || null,
       transport_method: transport_method || null,
     };
   };

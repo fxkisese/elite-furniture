@@ -110,10 +110,10 @@ export default function QuickViewModal({ product, onClose, onAddToCart, onOpenGa
           <button
             type="button"
             onClick={onClose}
-            aria-label="Go back"
-            className="hidden md:flex absolute top-6 right-6 items-center gap-2 px-4 h-9 rounded-full hover:bg-[var(--sc-stone)] transition-colors text-xs uppercase tracking-wider font-medium text-[var(--sc-ink)]"
+            aria-label="Close"
+            className="hidden md:flex absolute top-6 right-6 items-center justify-center w-10 h-10 rounded-full bg-[var(--sc-stone)] hover:bg-gray-200 transition-colors text-[var(--sc-ink)]"
           >
-            <ArrowLeft size={16} /> GO BACK
+            <X size={20} strokeWidth={1.5} />
           </button>
 
           <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--sc-gold)]">{category}</p>
