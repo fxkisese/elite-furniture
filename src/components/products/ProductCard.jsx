@@ -1,19 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatPrice } from '@/lib/utils';
-import { Heart, ShoppingCart, MessageCircle, Maximize2, Star, Award } from 'lucide-react';
+import { Heart, ShoppingCart, MessageCircle, Maximize2, Star, Award, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import ProductGalleryModal from './ProductGalleryModal';
 
 export default function ProductCard({ product }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
   const { addToCart } = useCart();
 
   if (!product) return null;
 
+  // Extract metadata for multiple images from delivery_outside if necessary
+  let meta = {};
+  try { meta = JSON.parse(product.delivery_outside || '{}').metadata || {}; } catch(e) {}
+
   const title = product.title || product.name;
   const image = product.imageUrl || product.image;
-  const images = product.images && product.images.length > 0 ? product.images : (image ? [image] : []);
+  
+  const metaImages = meta.images && meta.images.length > 0 ? meta.images : null;
+  const productImages = product.images && product.images.length > 0 ? product.images : null;
+  const fallback = image ? [image] : [];
+  const images = metaImages || productImages || fallback;
   
   const price = product.price;
   const discountPrice = product.discount_price;
@@ -24,7 +33,6 @@ export default function ProductCard({ product }) {
   const rating = product.rating || 5.0;
   const reviewCount = product.review_count || 0;
   
-  const description = product.description;
   const categoryLabel = product.category?.toUpperCase() || 'PRODUCT';
 
   const handleAddToCart = (e) => {
@@ -43,6 +51,24 @@ export default function ProductCard({ product }) {
     setIsGalleryOpen(true);
   };
 
+  const prevImage = (e) => {
+    e.stopPropagation();
+    setActiveIdx((i) => (i - 1 + images.length) % images.length);
+  };
+  const nextImage = (e) => {
+    e.stopPropagation();
+    setActiveIdx((i) => (i + 1) % images.length);
+  };
+
+  // Automatic slideshow effect
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveIdx((i) => (i + 1) % images.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [images.length]);
+
   return (
     <>
       <article className="group relative rounded-xl overflow-hidden bg-white flex flex-col h-full hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] transition-all duration-500 border border-gray-100">
@@ -53,12 +79,48 @@ export default function ProductCard({ product }) {
         >
           {images.length > 0 ? (
             <img 
-              src={images[0]} 
+              key={images[activeIdx]}
+              src={images[activeIdx]} 
               alt={title} 
-              className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-700 ease-out" 
+              className="absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-105 transition-all duration-700 ease-out" 
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">No Image</div>
+          )}
+
+          {/* Prev / Next arrows & Dots */}
+          {images.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={prevImage}
+                aria-label="Previous image"
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 shadow-md text-black opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#D4AF37] hover:text-white"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={nextImage}
+                aria-label="Next image"
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 shadow-md text-black opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#D4AF37] hover:text-white"
+              >
+                <ChevronRight size={18} />
+              </button>
+
+              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                {images.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setActiveIdx(i); }}
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${
+                      i === activeIdx ? "bg-[#D4AF37] w-3" : "bg-black/30"
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
           )}
           
           {/* Top Overlays */}

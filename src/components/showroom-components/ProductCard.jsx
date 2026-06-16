@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, Eye, ShoppingCart, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import StarRating from "./StarRating";
 import Badge from "./Badge";
@@ -56,6 +56,15 @@ export default function ProductCard({
     e.stopPropagation();
     setActiveIdx((i) => (i + 1) % displayImages.length);
   };
+
+  // Automatic slideshow effect
+  useEffect(() => {
+    if (displayImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveIdx((i) => (i + 1) % displayImages.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [displayImages.length]);
 
   return (
     <article className="relative flex flex-col h-full bg-white border border-[var(--sc-line)] overflow-hidden transition-shadow duration-500 hover:shadow-[0_25px_60px_-20px_rgba(11,11,12,0.35)]">
