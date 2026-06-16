@@ -1,19 +1,10 @@
 import { useState } from "react";
-import { X, ShoppingCart, MessageCircle, ArrowLeft } from "lucide-react";
+import { X, ShoppingCart, MessageCircle } from "lucide-react";
 import StarRating from "./StarRating";
 import Badge from "./Badge";
 
 /**
  * QuickViewModal
- *
- * Centered modal preview of a product without leaving the collection grid.
- *
- * Props:
- *  - product: same shape as ProductCard's `product`
- *  - onClose: () => void
- *  - onAddToCart: (product) => void
- *  - onOpenGallery: (images, index, name) => void  — escalate to fullscreen gallery
- *  - whatsappNumber: string (international format, no "+")
  */
 export default function QuickViewModal({ product, onClose, onAddToCart, onOpenGallery, whatsappNumber }) {
   const [activeImage, setActiveImage] = useState(0);
@@ -53,14 +44,14 @@ export default function QuickViewModal({ product, onClose, onAddToCart, onOpenGa
         className="relative bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto sc-scale-in grid grid-cols-1 md:grid-cols-2"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close (mobile, top of image) */}
+        {/* Close button — visible on all screen sizes, top-right */}
         <button
           type="button"
           onClick={onClose}
-          aria-label="Go back"
-          className="md:hidden absolute top-3 left-3 z-10 flex items-center gap-1.5 px-3 h-8 rounded-full bg-white/90 shadow-sm text-[10px] uppercase tracking-wider font-medium text-[var(--sc-ink)]"
+          aria-label="Close"
+          className="absolute top-3 right-3 z-30 flex items-center justify-center w-9 h-9 rounded-full bg-white shadow-md hover:bg-gray-100 transition-colors text-black"
         >
-          <ArrowLeft size={14} /> GO BACK
+          <X size={18} strokeWidth={2} />
         </button>
 
         {/* Image side */}
@@ -107,14 +98,6 @@ export default function QuickViewModal({ product, onClose, onAddToCart, onOpenGa
 
         {/* Details side */}
         <div className="p-6 sm:p-8 flex flex-col gap-3 sc-font-body relative">
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="hidden md:flex absolute top-6 right-6 items-center justify-center w-10 h-10 rounded-full bg-[var(--sc-stone)] hover:bg-gray-200 transition-colors text-[var(--sc-ink)]"
-          >
-            <X size={20} strokeWidth={1.5} />
-          </button>
 
           <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--sc-gold)]">{category}</p>
           <h2 className="sc-font-display text-2xl sm:text-3xl text-[var(--sc-ink)] leading-snug pr-8">

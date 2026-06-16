@@ -1,25 +1,8 @@
 import { useState } from "react";
-import { Heart, Eye, ShoppingCart, MessageCircle } from "lucide-react";
+import { Heart, Eye, ShoppingCart, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import StarRating from "./StarRating";
 import Badge from "./Badge";
 
-/**
- * ProductCard
- *
- * Expected `product` shape:
- * {
- *   id: string | number,
- *   category: string,
- *   name: string,
- *   description?: string,
- *   images: string[],          // first image is used as the card cover
- *   price: number,
- *   originalPrice?: number,    // if set and > price, shows strike-through + % off
- *   rating?: number,           // 0-5
- *   reviews?: number,
- *   badges?: ("new" | "bestseller" | "sale" | "limited")[],
- * }
- */
 export default function ProductCard({
   product,
   isWishlisted,
@@ -30,6 +13,7 @@ export default function ProductCard({
   whatsappNumber,
 }) {
   const [loaded, setLoaded] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
 
   let meta = {};
   try { meta = JSON.parse(product.delivery_outside || '{}').metadata || {}; } catch(e) {}
@@ -48,7 +32,12 @@ export default function ProductCard({
   const piece_price = meta.piece_price || product.piece_price;
   const size = meta.size || product.size;
   const combo_items = meta.combo_items || [];
-  const images = meta.images && meta.images.length > 0 ? meta.images : (product.images || []);
+
+  // Merge images from metadata (admin upload) and product.images array
+  const metaImages = meta.images && meta.images.length > 0 ? meta.images : null;
+  const productImages = product.images && product.images.length > 0 ? product.images : null;
+  const fallback = product.image ? [product.image] : [];
+  const displayImages = metaImages || productImages || fallback;
 
   const hasDiscount = originalPrice && originalPrice > price;
   const discountPercent = hasDiscount
@@ -59,50 +48,71 @@ export default function ProductCard({
     `Hi, I'm interested in the "${name}" (Ksh ${(Number(price) || 0).toLocaleString()}). Is it available?`
   )}`;
 
-  const displayImages = images.length > 0 ? images : (product.image ? [product.image] : []);
+  const prevImage = (e) => {
+    e.stopPropagation();
+    setActiveIdx((i) => (i - 1 + displayImages.length) % displayImages.length);
+  };
+  const nextImage = (e) => {
+    e.stopPropagation();
+    setActiveIdx((i) => (i + 1) % displayImages.length);
+  };
 
   return (
     <article className="relative flex flex-col h-full bg-white border border-[var(--sc-line)] overflow-hidden transition-shadow duration-500 hover:shadow-[0_25px_60px_-20px_rgba(11,11,12,0.35)]">
-      {/* Image / gallery trigger */}
+      {/* Image area */}
       <div
         className="group relative aspect-[4/3] bg-[var(--sc-stone)] overflow-hidden cursor-zoom-in"
-        onClick={() => onOpenGallery(displayImages, 0, name)}
+        onClick={() => onOpenGallery(displayImages, activeIdx, name)}
       >
         {!loaded && <div className="absolute inset-0 sc-skeleton" />}
 
-        {/* Primary Image */}
+        {/* Current image */}
         <img
-          src={displayImages[0]}
+          key={displayImages[activeIdx]}
+          src={displayImages[activeIdx]}
           alt={name}
           loading="lazy"
           onLoad={() => setLoaded(true)}
-          className={`absolute inset-0 w-full h-full object-contain p-3 sm:p-4 transition-[transform,opacity] duration-700 ease-out group-hover:scale-110 ${
-            loaded ? (displayImages.length > 1 ? "opacity-100 group-hover:opacity-0" : "opacity-100") : "opacity-0"
-          }`}
+          className={`absolute inset-0 w-full h-full object-contain p-3 sm:p-4 transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
         />
 
-        {/* Secondary Image (Hover) */}
+        {/* Prev / Next arrows — only when multiple images */}
         {displayImages.length > 1 && (
-          <img
-            src={displayImages[1]}
-            alt={`${name} hover`}
-            loading="lazy"
-            className={`absolute inset-0 w-full h-full object-contain p-3 sm:p-4 transition-[transform,opacity] duration-700 ease-out opacity-0 group-hover:opacity-100 group-hover:scale-110 ${
-              !loaded && "invisible"
-            }`}
-          />
+          <>
+            <button
+              type="button"
+              onClick={prevImage}
+              aria-label="Previous image"
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 flex items-center justify-center rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[var(--sc-gold)] hover:text-black"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={nextImage}
+              aria-label="Next image"
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 flex items-center justify-center rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[var(--sc-gold)] hover:text-black"
+            >
+              <ChevronRight size={16} />
+            </button>
+
+            {/* Dot indicators */}
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-10">
+              {displayImages.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setActiveIdx(i); }}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${
+                    i === activeIdx ? "bg-[var(--sc-gold)] w-3" : "bg-white/60"
+                  }`}
+                />
+              ))}
+            </div>
+          </>
         )}
 
-        {/* Multiple Images Indicator (Dots) */}
-        {displayImages.length > 1 && (
-          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            {displayImages.map((_, i) => (
-              <span key={i} className={`w-1.5 h-1.5 rounded-full ${i === 0 ? "bg-[var(--sc-gold)]" : "bg-[var(--sc-ash)] opacity-50"}`} />
-            ))}
-          </div>
-        )}
-
-        {/* Gallery-frame corners (signature hover detail) */}
+        {/* Gallery-frame corners */}
         <span className="sc-corner sc-corner-tl" />
         <span className="sc-corner sc-corner-tr" />
         <span className="sc-corner sc-corner-bl" />
