@@ -155,21 +155,34 @@ const TRANSPORT_METHODS = ['Truck', 'Pickup Van', 'Courier', 'Manual Arrangement
 const DELIVERY_REGIONS = ['Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Nyeri'];
 
 function ProductForm({ onSubmit, onCancel, initialData }) {
+  let initMeta = {};
+  let initOutside = {};
+  try {
+    const parsed = JSON.parse(initialData?.delivery_outside || '{}') || {};
+    if (parsed.metadata) {
+      initMeta = parsed.metadata;
+      delete parsed.metadata;
+    }
+    initOutside = parsed;
+  } catch(e) {}
+
   const [v, set, setValues] = useForm(initialData || { 
     name: '', category: 'Living Room', subcategory: '', 
-    price: '', discount_price: '', piece_price: '',
-    description: '', size: '', in_stock: true, featured: false, 
-    image: '', images: [], badge: '', rating: 5.0, review_count: 0,
+    price: '', discount_price: '', piece_price: initMeta.piece_price || '',
+    description: '', size: initMeta.size || '', in_stock: true, featured: false, 
+    image: '', images: initMeta.images || [], combo_items: initMeta.combo_items || [], badge: '', rating: 5.0, review_count: 0,
     delivery_nairobi: '600', transport_method: '', delivery_outside: '{}'
   });
   const [uploadingImg, setUploadingImg] = useState(false);
-  const [outsidePrices, setOutsidePrices] = useState(() => {
-    try {
-      return JSON.parse((initialData?.delivery_outside) || '{}') || {};
-    } catch {
-      return {};
-    }
+  const [outsidePrices, setOutsidePrices] = useState(initOutside);
+
+  const handleAddComboItem = () => setValues(prev => ({ ...prev, combo_items: [...(prev.combo_items || []), { name: '', price: '', discount: '' }] }));
+  const handleComboChange = (idx, field, val) => setValues(prev => {
+     const newArr = [...(prev.combo_items || [])];
+     newArr[idx] = { ...newArr[idx], [field]: val };
+     return { ...prev, combo_items: newArr };
   });
+  const handleRemoveCombo = (idx) => setValues(prev => ({ ...prev, combo_items: (prev.combo_items || []).filter((_, i) => i !== idx) }));
 
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
@@ -242,12 +255,23 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
       onSubmit({ 
         ...v, 
         price: Number(v.price) || null,
-        piece_price: Number(v.piece_price) || null,
+        piece_price: undefined,
+        size: undefined,
+        images: undefined,
+        combo_items: undefined,
         discount_price: Number(v.discount_price) || null,
         rating: Number(v.rating) || 5.0,
         review_count: Number(v.review_count) || 0,
         delivery_nairobi: Number(v.delivery_nairobi) || 600,
-        delivery_outside: JSON.stringify(outsidePrices),
+        delivery_outside: JSON.stringify({
+          ...outsidePrices,
+          metadata: {
+            size: v.size,
+            piece_price: v.piece_price,
+            images: v.images,
+            combo_items: v.combo_items
+          }
+        }),
         transport_method: v.transport_method || null,
       }); 
     }}>
@@ -280,6 +304,32 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
             </select>
           </div>
         </div>
+        
+        {v.category === 'Combo Items' && (
+          <div style={{ background: '#f9fafb', border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: 16 }}>
+             <div style={{ ...labelStyle, color: COLORS.gold, marginBottom: 12 }}>Combo Item Details</div>
+             {(v.combo_items || []).map((ci, i) => (
+                <div key={i} className="flex gap-2 items-end mb-3">
+                   <div className="flex-1">
+                      <label style={labelStyle}>Item Name</label>
+                      <input style={inputStyle} className="cg-input" value={ci.name || ''} onChange={e => handleComboChange(i, 'name', e.target.value)} placeholder="e.g. 3-Seater Sofa" />
+                   </div>
+                   <div className="w-28">
+                      <label style={labelStyle}>Price (KSh)</label>
+                      <input style={inputStyle} className="cg-input" type="number" min="0" value={ci.price || ''} onChange={e => handleComboChange(i, 'price', e.target.value)} />
+                   </div>
+                   <div className="w-28">
+                      <label style={labelStyle}>Discount</label>
+                      <input style={inputStyle} className="cg-input" type="number" min="0" value={ci.discount || ''} onChange={e => handleComboChange(i, 'discount', e.target.value)} />
+                   </div>
+                   <button type="button" className="cg-icon-btn mb-[2px]" onClick={() => handleRemoveCombo(i)}>
+                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                   </button>
+                </div>
+             ))}
+             <button type="button" onClick={handleAddComboItem} className="text-sm font-semibold text-[#D4AF37] mt-1">+ Add Combo Item</button>
+          </div>
+        )}
 
         <div className="grid grid-cols-3 gap-4">
           <div>

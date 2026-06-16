@@ -31,19 +31,24 @@ export default function ProductCard({
 }) {
   const [loaded, setLoaded] = useState(false);
 
+  let meta = {};
+  try { meta = JSON.parse(product.delivery_outside || '{}').metadata || {}; } catch(e) {}
+
   const {
     category,
     name,
     description,
-    images = [],
     price,
     originalPrice,
-    piece_price,
     rating = 0,
     reviews = 0,
     badges = [],
-    size,
   } = product;
+
+  const piece_price = meta.piece_price || product.piece_price;
+  const size = meta.size || product.size;
+  const combo_items = meta.combo_items || [];
+  const images = meta.images && meta.images.length > 0 ? meta.images : (product.images || []);
 
   const hasDiscount = originalPrice && originalPrice > price;
   const discountPercent = hasDiscount
@@ -145,6 +150,23 @@ export default function ProductCard({
           <p className="text-[11px] font-semibold text-[var(--sc-gold)] mt-[-4px]">
             Size: <span className="text-[var(--sc-ash)] font-normal">{size}</span>
           </p>
+        )}
+
+        {combo_items && combo_items.length > 0 && (
+          <div className="mt-1 bg-gray-50 p-3 border border-gray-100 rounded-sm">
+            <p className="text-[10px] uppercase font-bold text-gray-400 mb-1.5">Combo Includes:</p>
+            <ul className="space-y-1">
+              {combo_items.map((ci, i) => (
+                <li key={i} className="text-xs text-gray-600 flex justify-between">
+                  <span>• {ci.name}</span>
+                  <span>
+                    {ci.discount ? <span className="line-through text-gray-400 mr-1">KSh {Number(ci.price).toLocaleString()}</span> : null}
+                    <span className="font-semibold text-gray-800">KSh {(Number(ci.price) - (Number(ci.discount) || 0)).toLocaleString()}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
 
         {/* Price block */}
