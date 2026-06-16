@@ -348,7 +348,7 @@ export default function Home() {
 
       {/* TikTok Section */}
       <section style={{ backgroundColor: '#0A0A0A', padding: '5rem 2rem', borderTop: '1px solid #2A2A2A' }}>
-        <div style={{ maxWidth: '860px', margin: '0 auto', textAlign: 'center' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', textAlign: 'center' }}>
           <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '10px', letterSpacing: '0.3em', color: '#555555', textTransform: 'uppercase', marginBottom: '1rem' }}>
             FOLLOW US
           </div>
@@ -434,7 +434,7 @@ function TikTokEmbed() {
       data-unique-id="elitespacefurniture"
       data-embed-from="embed_page"
       data-embed-type="creator"
-      style={{ maxWidth: '780px', minWidth: '288px', width: '100%' }}
+      style={{ maxWidth: '1100px', minWidth: '288px', width: '100%' }}
     >
       <section>
         <a target="_blank" rel="noreferrer" href="https://www.tiktok.com/@elitespacefurniture?refer=creator_embed">
