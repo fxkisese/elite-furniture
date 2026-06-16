@@ -41,6 +41,7 @@ export default function ProductCard({
     rating = 0,
     reviews = 0,
     badges = [],
+    size,
   } = product;
 
   const hasDiscount = originalPrice && originalPrice > price;
@@ -136,6 +137,12 @@ export default function ProductCard({
         {description && (
           <p className="sc-line-clamp-2 text-sm text-[var(--sc-ash)] leading-relaxed flex-1">
             {description}
+          </p>
+        )}
+
+        {size && (
+          <p className="text-[11px] font-semibold text-[var(--sc-gold)] mt-[-4px]">
+            Size: <span className="text-[var(--sc-ash)] font-normal">{size}</span>
           </p>
         )}
 

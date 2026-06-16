@@ -157,7 +157,7 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
   const [v, set, setValues] = useForm(initialData || { 
     name: '', category: 'Living Room', subcategory: '', 
     price: '', discount_price: '', 
-    description: '', in_stock: true, featured: false, 
+    description: '', size: '', in_stock: true, featured: false, 
     image: '', images: [], badge: '', rating: 5.0, review_count: 0,
     delivery_nairobi: '600', transport_method: '', delivery_outside: '{}'
   });
@@ -333,6 +333,11 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
         <div>
           <label style={labelStyle}>Description</label>
           <textarea style={{...inputStyle, resize: 'none'}} rows={3} className="cg-input" value={v.description} onChange={set('description')} />
+        </div>
+
+        <div>
+          <label style={labelStyle}>Item Size / Dimensions (Optional)</label>
+          <input style={inputStyle} className="cg-input" value={v.size || ''} onChange={set('size')} placeholder="e.g. 1.2m x 0.6m" />
         </div>
 
         <div>
