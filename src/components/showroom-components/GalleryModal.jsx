@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, ArrowLeft } from "lucide-react";
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
@@ -163,10 +163,10 @@ export default function GalleryModal({ images, productName, initialIndex = 0, on
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close gallery"
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[var(--sc-gold)] hover:text-[var(--sc-ink)] transition-colors"
+            aria-label="Go back"
+            className="flex items-center gap-2 px-4 h-10 rounded-full bg-white/10 hover:bg-[var(--sc-gold)] hover:text-[var(--sc-ink)] transition-colors text-xs uppercase tracking-[0.1em] font-medium"
           >
-            <X size={20} />
+            <ArrowLeft size={16} /> GO BACK
           </button>
         </div>
       </div>
