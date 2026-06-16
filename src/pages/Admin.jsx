@@ -161,18 +161,33 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
     const parsed = JSON.parse(initialData?.delivery_outside || '{}') || {};
     if (parsed.metadata) {
       initMeta = parsed.metadata;
-      delete parsed.metadata;
+      const { metadata: _m, ...rest } = parsed;
+      initOutside = rest;
+    } else {
+      initOutside = parsed;
     }
-    initOutside = parsed;
   } catch(e) {}
 
-  const [v, set, setValues] = useForm(initialData || { 
+  const defaultValues = { 
     name: '', category: 'Living Room', subcategory: '', 
-    price: '', discount_price: '', piece_price: initMeta.piece_price || '',
-    description: '', size: initMeta.size || '', in_stock: true, featured: false, 
-    image: '', images: initMeta.images || [], combo_items: initMeta.combo_items || [], badge: '', rating: 5.0, review_count: 0,
-    delivery_nairobi: '600', transport_method: '', delivery_outside: '{}'
-  });
+    price: '', discount_price: '',
+    description: '', in_stock: true, featured: false, 
+    image: '', badge: '', rating: 5.0, review_count: 0,
+    delivery_nairobi: '600', transport_method: '', delivery_outside: '{}',
+    // metadata-backed fields
+    size: '', piece_price: '', images: [], combo_items: [],
+  };
+
+  const editValues = initialData ? {
+    ...initialData,
+    // Merge metadata fields on top of the DB row
+    size: initMeta.size || initialData.size || '',
+    piece_price: initMeta.piece_price || initialData.piece_price || '',
+    images: (initMeta.images && initMeta.images.length > 0) ? initMeta.images : (initialData.images || []),
+    combo_items: initMeta.combo_items || [],
+  } : defaultValues;
+
+  const [v, set, setValues] = useForm(editValues);
   const [uploadingImg, setUploadingImg] = useState(false);
   const [outsidePrices, setOutsidePrices] = useState(initOutside);
 
@@ -1128,16 +1143,48 @@ export default function Admin() {
     reader.readAsDataURL(file);
   };
 
+  const cleanProductData = (data) => {
+    // Only pass columns that exist in the products schema
+    const { 
+      name, category, subcategory, price, discount_price, 
+      description, in_stock, featured, image, images,
+      badge, rating, review_count, delivery_nairobi,
+      delivery_outside, transport_method,
+      // strip these — they're stored inside delivery_outside JSON
+      size: _size, piece_price: _pp, combo_items: _ci,
+      // strip any other stray fields
+      id: _id, created_at: _cat,
+      ...rest
+    } = data;
+    return {
+      name, category, subcategory: subcategory || null,
+      price: price ?? null,
+      discount_price: discount_price ?? null,
+      description: description || null,
+      in_stock: in_stock !== undefined ? in_stock : true,
+      featured: featured !== undefined ? featured : false,
+      image: image || null,
+      images: images && images.length > 0 ? images : null,
+      badge: badge || null,
+      rating: Number(rating) || 5.0,
+      review_count: Number(review_count) || 0,
+      delivery_nairobi: Number(delivery_nairobi) || 600,
+      delivery_outside: delivery_outside || '{}',
+      transport_method: transport_method || null,
+    };
+  };
+
   const handleCreateProduct = async (data) => {
-    const { error } = await supabase.from('products').insert([data]);
-    if (error) toast.error('Error adding product');
+    const clean = cleanProductData(data);
+    const { error } = await supabase.from('products').insert([clean]);
+    if (error) toast.error(`Error adding product: ${error.message}`);
     else { toast.success('Product added'); loadData(); }
   };
 
   const handleUpdateProduct = async (id, data) => {
-    const { id: _id, created_at, ...updateData } = data; // Ensure id/created_at aren't updated
-    const { error } = await supabase.from('products').update(updateData).eq('id', id);
-    if (error) toast.error('Error updating product');
+    const clean = cleanProductData(data);
+    const { error } = await supabase.from('products').update(clean).eq('id', id);
+    if (error) toast.error(`Error updating product: ${error.message}`);
     else { toast.success('Product updated'); loadData(); }
   };
 
