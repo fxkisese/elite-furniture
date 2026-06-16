@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { formatPrice } from '@/lib/utils';
 
 /**
@@ -102,7 +102,7 @@ export async function generateInvoicePDF(orderData, items) {
   const startY = orderData.customer_name ? 95 : 60;
 
   // 6. Draw Table
-  doc.autoTable({
+  autoTable(doc, {
     startY: startY,
     head: [['Image', 'Item Description', 'Qty', 'Unit Price', 'Total']],
     body: tableBody,
