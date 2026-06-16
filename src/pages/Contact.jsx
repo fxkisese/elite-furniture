@@ -67,30 +67,27 @@ export default function Contact() {
             
             <div className="grid gap-8">
               {branches.map((branch, idx) => (
-                <div key={idx} className="border-none shadow-md overflow-hidden bg-card rounded-xl">
-                  <div className="h-2 bg-primary w-full" />
-                  <div className="p-8">
-                    <h3 className="text-2xl font-bold mb-6">{branch.name}</h3>
-                    <div className="space-y-4 text-muted-foreground">
-                      <div className="flex items-start">
-                        <MapPin className="w-5 h-5 mr-4 text-primary shrink-0 mt-0.5" />
-                        <div>
-                          <p>{branch.address}</p>
-                          <a href={branch.mapUrl} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline mt-1 inline-block">View on Google Maps</a>
-                        </div>
+                <div key={idx} className="p-8 bg-secondary/50 rounded-2xl border hover:shadow-lg transition-shadow duration-300">
+                  <h3 className="text-2xl font-bold mb-6 text-foreground">{branch.name}</h3>
+                  <div className="space-y-4 text-muted-foreground">
+                    <div className="flex items-start">
+                      <MapPin className="w-5 h-5 mr-4 text-primary shrink-0 mt-0.5" />
+                      <div>
+                        <p>{branch.address}</p>
+                        <a href={branch.mapUrl} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline mt-1 inline-block">View on Google Maps</a>
                       </div>
-                      <div className="flex items-center">
-                        <Phone className="w-5 h-5 mr-4 text-primary shrink-0" />
-                        <a href={`tel:${branch.phone.replace(/\\s/g, '')}`} className="hover:text-primary transition-colors">{branch.phone}</a>
-                      </div>
-                      <div className="flex items-center">
-                        <Mail className="w-5 h-5 mr-4 text-primary shrink-0" />
-                        <a href={`mailto:${branch.email}`} className="hover:text-primary transition-colors">{branch.email}</a>
-                      </div>
-                      <div className="flex items-center">
-                        <Clock className="w-5 h-5 mr-4 text-primary shrink-0" />
-                        <span>{branch.hours}</span>
-                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <Phone className="w-5 h-5 mr-4 text-primary shrink-0" />
+                      <a href={`tel:${branch.phone.replace(/\\s/g, '')}`} className="hover:text-primary transition-colors">{branch.phone}</a>
+                    </div>
+                    <div className="flex items-center">
+                      <Mail className="w-5 h-5 mr-4 text-primary shrink-0" />
+                      <a href={`mailto:${branch.email}`} className="hover:text-primary transition-colors">{branch.email}</a>
+                    </div>
+                    <div className="flex items-center">
+                      <Clock className="w-5 h-5 mr-4 text-primary shrink-0" />
+                      <span>{branch.hours}</span>
                     </div>
                   </div>
                 </div>
