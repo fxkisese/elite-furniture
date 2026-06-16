@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, ShoppingCart, MessageCircle } from "lucide-react";
+import { X, ShoppingCart, MessageCircle, ArrowLeft } from "lucide-react";
 import StarRating from "./StarRating";
 import Badge from "./Badge";
 
@@ -50,10 +50,10 @@ export default function QuickViewModal({ product, onClose, onAddToCart, onOpenGa
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close quick view"
-          className="md:hidden absolute top-3 right-3 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/90 shadow-sm"
+          aria-label="Go back"
+          className="md:hidden absolute top-3 left-3 z-10 flex items-center gap-1.5 px-3 h-8 rounded-full bg-white/90 shadow-sm text-[10px] uppercase tracking-wider font-medium text-[var(--sc-ink)]"
         >
-          <X size={18} />
+          <ArrowLeft size={14} /> GO BACK
         </button>
 
         {/* Image side */}
@@ -66,7 +66,7 @@ export default function QuickViewModal({ product, onClose, onAddToCart, onOpenGa
               src={images[activeImage]}
               alt={name}
               loading="lazy"
-              className="absolute inset-0 w-full h-full object-contain p-8"
+              className="absolute inset-0 w-full h-full object-contain p-4"
             />
             {badges.length > 0 && (
               <div className="absolute top-3 left-3 flex flex-col gap-1.5">
@@ -103,10 +103,10 @@ export default function QuickViewModal({ product, onClose, onAddToCart, onOpenGa
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close quick view"
-            className="hidden md:flex absolute top-6 right-6 w-9 h-9 items-center justify-center rounded-full hover:bg-[var(--sc-stone)] transition-colors"
+            aria-label="Go back"
+            className="hidden md:flex absolute top-6 right-6 items-center gap-2 px-4 h-9 rounded-full hover:bg-[var(--sc-stone)] transition-colors text-xs uppercase tracking-wider font-medium text-[var(--sc-ink)]"
           >
-            <X size={18} />
+            <ArrowLeft size={16} /> GO BACK
           </button>
 
           <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--sc-gold)]">{category}</p>
