@@ -238,18 +238,26 @@ export default function Home() {
 
       {/* Featured Products */}
       <FeaturedCollection 
-        products={products.map(p => ({
-          id: p.id,
-          category: p.category,
-          name: p.name,
-          description: p.description,
-          images: p.images && p.images.length > 0 ? p.images : (p.image ? [p.image] : []),
-          price: p.discount_price || p.price,
-          originalPrice: p.discount_price ? p.price : null,
-          rating: p.rating || 5.0,
-          reviews: p.review_count || 0,
-          badges: p.badge ? [p.badge] : []
-        }))}
+        products={products.map(p => {
+          let meta = {};
+          try { meta = JSON.parse(p.delivery_outside || '{}').metadata || {}; } catch(e) {}
+          return {
+            id: p.id,
+            category: p.category,
+            name: p.name,
+            description: p.description,
+            images: meta.images && meta.images.length > 0 ? meta.images : (p.image ? [p.image] : []),
+            price: p.discount_price || p.price,
+            originalPrice: p.discount_price ? p.price : null,
+            rating: p.rating || 5.0,
+            reviews: p.review_count || 0,
+            badges: p.badge ? [p.badge] : [],
+            piece_price: meta.piece_price || p.piece_price,
+            size: meta.size || p.size,
+            combo_items: meta.combo_items || [],
+            delivery_outside: p.delivery_outside
+          };
+        })}
         whatsappNumber="254793816450"
         allProductsHref="/products"
         onAddToCart={addToCart}
