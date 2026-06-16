@@ -161,23 +161,54 @@ export default function Products() {
           </div>
         </div>
 
-        {/* Filter Panel */}
-        <div className="bg-white border border-gray-200 rounded-none shadow-sm p-6 md:p-8 mb-10">
-          {/* Search and Sort */}
-          <div className="flex flex-col sm:flex-row gap-4">
+        {/* Compact Filter Panel */}
+        <div className="bg-white border border-gray-200 shadow-sm p-4 md:p-5 mb-8">
+          
+          {/* Top Row: Search, Price Range, Sort */}
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4 mb-4">
+            
+            {/* Search */}
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 placeholder="Search products..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="flex h-11 rounded-none border border-gray-300 bg-white pl-9 pr-3 py-2 text-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A570] focus-visible:ring-offset-2 w-full transition-shadow"
+                className="flex h-9 rounded-none border border-gray-300 bg-white pl-9 pr-3 py-1 text-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#C8A570] w-full"
               />
             </div>
+
+            {/* Price Range */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold tracking-wider uppercase text-gray-500 hidden sm:block mr-1">
+                Price:
+              </span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min="0"
+                placeholder="Min KSh"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                className="h-9 w-24 sm:w-28 rounded-none border border-gray-300 bg-white px-2 py-1 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#C8A570]"
+              />
+              <span className="text-gray-400 text-xs">-</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min="0"
+                placeholder="Max KSh"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                className="h-9 w-24 sm:w-28 rounded-none border border-gray-300 bg-white px-2 py-1 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#C8A570]"
+              />
+            </div>
+
+            {/* Sort */}
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
-              className="flex h-11 items-center justify-between rounded-none border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A570] focus:ring-offset-2 sm:w-[220px] cursor-pointer"
+              className="flex h-9 items-center rounded-none border border-gray-300 bg-white px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#C8A570] lg:w-[180px] cursor-pointer"
             >
               <option value="recommended">Recommended</option>
               <option value="best-seller">Best Sellers First</option>
@@ -188,114 +219,82 @@ export default function Products() {
             </select>
           </div>
 
-          <div className="h-px bg-gray-100 my-6" />
+          <div className="h-px bg-gray-100 my-4" />
 
-          {/* Price Range + Best Seller */}
-          <div className="flex flex-col sm:flex-row sm:items-end gap-6 mb-6">
-            <div>
-              <label className="block text-[11px] font-bold tracking-widest uppercase text-gray-500 mb-2">
-                Price Range (KSh)
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min="0"
-                  placeholder="Min"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                  className="h-11 w-32 rounded-none border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A570] focus-visible:ring-offset-2"
-                />
-                <span className="text-gray-400 text-sm font-medium">to</span>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min="0"
-                  placeholder="Max"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
-                  className="h-11 w-32 rounded-none border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A570] focus-visible:ring-offset-2"
-                />
+          {/* Bottom Row: Categories & Highlights */}
+          <div className="flex flex-col xl:flex-row xl:items-center gap-4 xl:gap-6">
+            
+            {/* Categories */}
+            <div className="flex-1 overflow-x-auto sc-thumb-scroll pb-1 xl:pb-0">
+              <div className="flex flex-wrap xl:flex-nowrap gap-2">
+                {CATEGORIES.map(cat => {
+                  const IconComponent = cat.icon;
+                  const active = category === cat.name;
+                  return (
+                    <button
+                      key={cat.name}
+                      onClick={() => setCategory(cat.name)}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs font-semibold transition-all whitespace-nowrap border shrink-0",
+                        active
+                          ? "bg-black text-white border-black shadow-sm"
+                          : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
+                      )}
+                    >
+                      <IconComponent className={cn("w-3.5 h-3.5", active ? "text-[#D4AF37]" : "text-gray-400")} />
+                      {cat.name.toUpperCase()}
+                      <span className={cn(
+                        "text-[9px] font-bold px-1.5 py-0.5 ml-1 rounded-none",
+                        active ? "bg-white/20 text-white" : "bg-gray-200 text-gray-500"
+                      )}>
+                        {categoryCounts[cat.name] ?? 0}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            <div>
-              <label className="block text-[11px] font-bold tracking-widest uppercase text-gray-500 mb-2">
-                Highlights
-              </label>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => setBestSellerOnly(!bestSellerOnly)}
-                  className={cn(
-                    "inline-flex items-center gap-2 h-11 px-5 rounded-none text-sm font-semibold transition-all border",
-                    bestSellerOnly
-                      ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-md"
-                      : "bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37] hover:text-[#0A0A0A]"
-                  )}
-                >
-                  <Award className={cn("w-4 h-4", bestSellerOnly ? "text-[#D4AF37]" : "text-gray-400")} />
-                  Best Sellers
-                </button>
-                <button
-                  onClick={() => setOnSaleOnly(!onSaleOnly)}
-                  className={cn(
-                    "inline-flex items-center gap-2 h-11 px-5 rounded-none text-sm font-semibold transition-all border",
-                    onSaleOnly
-                      ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-md"
-                      : "bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37] hover:text-[#0A0A0A]"
-                  )}
-                >
-                  <Tag className={cn("w-4 h-4", onSaleOnly ? "text-[#D4AF37]" : "text-gray-400")} />
-                  On Sale
-                </button>
-                <button
-                  onClick={() => setNewArrivalsOnly(!newArrivalsOnly)}
-                  className={cn(
-                    "inline-flex items-center gap-2 h-11 px-5 rounded-none text-sm font-semibold transition-all border",
-                    newArrivalsOnly
-                      ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-md"
-                      : "bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37] hover:text-[#0A0A0A]"
-                  )}
-                >
-                  <Sparkles className={cn("w-4 h-4", newArrivalsOnly ? "text-[#D4AF37]" : "text-gray-400")} />
-                  New Arrivals
-                </button>
-              </div>
+            {/* Highlights */}
+            <div className="flex flex-wrap gap-2 shrink-0 border-t border-gray-100 xl:border-none pt-3 xl:pt-0">
+              <button
+                onClick={() => setBestSellerOnly(!bestSellerOnly)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 h-8 px-3 rounded-none text-xs font-semibold transition-all border",
+                  bestSellerOnly
+                    ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-sm"
+                    : "bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37] hover:text-[#0A0A0A]"
+                )}
+              >
+                <Award className={cn("w-3.5 h-3.5", bestSellerOnly ? "text-[#D4AF37]" : "text-gray-400")} />
+                Best Sellers
+              </button>
+              <button
+                onClick={() => setOnSaleOnly(!onSaleOnly)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 h-8 px-3 rounded-none text-xs font-semibold transition-all border",
+                  onSaleOnly
+                    ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-sm"
+                    : "bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37] hover:text-[#0A0A0A]"
+                )}
+              >
+                <Tag className={cn("w-3.5 h-3.5", onSaleOnly ? "text-[#D4AF37]" : "text-gray-400")} />
+                On Sale
+              </button>
+              <button
+                onClick={() => setNewArrivalsOnly(!newArrivalsOnly)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 h-8 px-3 rounded-none text-xs font-semibold transition-all border",
+                  newArrivalsOnly
+                    ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-sm"
+                    : "bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37] hover:text-[#0A0A0A]"
+                )}
+              >
+                <Sparkles className={cn("w-3.5 h-3.5", newArrivalsOnly ? "text-[#D4AF37]" : "text-gray-400")} />
+                New Arrivals
+              </button>
             </div>
-          </div>
-
-          {/* Categories */}
-          <div>
-            <label className="block text-[11px] font-bold tracking-widest uppercase text-gray-500 mb-3">
-              Category
-            </label>
-            <div className="flex flex-wrap gap-3">
-              {CATEGORIES.map(cat => {
-                const IconComponent = cat.icon;
-                const active = category === cat.name;
-                return (
-                  <button
-                    key={cat.name}
-                    onClick={() => setCategory(cat.name)}
-                    className={cn(
-                      "inline-flex items-center gap-2 px-5 py-2.5 rounded-none text-sm font-semibold transition-all whitespace-nowrap border",
-                      active
-                        ? "bg-black text-white border-black shadow-md"
-                        : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
-                    )}
-                  >
-                    <IconComponent className={cn("w-4 h-4", active ? "text-[#D4AF37]" : "text-gray-400")} />
-                    {cat.name.toUpperCase()}
-                    <span className={cn(
-                      "text-[10px] font-bold px-1.5 py-0.5 rounded-none",
-                      active ? "bg-white/20 text-white" : "bg-gray-200 text-gray-500"
-                    )}>
-                      {categoryCounts[cat.name] ?? 0}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            
           </div>
         </div>
 
