@@ -152,8 +152,13 @@ export default function CartDrawer() {
                 </Button>
                 <Button 
                   onClick={async () => {
-                    const { generateInvoicePDF } = await import('@/utils/invoiceGenerator');
-                    await generateInvoicePDF({ order_number: 'CART-INQUIRY' }, cartItems);
+                    try {
+                      const { generateInvoicePDF } = await import('@/utils/invoiceGenerator');
+                      await generateInvoicePDF({ order_number: 'CART-INQUIRY' }, cartItems);
+                    } catch (err) {
+                      console.error("PDF Error:", err);
+                      import('sonner').then(({ toast }) => toast.error("Failed to download invoice."));
+                    }
                   }}
                   variant="outline"
                   className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold h-10 text-xs transition-colors px-2"

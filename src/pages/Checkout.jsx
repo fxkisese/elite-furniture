@@ -322,8 +322,13 @@ export default function Checkout() {
             </button>
             <button
               onClick={async () => {
-                const { generateInvoicePDF } = await import('@/utils/invoiceGenerator');
-                await generateInvoicePDF(order, order.items);
+                try {
+                  const { generateInvoicePDF } = await import('@/utils/invoiceGenerator');
+                  await generateInvoicePDF(order, order.items);
+                } catch (err) {
+                  console.error("PDF Error:", err);
+                  import('sonner').then(({ toast }) => toast.error("Failed to download invoice. Please try again."));
+                }
               }}
               className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold bg-white border-2 border-gray-200 text-gray-800 hover:bg-gray-50 h-12 transition-colors"
             >
