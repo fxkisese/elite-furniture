@@ -66,7 +66,7 @@ export default function ProductCard({
           alt={name}
           loading="lazy"
           onLoad={() => setLoaded(true)}
-          className={`absolute inset-0 w-full h-full object-contain p-6 sm:p-8 transition-[transform,opacity] duration-700 ease-out group-hover:scale-110 ${
+          className={`absolute inset-0 w-full h-full object-contain p-3 sm:p-4 transition-[transform,opacity] duration-700 ease-out group-hover:scale-110 ${
             loaded ? "opacity-100" : "opacity-0"
           }`}
         />
