@@ -161,7 +161,7 @@ export default function Products() {
         </div>
 
         {/* Filter Panel */}
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 md:p-8 mb-10">
+        <div className="bg-white border border-gray-200 rounded-none shadow-sm p-6 md:p-8 mb-10">
           {/* Search and Sort */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -170,13 +170,13 @@ export default function Products() {
                 placeholder="Search products..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="flex h-11 rounded-md border border-gray-300 bg-white pl-9 pr-3 py-2 text-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A570] focus-visible:ring-offset-2 w-full transition-shadow"
+                className="flex h-11 rounded-none border border-gray-300 bg-white pl-9 pr-3 py-2 text-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A570] focus-visible:ring-offset-2 w-full transition-shadow"
               />
             </div>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
-              className="flex h-11 items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A570] focus:ring-offset-2 sm:w-[220px] cursor-pointer"
+              className="flex h-11 items-center justify-between rounded-none border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A570] focus:ring-offset-2 sm:w-[220px] cursor-pointer"
             >
               <option value="recommended">Recommended</option>
               <option value="best-seller">Best Sellers First</option>
@@ -203,7 +203,7 @@ export default function Products() {
                   placeholder="Min"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
-                  className="h-11 w-32 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A570] focus-visible:ring-offset-2"
+                  className="h-11 w-32 rounded-none border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A570] focus-visible:ring-offset-2"
                 />
                 <span className="text-gray-400 text-sm font-medium">to</span>
                 <input
@@ -213,7 +213,7 @@ export default function Products() {
                   placeholder="Max"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
-                  className="h-11 w-32 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A570] focus-visible:ring-offset-2"
+                  className="h-11 w-32 rounded-none border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A570] focus-visible:ring-offset-2"
                 />
               </div>
             </div>
@@ -226,7 +226,7 @@ export default function Products() {
                 <button
                   onClick={() => setBestSellerOnly(!bestSellerOnly)}
                   className={cn(
-                    "inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-semibold transition-all border",
+                    "inline-flex items-center gap-2 h-11 px-5 rounded-none text-sm font-semibold transition-all border",
                     bestSellerOnly
                       ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-md"
                       : "bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37] hover:text-[#0A0A0A]"
@@ -238,7 +238,7 @@ export default function Products() {
                 <button
                   onClick={() => setOnSaleOnly(!onSaleOnly)}
                   className={cn(
-                    "inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-semibold transition-all border",
+                    "inline-flex items-center gap-2 h-11 px-5 rounded-none text-sm font-semibold transition-all border",
                     onSaleOnly
                       ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-md"
                       : "bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37] hover:text-[#0A0A0A]"
@@ -250,7 +250,7 @@ export default function Products() {
                 <button
                   onClick={() => setNewArrivalsOnly(!newArrivalsOnly)}
                   className={cn(
-                    "inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-semibold transition-all border",
+                    "inline-flex items-center gap-2 h-11 px-5 rounded-none text-sm font-semibold transition-all border",
                     newArrivalsOnly
                       ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-md"
                       : "bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37] hover:text-[#0A0A0A]"
@@ -277,7 +277,7 @@ export default function Products() {
                     key={cat.name}
                     onClick={() => setCategory(cat.name)}
                     className={cn(
-                      "inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap border",
+                      "inline-flex items-center gap-2 px-5 py-2.5 rounded-none text-sm font-semibold transition-all whitespace-nowrap border",
                       active
                         ? "bg-black text-white border-black shadow-md"
                         : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
@@ -286,7 +286,7 @@ export default function Products() {
                     <IconComponent className={cn("w-4 h-4", active ? "text-[#D4AF37]" : "text-gray-400")} />
                     {cat.name.toUpperCase()}
                     <span className={cn(
-                      "text-[10px] font-bold px-1.5 py-0.5 rounded-full",
+                      "text-[10px] font-bold px-1.5 py-0.5 rounded-none",
                       active ? "bg-white/20 text-white" : "bg-gray-200 text-gray-500"
                     )}>
                       {categoryCounts[cat.name] ?? 0}
@@ -341,22 +341,22 @@ export default function Products() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-24 bg-gray-100 rounded-2xl border border-gray-300 mb-20 flex flex-col items-center">
+          <div className="text-center py-24 bg-gray-100 rounded-none border border-gray-300 mb-20 flex flex-col items-center">
             <h3 className="text-xl font-bold mb-2">No products found</h3>
             <p className="text-gray-600 mb-6">We couldn't find anything matching your current filters.</p>
-            <button onClick={clearFilters} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-black text-white hover:bg-gray-800 h-10 px-4 py-2">Clear Filters</button>
+            <button onClick={clearFilters} className="inline-flex items-center justify-center rounded-none text-sm font-medium transition-colors bg-black text-white hover:bg-gray-800 h-10 px-4 py-2">Clear Filters</button>
           </div>
         )}
 
         {/* Custom Order CTA */}
-        <div className="bg-white border-2 border-[#D4AF37] text-gray-900 shadow-md rounded-2xl p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+        <div className="bg-white border-2 border-[#D4AF37] text-gray-900 shadow-md rounded-none p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
           <div className="relative z-10 max-w-2xl text-center md:text-left">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">Can't find what you're looking for?</h2>
             <p className="text-gray-600 text-lg">
               We do custom furniture to fit your space and style.
             </p>
           </div>
-          <Link to="/custom-orders" className="relative z-10 whitespace-nowrap shrink-0 inline-flex items-center justify-center rounded-md text-sm font-bold transition-colors bg-black text-white hover:bg-gray-800 h-12 px-8">
+          <Link to="/custom-orders" className="relative z-10 whitespace-nowrap shrink-0 inline-flex items-center justify-center rounded-none text-sm font-bold transition-colors bg-black text-white hover:bg-gray-800 h-12 px-8">
               REQUEST A QUOTE
           </Link>
         </div>
@@ -367,7 +367,7 @@ export default function Products() {
 
 function FilterChip({ label, onRemove }) {
   return (
-    <span className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+    <span className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-none">
       {label}
       <button onClick={onRemove} className="hover:text-[#C8A570] transition-colors">
         <X className="w-3 h-3" />
