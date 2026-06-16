@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import ProductCard from '@/components/products/ProductCard';
-import { Search, FilterX, Sofa, Bed, UtensilsCrossed, Briefcase, Package, Award, X } from 'lucide-react';
+import { Search, FilterX, Sofa, Bed, UtensilsCrossed, Briefcase, Package, Award, X, Tag, Sparkles } from 'lucide-react';
 import { cn, formatPrice } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 
@@ -37,6 +37,8 @@ const CATEGORIES = [
 ];
 
 const isBestSeller = (p) => p?.badge === 'Best Seller' || p?.best_seller === true;
+const isOnSale = (p) => (p?.originalPrice && p.originalPrice > p.price) || p?.discount_price || p?.badge === 'Sale' || p?.on_sale === true;
+const isNewArrival = (p) => p?.badge === 'New' || p?.badge === 'New Arrival' || p?.is_new === true;
 
 export default function Products() {
   const [search, setSearch] = useState('');
@@ -45,6 +47,8 @@ export default function Products() {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [bestSellerOnly, setBestSellerOnly] = useState(false);
+  const [onSaleOnly, setOnSaleOnly] = useState(false);
+  const [newArrivalsOnly, setNewArrivalsOnly] = useState(false);
   const [dbProducts, setDbProducts] = useState(INITIAL_PRODUCTS);
 
   useEffect(() => {
@@ -98,6 +102,14 @@ export default function Products() {
       result = result.filter(p => isBestSeller(p));
     }
 
+    if (onSaleOnly) {
+      result = result.filter(p => isOnSale(p));
+    }
+
+    if (newArrivalsOnly) {
+      result = result.filter(p => isNewArrival(p));
+    }
+
     if (sort === 'price-asc') {
       result = [...result].sort((a, b) => a.price - b.price);
     } else if (sort === 'price-desc') {
@@ -111,9 +123,9 @@ export default function Products() {
     }
 
     return result;
-  }, [search, category, sort, minPrice, maxPrice, bestSellerOnly, dbProducts]);
+  }, [search, category, sort, minPrice, maxPrice, bestSellerOnly, onSaleOnly, newArrivalsOnly, dbProducts]);
 
-  const hasActiveFilters = search || category !== 'All Products' || sort !== 'recommended' || minPrice !== '' || maxPrice !== '' || bestSellerOnly;
+  const hasActiveFilters = search || category !== 'All Products' || sort !== 'recommended' || minPrice !== '' || maxPrice !== '' || bestSellerOnly || onSaleOnly || newArrivalsOnly;
 
   const clearFilters = () => {
     setSearch('');
@@ -122,6 +134,8 @@ export default function Products() {
     setMinPrice('');
     setMaxPrice('');
     setBestSellerOnly(false);
+    setOnSaleOnly(false);
+    setNewArrivalsOnly(false);
   };
 
   return (
@@ -208,18 +222,44 @@ export default function Products() {
               <label className="block text-[11px] font-bold tracking-widest uppercase text-gray-500 mb-2">
                 Highlights
               </label>
-              <button
-                onClick={() => setBestSellerOnly(!bestSellerOnly)}
-                className={cn(
-                  "inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-semibold transition-all border",
-                  bestSellerOnly
-                    ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-md"
-                    : "bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37] hover:text-[#0A0A0A]"
-                )}
-              >
-                <Award className={cn("w-4 h-4", bestSellerOnly ? "text-[#D4AF37]" : "text-gray-400")} />
-                Best Sellers Only
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setBestSellerOnly(!bestSellerOnly)}
+                  className={cn(
+                    "inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-semibold transition-all border",
+                    bestSellerOnly
+                      ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-md"
+                      : "bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37] hover:text-[#0A0A0A]"
+                  )}
+                >
+                  <Award className={cn("w-4 h-4", bestSellerOnly ? "text-[#D4AF37]" : "text-gray-400")} />
+                  Best Sellers
+                </button>
+                <button
+                  onClick={() => setOnSaleOnly(!onSaleOnly)}
+                  className={cn(
+                    "inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-semibold transition-all border",
+                    onSaleOnly
+                      ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-md"
+                      : "bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37] hover:text-[#0A0A0A]"
+                  )}
+                >
+                  <Tag className={cn("w-4 h-4", onSaleOnly ? "text-[#D4AF37]" : "text-gray-400")} />
+                  On Sale
+                </button>
+                <button
+                  onClick={() => setNewArrivalsOnly(!newArrivalsOnly)}
+                  className={cn(
+                    "inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-semibold transition-all border",
+                    newArrivalsOnly
+                      ? "bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-md"
+                      : "bg-white text-gray-700 border-gray-300 hover:border-[#D4AF37] hover:text-[#0A0A0A]"
+                  )}
+                >
+                  <Sparkles className={cn("w-4 h-4", newArrivalsOnly ? "text-[#D4AF37]" : "text-gray-400")} />
+                  New Arrivals
+                </button>
+              </div>
             </div>
           </div>
 
@@ -277,6 +317,12 @@ export default function Products() {
             )}
             {bestSellerOnly && (
               <FilterChip label="Best Sellers" onRemove={() => setBestSellerOnly(false)} />
+            )}
+            {onSaleOnly && (
+              <FilterChip label="On Sale" onRemove={() => setOnSaleOnly(false)} />
+            )}
+            {newArrivalsOnly && (
+              <FilterChip label="New Arrivals" onRemove={() => setNewArrivalsOnly(false)} />
             )}
           </div>
 
