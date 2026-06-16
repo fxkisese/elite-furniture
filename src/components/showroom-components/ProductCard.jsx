@@ -59,24 +59,48 @@ export default function ProductCard({
     `Hi, I'm interested in the "${name}" (Ksh ${(Number(price) || 0).toLocaleString()}). Is it available?`
   )}`;
 
+  const displayImages = images.length > 0 ? images : (product.image ? [product.image] : []);
+
   return (
     <article className="relative flex flex-col h-full bg-white border border-[var(--sc-line)] overflow-hidden transition-shadow duration-500 hover:shadow-[0_25px_60px_-20px_rgba(11,11,12,0.35)]">
       {/* Image / gallery trigger */}
       <div
         className="group relative aspect-[4/3] bg-[var(--sc-stone)] overflow-hidden cursor-zoom-in"
-        onClick={() => onOpenGallery(images, 0, name)}
+        onClick={() => onOpenGallery(displayImages, 0, name)}
       >
         {!loaded && <div className="absolute inset-0 sc-skeleton" />}
 
+        {/* Primary Image */}
         <img
-          src={images[0]}
+          src={displayImages[0]}
           alt={name}
           loading="lazy"
           onLoad={() => setLoaded(true)}
           className={`absolute inset-0 w-full h-full object-contain p-3 sm:p-4 transition-[transform,opacity] duration-700 ease-out group-hover:scale-110 ${
-            loaded ? "opacity-100" : "opacity-0"
+            loaded ? (displayImages.length > 1 ? "opacity-100 group-hover:opacity-0" : "opacity-100") : "opacity-0"
           }`}
         />
+
+        {/* Secondary Image (Hover) */}
+        {displayImages.length > 1 && (
+          <img
+            src={displayImages[1]}
+            alt={`${name} hover`}
+            loading="lazy"
+            className={`absolute inset-0 w-full h-full object-contain p-3 sm:p-4 transition-[transform,opacity] duration-700 ease-out opacity-0 group-hover:opacity-100 group-hover:scale-110 ${
+              !loaded && "invisible"
+            }`}
+          />
+        )}
+
+        {/* Multiple Images Indicator (Dots) */}
+        {displayImages.length > 1 && (
+          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            {displayImages.map((_, i) => (
+              <span key={i} className={`w-1.5 h-1.5 rounded-full ${i === 0 ? "bg-[var(--sc-gold)]" : "bg-[var(--sc-ash)] opacity-50"}`} />
+            ))}
+          </div>
+        )}
 
         {/* Gallery-frame corners (signature hover detail) */}
         <span className="sc-corner sc-corner-tl" />

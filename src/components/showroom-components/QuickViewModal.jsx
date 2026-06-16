@@ -18,17 +18,24 @@ import Badge from "./Badge";
 export default function QuickViewModal({ product, onClose, onAddToCart, onOpenGallery, whatsappNumber }) {
   const [activeImage, setActiveImage] = useState(0);
 
+  let meta = {};
+  try { meta = JSON.parse(product.delivery_outside || '{}').metadata || {}; } catch(e) {}
+
   const {
     category,
     name,
     description,
-    images = [],
     price,
     originalPrice,
     rating = 0,
     reviews = 0,
     badges = [],
   } = product;
+
+  const images = meta.images && meta.images.length > 0 ? meta.images : (product.images || []);
+  const piece_price = meta.piece_price || product.piece_price;
+  const size = meta.size || product.size;
+  const combo_items = meta.combo_items || [];
 
   const hasDiscount = originalPrice && originalPrice > price;
   const discountPercent = hasDiscount ? Math.round((1 - price / originalPrice) * 100) : 0;
