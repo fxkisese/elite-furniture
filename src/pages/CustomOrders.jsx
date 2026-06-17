@@ -150,9 +150,10 @@ export default function CustomOrders() {
       description: item.description.trim(),
     }));
 
-    const itemsSummary = quoteItems.map((it, idx) =>
-      `${idx + 1}. ${it.name} x${it.quantity}${it.dimensions ? ` (${it.dimensions})` : ''} \u2014 ${formatPrice(it.price_per_item)} each = ${formatPrice(it.total)}${it.description ? `\n   Description: ${it.description}` : ''}`
-    ).join('\n');
+    const itemsSummary = quoteItems.map((it, idx) => {
+      const priceStr = it.source === 'custom' ? 'Price TBD' : `${formatPrice(it.price_per_item)} each = ${formatPrice(it.total)}`;
+      return `${idx + 1}. ${it.name} x${it.quantity}${it.dimensions ? ` (${it.dimensions})` : ''} \u2014 ${priceStr}${it.description ? `\n   Description: ${it.description}` : ''}`;
+    }).join('\n');
 
     // Build the furniture_type field from item names
     const furnitureType = quoteItems.map(it => `${it.name} x${it.quantity}`).join(', ');
@@ -523,7 +524,7 @@ function QuoteItemRow({ index, item, total, catalog, catalogByCategory, onSource
           )}
 
           {/* Quantity, dimensions, price, total */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className={cn("grid gap-4", item.source === 'catalog' ? "grid-cols-2 md:grid-cols-4" : "grid-cols-1 md:grid-cols-2")}>
             <div className="space-y-2 flex flex-col">
               <label className="text-sm font-medium">Quantity *</label>
               <input
@@ -544,23 +545,27 @@ function QuoteItemRow({ index, item, total, catalog, catalogByCategory, onSource
                 className={inputClass}
               />
             </div>
-            <div className="space-y-2 flex flex-col">
-              <label className="text-sm font-medium">Price / Item (KSh)</label>
-              <input
-                type="number"
-                min="0"
-                value={item.price}
-                onChange={(e) => onChange({ price: e.target.value })}
-                placeholder="0"
-                className={inputClass}
-              />
-            </div>
-            <div className="space-y-2 flex flex-col">
-              <label className="text-sm font-medium">Total</label>
-              <div className={cn(inputClass, "flex items-center font-bold bg-gray-100 text-gray-900")}>
-                {formatPrice(total)}
-              </div>
-            </div>
+            {item.source === 'catalog' && (
+              <>
+                <div className="space-y-2 flex flex-col">
+                  <label className="text-sm font-medium">Price / Item (KSh)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={item.price}
+                    onChange={(e) => onChange({ price: e.target.value })}
+                    placeholder="0"
+                    className={inputClass}
+                  />
+                </div>
+                <div className="space-y-2 flex flex-col">
+                  <label className="text-sm font-medium">Total</label>
+                  <div className={cn(inputClass, "flex items-center font-bold bg-gray-100 text-gray-900")}>
+                    {formatPrice(total)}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Description */}
