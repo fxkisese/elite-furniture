@@ -4,6 +4,7 @@ import { CheckCircle2, ArrowRight, Plus, Trash2, Package, PenLine, ImageOff, X, 
 import { cn, formatPrice } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
+import { sanitizeText, sanitizeEmail, sanitizePhone, sanitizeNumber } from '@/lib/sanitize';
 
 const TIMELINES = ['ASAP (Rushed)', '2-4 Weeks', '1-2 Months', 'Flexible'];
 
@@ -140,14 +141,14 @@ export default function CustomOrders() {
     const quoteItems = items.map(item => ({
       source: item.source,
       product_id: item.source === 'catalog' ? item.productId || null : null,
-      name: item.name.trim(),
+      name: sanitizeText(item.name),
       image: item.image || null,
-      category: item.category || null,
-      quantity: Number(item.quantity) || 0,
-      dimensions: item.dimensions.trim(),
-      price_per_item: Number(item.price) || 0,
+      category: sanitizeText(item.category) || null,
+      quantity: sanitizeNumber(item.quantity),
+      dimensions: sanitizeText(item.dimensions),
+      price_per_item: sanitizeNumber(item.price),
       total: itemTotal(item),
-      description: item.description.trim(),
+      description: sanitizeText(item.description),
     }));
 
     const itemsSummary = quoteItems.map((it, idx) => {
@@ -164,17 +165,28 @@ export default function CustomOrders() {
       .map(it => `${it.name}: ${it.dimensions}`)
       .join('; ') || null;
 
-    const notesStr = `Timeline: ${timeline || 'Not specified'}\nSubtotal: ${formatPrice(itemsSubtotal)}\nDelivery: ${formatPrice(deliveryAmount)}\nGrand Total: ${formatPrice(grandTotal)}\n\nItems:\n${itemsSummary}`;
+    const notesStr = `Timeline: ${sanitizeText(timeline) || 'Not specified'}\nSubtotal: ${formatPrice(itemsSubtotal)}\nDelivery: ${formatPrice(deliveryAmount)}\nGrand Total: ${formatPrice(grandTotal)}\n\nItems:\n${itemsSummary}`;
 
-    // Map to the actual quotes table schema columns
+    // Sanitize contact fields before writing to DB
+    const rawName = form.get('name') || '';
+    const rawEmail = form.get('email') || '';
+    const rawPhone = form.get('phone') || '';
+
     const data = {
-      name: form.get('name'),
-      email: form.get('email') || null,
-      phone: form.get('phone'),
+      name: sanitizeText(rawName),
+      email: sanitizeEmail(rawEmail),
+      phone: sanitizePhone(rawPhone),
       furniture_type: furnitureType,
       measurements: measurementsStr,
       notes: notesStr,
     };
+
+    // Basic validation after sanitization
+    if (!data.name || !data.phone) {
+      toast.error('Please provide your name and phone number.');
+      setLoading(false);
+      return;
+    }
 
     const { error } = await supabase.from('quotes').insert([data]);
 

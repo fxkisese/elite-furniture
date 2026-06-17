@@ -3,6 +3,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
+import { sanitizeText, sanitizeEmail, sanitizePhone } from '@/lib/sanitize';
 
 export default function Contact() {
   const [loading, setLoading] = useState(false);
@@ -13,11 +14,17 @@ export default function Contact() {
     
     const formData = new FormData(e.target);
     const data = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      phone: formData.get('phone'),
-      message: formData.get('message')
+      name: sanitizeText(formData.get('name') || ''),
+      email: sanitizeEmail(formData.get('email') || '') || null,
+      phone: sanitizePhone(formData.get('phone') || '') || null,
+      message: sanitizeText(formData.get('message') || ''),
     };
+
+    if (!data.name || !data.message) {
+      toast.error('Please fill in your name and message.');
+      setLoading(false);
+      return;
+    }
 
     const { error } = await supabase.from('messages').insert([data]);
     
