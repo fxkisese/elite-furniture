@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import { MapPin, ChevronDown, ChevronUp, Star, ArrowRight } from 'lucide-react';
@@ -205,6 +205,40 @@ function BeforeAfterCard({ item }) {
 
 // ─── MAIN PAGE ───────────────────────────────────────────────────────────────
 
+function TikTokEmbed() {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://www.tiktok.com/embed.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      const existingScript = document.querySelector('script[src="https://www.tiktok.com/embed.js"]');
+      if (existingScript) existingScript.remove();
+    };
+  }, []);
+
+  return (
+    <blockquote
+      ref={ref}
+      className="tiktok-embed"
+      cite="https://www.tiktok.com/@elitespacefurniture"
+      data-unique-id="elitespacefurniture"
+      data-embed-from="embed_page"
+      data-embed-type="creator"
+      style={{ maxWidth: '1100px', minWidth: '288px', width: '100%' }}
+    >
+      <section>
+        <a target="_blank" rel="noreferrer" href="https://www.tiktok.com/@elitespacefurniture?refer=creator_embed">
+          @elitespacefurniture
+        </a>
+      </section>
+    </blockquote>
+  );
+}
+
 export default function About() {
   return (
     <PageLayout>
@@ -399,26 +433,8 @@ export default function About() {
           <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
             We share builds, transformations, and behind-the-scenes clips from our workshop.
           </p>
-          {/* 
-            Replace the placeholder below with your TikTok embed widget 
-            (same component used on the Home page) 
-          */}
-          <div className="rounded-2xl border bg-secondary/30 p-8 flex flex-col items-center justify-center min-h-[300px] gap-4">
-            {/* ↓ PASTE YOUR TIKTOK FEED COMPONENT HERE — same one from Home page */}
-            {/* <TikTokFeed /> */}
-            <div className="text-5xl">🎵</div>
-            <p className="font-semibold text-lg">TikTok Feed</p>
-            <p className="text-muted-foreground text-sm text-center max-w-xs">
-              Paste your TikTok feed component here — the same one used on the Home page.
-            </p>
-            <a
-              href="https://www.tiktok.com/@craftsmangalore"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-black/80 transition-colors"
-            >
-              View on TikTok <ArrowRight className="w-4 h-4" />
-            </a>
+          <div className="flex justify-center">
+            <TikTokEmbed />
           </div>
         </div>
 
