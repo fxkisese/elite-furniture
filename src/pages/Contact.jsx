@@ -42,7 +42,7 @@ export default function Contact() {
     {
       name: 'Kyumbi Showroom & Workshop',
       address: 'Mombasa Road, Kyumbi',
-      phone: '+254 793 816 450',
+      phone: '+254 141 484 249',
       email: 'info@craftsmangalore.homes',
       hours: 'Mon-Sat: 8:00 AM - 6:00 PM',
       mapUrl: 'https://maps.google.com/?q=Kyumbi,Mombasa+Road'
@@ -50,7 +50,7 @@ export default function Contact() {
     {
       name: 'Tena Estate Branch',
       address: 'Manyanja Road, Tena Estate',
-      phone: '+254 793 816 450',
+      phone: '+254 141 484 249',
       email: 'tena@craftsmangalore.homes',
       hours: 'Mon-Sun: 9:00 AM - 7:00 PM',
       mapUrl: 'https://maps.google.com/?q=Manyanja+Road,Tena+Estate'
@@ -123,7 +123,7 @@ export default function Contact() {
               
               <div className="space-y-2 flex flex-col">
                 <label htmlFor="phone" className="text-sm font-medium text-gray-900">Phone Number (Optional)</label>
-                <input id="phone" name="phone" type="tel" placeholder="+254 793 816 450" className="flex h-11 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black disabled:cursor-not-allowed disabled:opacity-50" />
+                <input id="phone" name="phone" type="tel" placeholder="+254 141 484 249" className="flex h-11 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black disabled:cursor-not-allowed disabled:opacity-50" />
               </div>
               
               <div className="space-y-2 flex flex-col">

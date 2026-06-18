@@ -1,6 +1,6 @@
 import { formatPrice } from '@/lib/utils';
 
-const ADMIN_WHATSAPP = import.meta.env.VITE_ADMIN_WHATSAPP || '254793816450';
+const ADMIN_WHATSAPP = import.meta.env.VITE_ADMIN_WHATSAPP || '254141484249';
 
 /**
  * Format an order into a WhatsApp message for the admin

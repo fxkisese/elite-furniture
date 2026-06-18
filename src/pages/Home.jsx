@@ -28,7 +28,7 @@ export default function Home() {
       try {
         const { data: pData } = await supabase.from('products').select('*').eq('featured', true).limit(5);
         setProducts(pData || []);
-        
+
         const { data: hData } = await supabase.from('hero_slides').select('image').order('created_at', { ascending: false });
         if (hData && hData.length > 0) {
           setHeroSlides(hData.map(d => d.image));
@@ -68,8 +68,8 @@ export default function Home() {
                 filter: 'grayscale(20%)',
                 opacity: idx === currentSlideIdx ? 1 : 0,
                 transform: idx === currentSlideIdx ? 'translateX(0)' : 'translateX(-2%)',
-                transition: idx === currentSlideIdx 
-                  ? 'opacity 1.5s ease-in-out, transform 8s ease-out' 
+                transition: idx === currentSlideIdx
+                  ? 'opacity 1.5s ease-in-out, transform 8s ease-out'
                   : 'opacity 1.5s ease-in-out, transform 0s',
                 zIndex: 0,
               }}
@@ -237,10 +237,10 @@ export default function Home() {
       <div style={{ borderBottom: '2px solid #D4AF37' }} />
 
       {/* Featured Products */}
-      <FeaturedCollection 
+      <FeaturedCollection
         products={products.map(p => {
           let meta = {};
-          try { meta = JSON.parse(p.delivery_outside || '{}').metadata || {}; } catch(e) {}
+          try { meta = JSON.parse(p.delivery_outside || '{}').metadata || {}; } catch (e) { }
           return {
             id: p.id,
             category: p.category,
@@ -258,7 +258,7 @@ export default function Home() {
             delivery_outside: p.delivery_outside
           };
         })}
-        whatsappNumber="254793816450"
+        whatsappNumber="254141484249"
         allProductsHref="/products"
         onAddToCart={addToCart}
       />
@@ -411,7 +411,7 @@ export default function Home() {
           >
             REQUEST A QUOTE <ChevronRight size={14} />
           </Link>
-    </div>
+        </div>
       </section>
     </PageLayout>
   );
