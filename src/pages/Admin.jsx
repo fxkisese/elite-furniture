@@ -211,8 +211,8 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 800;
-          const MAX_HEIGHT = 800;
+          const MAX_WIDTH = 500;
+          const MAX_HEIGHT = 500;
           let width = img.width;
           let height = img.height;
 
@@ -233,14 +233,22 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
           
-          resolve(canvas.toDataURL('image/webp', 0.8));
+          resolve(canvas.toDataURL('image/jpeg', 0.6));
+        };
+        img.onerror = () => {
+          toast.error("Unsupported image format. Please use JPG/PNG.");
+          resolve(null);
         };
         img.src = event.target.result;
+      };
+      reader.onerror = () => {
+        toast.error("Error reading file.");
+        resolve(null);
       };
       reader.readAsDataURL(file);
     });
 
-    const dataUrls = await Promise.all(files.map(processFile));
+    const dataUrls = (await Promise.all(files.map(processFile))).filter(Boolean);
 
     setValues((prev) => {
       const newImages = [...(prev.images || []), ...dataUrls];
@@ -1133,14 +1141,22 @@ export default function Admin() {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         
-        const dataUrl = canvas.toDataURL('image/webp', 0.85);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
         
         const { error } = await supabase.from('hero_slides').insert([{ image: dataUrl }]);
         if (error) { toast.error('Error uploading slide'); console.error(error); }
         else { toast.success('Slide added'); loadData(); }
         setUploadingSlide(false);
       };
+      img.onerror = () => {
+        toast.error("Unsupported image format. Please use JPG/PNG.");
+        setUploadingSlide(false);
+      };
       img.src = event.target.result;
+    };
+    reader.onerror = () => {
+      toast.error("Error reading file.");
+      setUploadingSlide(false);
     };
     reader.readAsDataURL(file);
   };

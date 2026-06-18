@@ -40,18 +40,18 @@ export default function Contact() {
 
   const branches = [
     {
-      name: 'Kyumbi Showroom & Workshop',
-      address: 'Mombasa Road, Kyumbi',
+      name: 'Nairobi Main Branch',
+      address: 'Nairobi',
       phone: '+254 141 484 249',
-      email: 'info@craftsmangalore.homes',
+      email: 'info@furnitureelitespace.co.ke',
       hours: 'Mon-Sat: 8:00 AM - 6:00 PM',
-      mapUrl: 'https://maps.google.com/?q=Kyumbi,Mombasa+Road'
+      mapUrl: 'https://maps.google.com/maps?q=PV6W%2B4Q,Nairobi'
     },
     {
       name: 'Tena Estate Branch',
       address: 'Manyanja Road, Tena Estate',
       phone: '+254 141 484 249',
-      email: 'tena@craftsmangalore.homes',
+      email: 'tena@furnitureelitespace.co.ke',
       hours: 'Mon-Sun: 9:00 AM - 7:00 PM',
       mapUrl: 'https://maps.google.com/?q=Manyanja+Road,Tena+Estate'
     }

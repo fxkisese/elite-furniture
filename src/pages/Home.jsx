@@ -341,7 +341,7 @@ export default function Home() {
             backgroundColor: '#111',
           }}>
             <iframe
-              src="https://maps.google.com/maps?q=-1.2929523,36.8861463+(Eliwa+Funitures)&z=16&output=embed"
+              src="https://maps.google.com/maps?q=PV6W%2B4Q+Nairobi&z=16&output=embed"
               width="100%"
               height="100%"
               style={{ border: 0, filter: 'grayscale(100%) invert(92%) contrast(83%)' }}

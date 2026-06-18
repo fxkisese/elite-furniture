@@ -12,6 +12,11 @@ const loadImageAsBase64 = (url) => {
       return;
     }
     
+    if (url.startsWith('data:')) {
+      resolve(url);
+      return;
+    }
+    
     const img = new Image();
     img.crossOrigin = 'Anonymous';
     img.onload = () => {

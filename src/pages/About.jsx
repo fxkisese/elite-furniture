@@ -126,7 +126,7 @@ const faqs = [
   },
   {
     q: 'Where are your branches located?',
-    a: 'We have two locations: Mombasa Road, Kyumbi (Machakos Junction) and Manyanja Road, Whitehouse Footbridge, Tena Estate, Nairobi.',
+    a: 'We have two locations in Nairobi: Our Main Branch and our Tena Estate Branch at Manyanja Road, Whitehouse Footbridge.',
   },
   {
     q: 'What payment methods do you accept?',
@@ -378,11 +378,11 @@ export default function About() {
             {/* Branch Photos */}
             <div className="rounded-2xl overflow-hidden shadow-lg group relative">
               <div className="aspect-video bg-muted flex items-center justify-center">
-                <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80&w=800" alt="Kyumbi Branch" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80&w=800" alt="Nairobi Main Branch" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8 text-white">
-                <h3 className="text-2xl font-bold mb-2">Kyumbi Branch</h3>
-                <p className="flex items-center text-white/80"><MapPin className="w-4 h-4 mr-2" /> Mombasa Road, Kyumbi</p>
+                <h3 className="text-2xl font-bold mb-2">Nairobi Main Branch</h3>
+                <p className="flex items-center text-white/80"><MapPin className="w-4 h-4 mr-2" /> Nairobi</p>
               </div>
             </div>
             <div className="rounded-2xl overflow-hidden shadow-lg group relative">
@@ -398,16 +398,16 @@ export default function About() {
             {/* Google Maps Embeds */}
             <div className="rounded-2xl overflow-hidden shadow-lg border">
               <iframe
-                title="Kyumbi Branch Map"
+                title="Main Branch Map"
                 className="w-full h-64"
                 loading="lazy"
                 allowFullScreen
                 referrerPolicy="no-referrer-when-downgrade"
-                src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&q=Kyumbi,Machakos+Junction,Kenya"
+                src="https://maps.google.com/maps?q=PV6W%2B4Q,Nairobi&t=&z=15&ie=UTF8&iwloc=&output=embed"
               />
               <div className="p-4 bg-secondary/50">
-                <p className="font-semibold text-sm">Kyumbi Branch</p>
-                <p className="text-xs text-muted-foreground">Mombasa Road, Machakos Junction</p>
+                <p className="font-semibold text-sm">Nairobi Main Branch</p>
+                <p className="text-xs text-muted-foreground">Nairobi, Kenya</p>
               </div>
             </div>
             <div className="rounded-2xl overflow-hidden shadow-lg border">
