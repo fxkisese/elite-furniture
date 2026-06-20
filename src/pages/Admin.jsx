@@ -57,6 +57,8 @@ const IconSearch = (p) => <svg {...ic} {...p}><circle cx="11" cy="11" r="7" /><p
 const IconTrash = (p) => <svg {...ic} {...p}><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V6h12Z" /></svg>;
 const IconImage = (p) => <svg {...ic} {...p}><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>;
 const IconEdit = (p) => <svg {...ic} {...p}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>;
+const IconMenu = (p) => <svg {...ic} {...p}><path d="M4 6h16M4 12h16M4 18h16" /></svg>;
+const IconX = (p) => <svg {...ic} {...p}><path d="M18 6 6 18M6 6l12 12" /></svg>;
 
 /* Signature joint/tenon mark — used for active nav state */
 function JointTab() {
@@ -102,12 +104,12 @@ function Badge({ children, color }) {
 }
 function PageHeader({ eyebrow, title, action }) {
   return (
-    <div className="flex justify-between items-start" style={{ marginBottom: 28 }}>
+    <div className="cg-page-header">
       <div>
         <div style={{ fontSize: 12, letterSpacing: '0.15em', color: COLORS.gold, textTransform: 'uppercase', marginBottom: 6, fontWeight: 600 }}>{eyebrow}</div>
-        <h1 style={{ fontFamily: fontDisplay, fontSize: 32, fontWeight: 600, color: COLORS.text, margin: 0 }}>{title}</h1>
+        <h1 className="cg-page-title">{title}</h1>
       </div>
-      {action}
+      {action && <div className="cg-page-action">{action}</div>}
     </div>
   );
 }
@@ -115,7 +117,7 @@ function StatCard({ label, value, sub, accent }) {
   return (
     <div style={{ ...cardStyle, padding: '18px 20px', borderTop: `2px solid ${accent}` }}>
       <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: COLORS.muted, marginBottom: 8, fontWeight: 600 }}>{label}</div>
-      <div style={{ fontFamily: fontMono, fontSize: 24, fontWeight: 500, color: COLORS.text }}>{value}</div>
+      <div style={{ fontFamily: fontMono, fontSize: 22, fontWeight: 500, color: COLORS.text }}>{value}</div>
       {sub && <div style={{ fontSize: 12, color: COLORS.muted, marginTop: 4 }}>{sub}</div>}
     </div>
   );
@@ -138,12 +140,18 @@ function BarRow({ label, value, max, color }) {
   );
 }
 function Modal({ title, onClose, children }) {
+  /* Lock body scroll when modal is open */
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(10,8,6,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: 24, width: '100%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 12px 40px rgba(0,0,0,0.5)' }}>
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(10,8,6,0.65)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 9000, padding: 0 }} className="cg-modal-overlay">
+      <div onClick={(e) => e.stopPropagation()} className="cg-modal-card">
         <div className="flex justify-between items-center" style={{ marginBottom: 20 }}>
           <h3 style={{ fontFamily: fontDisplay, fontSize: 20, fontWeight: 600, color: COLORS.text, margin: 0 }}>{title}</h3>
-          <button onClick={onClose} className="cg-icon-btn" aria-label="Close"><svg {...ic} width="20" height="20"><path d="M18 6 6 18M6 6l12 12" /></svg></button>
+          <button onClick={onClose} className="cg-icon-btn" aria-label="Close"><IconX /></button>
         </div>
         {children}
       </div>
@@ -175,13 +183,11 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
     description: '', in_stock: true, featured: false, 
     image: '', badge: '', rating: 5.0, review_count: 0,
     delivery_nairobi: '600', transport_method: '', delivery_outside: '{}',
-    // metadata-backed fields
     size: '', piece_price: '', images: [], combo_items: [],
   };
 
   const editValues = initialData ? {
     ...initialData,
-    // Merge metadata fields on top of the DB row
     size: initMeta.size || initialData.size || '',
     piece_price: initMeta.piece_price || initialData.piece_price || '',
     images: (initMeta.images && initMeta.images.length > 0) ? initMeta.images : (initialData.images || []),
@@ -217,39 +223,25 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
           let height = img.height;
 
           if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
+            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
           } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
+            if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
           }
 
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-          
           resolve(canvas.toDataURL('image/jpeg', 0.6));
         };
-        img.onerror = () => {
-          toast.error("Unsupported image format. Please use JPG/PNG.");
-          resolve(null);
-        };
+        img.onerror = () => { toast.error("Unsupported image format. Please use JPG/PNG."); resolve(null); };
         img.src = event.target.result;
       };
-      reader.onerror = () => {
-        toast.error("Error reading file.");
-        resolve(null);
-      };
+      reader.onerror = () => { toast.error("Error reading file."); resolve(null); };
       reader.readAsDataURL(file);
     });
 
     const dataUrls = (await Promise.all(files.map(processFile))).filter(Boolean);
-
     setValues((prev) => {
       const newImages = [...(prev.images || []), ...dataUrls];
       return { ...prev, images: newImages, image: newImages[0] || '' };
@@ -302,7 +294,7 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
       <div className="space-y-4">
         <div><label style={labelStyle}>Product name *</label><input style={inputStyle} className="cg-input" value={v.name} onChange={set('name')} required placeholder="e.g. Chesterfield Sofa Set" /></div>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label style={labelStyle}>Category *</label>
             <input list="category-list" style={inputStyle} className="cg-input" value={v.category} onChange={set('category')} required placeholder="Select or type..." />
             <datalist id="category-list">
@@ -334,21 +326,21 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
           <div style={{ background: '#f9fafb', border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: 16 }}>
              <div style={{ ...labelStyle, color: COLORS.gold, marginBottom: 12 }}>Combo Item Details</div>
              {(v.combo_items || []).map((ci, i) => (
-                <div key={i} className="flex gap-2 items-end mb-3">
-                   <div className="flex-1">
+                <div key={i} className="cg-combo-row">
+                   <div style={{ flex: 1, minWidth: 0 }}>
                       <label style={labelStyle}>Item Name</label>
                       <input style={inputStyle} className="cg-input" value={ci.name || ''} onChange={e => handleComboChange(i, 'name', e.target.value)} placeholder="e.g. 3-Seater Sofa" />
                    </div>
-                   <div className="w-28">
+                   <div className="cg-combo-price">
                       <label style={labelStyle}>Price (KSh)</label>
                       <input style={inputStyle} className="cg-input" type="number" min="0" value={ci.price || ''} onChange={e => handleComboChange(i, 'price', e.target.value)} />
                    </div>
-                   <div className="w-28">
+                   <div className="cg-combo-price">
                       <label style={labelStyle}>Discount</label>
                       <input style={inputStyle} className="cg-input" type="number" min="0" value={ci.discount || ''} onChange={e => handleComboChange(i, 'discount', e.target.value)} />
                    </div>
-                   <button type="button" className="cg-icon-btn mb-[2px]" onClick={() => handleRemoveCombo(i)}>
-                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                   <button type="button" className="cg-icon-btn cg-combo-del" onClick={() => handleRemoveCombo(i)}>
+                     <IconX />
                    </button>
                 </div>
              ))}
@@ -356,7 +348,7 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <div>
             <label style={labelStyle}>Badge</label>
             <select style={inputStyle} className="cg-input" value={v.badge || ''} onChange={set('badge')}>
@@ -374,7 +366,7 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
         {/* Delivery Pricing Section */}
         <div style={{ background: '#f9fafb', border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: 16 }}>
           <div style={{ ...labelStyle, fontSize: 12, color: COLORS.gold, marginBottom: 12 }}>🚛 DELIVERY PRICING</div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label style={labelStyle}>Nairobi Delivery (KSh)</label>
               <input style={inputStyle} className="cg-input" type="number" min="0" value={v.delivery_nairobi} onChange={set('delivery_nairobi')} placeholder="600" />
@@ -389,7 +381,7 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
           </div>
           <div style={{ marginTop: 12 }}>
             <label style={labelStyle}>Outside Nairobi Delivery Prices</label>
-            <div className="grid grid-cols-3 gap-3" style={{ marginTop: 6 }}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3" style={{ marginTop: 6 }}>
               {DELIVERY_REGIONS.map(region => (
                 <div key={region}>
                   <label style={{ fontSize: 11, color: COLORS.muted, display: 'block', marginBottom: 3 }}>{region}</label>
@@ -458,13 +450,13 @@ function SaleForm({ onSubmit, onCancel }) {
       <div className="space-y-4">
         <div><label style={labelStyle}>Customer name</label><input style={inputStyle} className="cg-input" value={v.customer} onChange={set('customer')} required /></div>
         <div><label style={labelStyle}>Item(s) sold</label><input style={inputStyle} className="cg-input" value={v.item} onChange={set('item')} required placeholder="e.g. Glass Coffee Table" /></div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label style={labelStyle}>Amount (KSh)</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.amount} onChange={set('amount')} required /></div>
           <div><label style={labelStyle}>Branch</label>
             <select style={inputStyle} className="cg-input" value={v.branch} onChange={set('branch')}>{BRANCHES.map((b) => <option key={b}>{b}</option>)}</select>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label style={labelStyle}>Payment</label>
             <select style={inputStyle} className="cg-input" value={v.payment} onChange={set('payment')}><option>Full</option><option>Deposit</option></select>
           </div>
@@ -485,16 +477,16 @@ function CreditForm({ onSubmit, onCancel }) {
   return (
     <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, total: Number(v.total) || 0, paid: Number(v.deposit) || 0, id: Date.now() }); }}>
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label style={labelStyle}>Customer name</label><input style={inputStyle} className="cg-input" value={v.customer} onChange={set('customer')} required /></div>
           <div><label style={labelStyle}>Phone</label><input style={inputStyle} className="cg-input" value={v.phone} onChange={set('phone')} placeholder="07xx xxx xxx" required /></div>
         </div>
         <div><label style={labelStyle}>Item(s)</label><input style={inputStyle} className="cg-input" value={v.item} onChange={set('item')} required /></div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label style={labelStyle}>Total amount (KSh)</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.total} onChange={set('total')} required /></div>
           <div><label style={labelStyle}>Deposit paid (KSh)</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.deposit} onChange={set('deposit')} /></div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label style={labelStyle}>Balance due date</label><input style={inputStyle} className="cg-input" type="date" value={v.dueDate} onChange={set('dueDate')} required /></div>
           <div><label style={labelStyle}>Branch</label>
             <select style={inputStyle} className="cg-input" value={v.branch} onChange={set('branch')}>{BRANCHES.map((b) => <option key={b}>{b}</option>)}</select>
@@ -513,7 +505,7 @@ function ExpenseForm({ onSubmit, onCancel }) {
   return (
     <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, amount: Number(v.amount) || 0, id: Date.now() }); }}>
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label style={labelStyle}>Date</label><input style={inputStyle} className="cg-input" type="date" value={v.date} onChange={set('date')} required /></div>
           <div><label style={labelStyle}>Category</label>
             <select style={inputStyle} className="cg-input" value={v.category} onChange={set('category')}>
@@ -522,7 +514,7 @@ function ExpenseForm({ onSubmit, onCancel }) {
           </div>
         </div>
         <div><label style={labelStyle}>Description</label><input style={inputStyle} className="cg-input" value={v.description} onChange={set('description')} required placeholder="What was this for?" /></div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label style={labelStyle}>Amount (KSh)</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.amount} onChange={set('amount')} required /></div>
           <div><label style={labelStyle}>Branch</label>
             <select style={inputStyle} className="cg-input" value={v.branch} onChange={set('branch')}>{BRANCHES.map((b) => <option key={b}>{b}</option>)}</select>
@@ -565,13 +557,13 @@ function DashboardPage({ products, sales, credit, expenses }) {
   return (
     <div>
       <PageHeader eyebrow="Overview" title="Dashboard" />
-      <div className="grid grid-cols-4 gap-4" style={{ marginBottom: 32 }}>
+      <div className="cg-stat-grid" style={{ marginBottom: 32 }}>
         <StatCard label="Today's sales" value={fmt(todaySales)} accent={COLORS.green} />
         <StatCard label="Credit outstanding" value={fmt(outstandingTotal)} sub={`${outstanding.length} account${outstanding.length === 1 ? '' : 's'}`} accent={COLORS.amber} />
         <StatCard label="Expenses this month" value={fmt(monthExpenses)} accent={COLORS.rust} />
         <StatCard label="Out of stock items" value={lowStock} sub="Check Products" accent={COLORS.gold} />
       </div>
-      <div className="grid grid-cols-2 gap-6">
+      <div className="cg-two-col-grid">
         <div>
           <h3 style={sectionTitleStyle}>Recent sales</h3>
           <div style={cardStyle}>
@@ -619,46 +611,48 @@ function ProductsPage({ products, handleDeleteProduct, openModal }) {
       <PageHeader eyebrow="Inventory" title="Products" action={
         <button className="cg-btn-primary" onClick={() => openModal('product')}><IconPlus /> Add product</button>
       } />
-      <div className="flex gap-3" style={{ marginBottom: 16 }}>
-        <div style={{ position: 'relative', flex: 1 }}>
+      <div className="cg-filter-bar" style={{ marginBottom: 16 }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
           <IconSearch style={{ position: 'absolute', left: 12, top: 11, color: COLORS.muted }} />
           <input style={{ ...inputStyle, paddingLeft: 36 }} className="cg-input" placeholder="Search products" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
-        <select style={{ ...inputStyle, width: 180 }} className="cg-input" value={category} onChange={(e) => setCategory(e.target.value)}>
+        <select style={{ ...inputStyle, width: 'auto', minWidth: 140, flexShrink: 0 }} className="cg-input" value={category} onChange={(e) => setCategory(e.target.value)}>
           {categories.map((c) => <option key={c}>{c}</option>)}
         </select>
       </div>
       <div style={cardStyle}>
-        <table className="w-full" style={{ borderCollapse: 'collapse' }}>
-          <thead><tr style={{ background: COLORS.surface2 }}>
-            <th style={thStyle}>Product</th><th style={thStyle}>Category</th><th style={thStyle}>Price</th>
-            <th style={thStyle}>Status</th><th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-          </tr></thead>
-          <tbody>
-            {filtered.map((p) => (
-              <tr key={p.id} className="cg-table-row">
-                <td style={tdStyle}>
-                  <div className="flex items-center gap-3">
-                    {p.image || p.imageUrl ? (
-                      <img src={p.image || p.imageUrl} alt={p.name || p.title} style={{ width: 36, height: 36, borderRadius: 4, objectFit: 'cover' }} />
-                    ) : (
-                      <div style={{ width: 36, height: 36, borderRadius: 4, background: COLORS.surface2 }} />
-                    )}
-                    {p.name || p.title}
-                  </div>
-                </td>
-                <td style={{ ...tdStyle, color: COLORS.muted }}>{p.category}</td>
-                <td style={{ ...tdStyle, fontFamily: fontMono }}>{fmt(p.price)}</td>
-                <td style={tdStyle}><Badge color={p.in_stock ? statusColor['In Stock'] : statusColor['Out of Stock']}>{p.in_stock ? 'In Stock' : 'Out of Stock'}</Badge></td>
-                <td style={{ ...tdStyle, textAlign: 'right' }}>
-                  <button className="cg-icon-btn" onClick={() => openModal({ type: 'edit_product', product: p })} aria-label="Edit" style={{ color: COLORS.gold, marginRight: 8 }}><IconEdit /></button>
-                  <button className="cg-icon-btn" onClick={() => handleDeleteProduct(p.id)} aria-label="Delete"><IconTrash /></button>
-                </td>
-              </tr>
-            ))}
-            {filtered.length === 0 && <tr><td colSpan={5}><EmptyRow text="No products match. Add one above." /></td></tr>}
-          </tbody>
-        </table>
+        <div className="cg-table-wrap">
+          <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 480 }}>
+            <thead><tr style={{ background: COLORS.surface2 }}>
+              <th style={thStyle}>Product</th><th style={thStyle}>Category</th><th style={thStyle}>Price</th>
+              <th style={thStyle}>Status</th><th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
+            </tr></thead>
+            <tbody>
+              {filtered.map((p) => (
+                <tr key={p.id} className="cg-table-row">
+                  <td style={tdStyle}>
+                    <div className="flex items-center gap-3">
+                      {p.image || p.imageUrl ? (
+                        <img src={p.image || p.imageUrl} alt={p.name || p.title} style={{ width: 36, height: 36, borderRadius: 4, objectFit: 'cover', flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: 36, height: 36, borderRadius: 4, background: COLORS.surface2, flexShrink: 0 }} />
+                      )}
+                      <span style={{ whiteSpace: 'nowrap' }}>{p.name || p.title}</span>
+                    </div>
+                  </td>
+                  <td style={{ ...tdStyle, color: COLORS.muted, whiteSpace: 'nowrap' }}>{p.category}</td>
+                  <td style={{ ...tdStyle, fontFamily: fontMono, whiteSpace: 'nowrap' }}>{fmt(p.price)}</td>
+                  <td style={tdStyle}><Badge color={p.in_stock ? statusColor['In Stock'] : statusColor['Out of Stock']}>{p.in_stock ? 'In Stock' : 'Out of Stock'}</Badge></td>
+                  <td style={{ ...tdStyle, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    <button className="cg-icon-btn" onClick={() => openModal({ type: 'edit_product', product: p })} aria-label="Edit" style={{ color: COLORS.gold, marginRight: 8 }}><IconEdit /></button>
+                    <button className="cg-icon-btn" onClick={() => handleDeleteProduct(p.id)} aria-label="Delete"><IconTrash /></button>
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && <tr><td colSpan={5}><EmptyRow text="No products match. Add one above." /></td></tr>}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -672,23 +666,25 @@ function MessagesPage({ messages }) {
         <div style={{ ...cardStyle, padding: '48px 16px', textAlign: 'center', color: COLORS.muted, fontSize: 13 }}>No messages yet.</div>
       ) : (
         <div style={cardStyle}>
-          <table className="w-full" style={{ borderCollapse: 'collapse' }}>
-            <thead><tr style={{ background: COLORS.surface2 }}>
-              <th style={thStyle}>Name</th><th style={thStyle}>Contact</th><th style={thStyle}>Message</th>
-            </tr></thead>
-            <tbody>
-              {messages.map((m) => (
-                <tr key={m.id} className="cg-table-row">
-                  <td style={{...tdStyle, fontWeight: 500}}>{m.name}</td>
-                  <td style={{...tdStyle, color: COLORS.muted, fontSize: 12}}>
-                    {m.email && <div>{m.email}</div>}
-                    {m.phone && <div>{m.phone}</div>}
-                  </td>
-                  <td style={{...tdStyle, color: COLORS.muted}}>{m.message}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="cg-table-wrap">
+            <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 400 }}>
+              <thead><tr style={{ background: COLORS.surface2 }}>
+                <th style={thStyle}>Name</th><th style={thStyle}>Contact</th><th style={thStyle}>Message</th>
+              </tr></thead>
+              <tbody>
+                {messages.map((m) => (
+                  <tr key={m.id} className="cg-table-row">
+                    <td style={{...tdStyle, fontWeight: 500, whiteSpace: 'nowrap'}}>{m.name}</td>
+                    <td style={{...tdStyle, color: COLORS.muted, fontSize: 12, whiteSpace: 'nowrap'}}>
+                      {m.email && <div>{m.email}</div>}
+                      {m.phone && <div>{m.phone}</div>}
+                    </td>
+                    <td style={{...tdStyle, color: COLORS.muted}}>{m.message}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -703,28 +699,30 @@ function QuotesPage({ quotes }) {
         <div style={{ ...cardStyle, padding: '48px 16px', textAlign: 'center', color: COLORS.muted, fontSize: 13 }}>No quote requests yet.</div>
       ) : (
         <div style={cardStyle}>
-          <table className="w-full" style={{ borderCollapse: 'collapse' }}>
-            <thead><tr style={{ background: COLORS.surface2 }}>
-              <th style={thStyle}>Customer</th><th style={thStyle}>Contact</th><th style={thStyle}>Request</th><th style={thStyle}>Status</th>
-            </tr></thead>
-            <tbody>
-              {quotes.map((q) => (
-                <tr key={q.id} className="cg-table-row">
-                  <td style={{...tdStyle, fontWeight: 500}}>{q.name}</td>
-                  <td style={{...tdStyle, color: COLORS.muted, fontSize: 12}}>
-                    {q.email && <div>{q.email}</div>}
-                    {q.phone && <div>{q.phone}</div>}
-                  </td>
-                  <td style={{...tdStyle, color: COLORS.muted}}>
-                    <div><span style={{color: COLORS.text}}>Type:</span> {q.furniture_type}</div>
-                    {q.measurements && <div><span style={{color: COLORS.text}}>Size:</span> {q.measurements}</div>}
-                    {q.notes && <div className="mt-1 text-sm italic">"{q.notes}"</div>}
-                  </td>
-                  <td style={tdStyle}><Badge color={COLORS.amber}>{(q.status || 'NEW').toUpperCase()}</Badge></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="cg-table-wrap">
+            <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 480 }}>
+              <thead><tr style={{ background: COLORS.surface2 }}>
+                <th style={thStyle}>Customer</th><th style={thStyle}>Contact</th><th style={thStyle}>Request</th><th style={thStyle}>Status</th>
+              </tr></thead>
+              <tbody>
+                {quotes.map((q) => (
+                  <tr key={q.id} className="cg-table-row">
+                    <td style={{...tdStyle, fontWeight: 500, whiteSpace: 'nowrap'}}>{q.name}</td>
+                    <td style={{...tdStyle, color: COLORS.muted, fontSize: 12, whiteSpace: 'nowrap'}}>
+                      {q.email && <div>{q.email}</div>}
+                      {q.phone && <div>{q.phone}</div>}
+                    </td>
+                    <td style={{...tdStyle, color: COLORS.muted}}>
+                      <div><span style={{color: COLORS.text}}>Type:</span> {q.furniture_type}</div>
+                      {q.measurements && <div><span style={{color: COLORS.text}}>Size:</span> {q.measurements}</div>}
+                      {q.notes && <div className="mt-1 text-sm italic">"{q.notes}"</div>}
+                    </td>
+                    <td style={tdStyle}><Badge color={COLORS.amber}>{(q.status || 'NEW').toUpperCase()}</Badge></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -739,30 +737,32 @@ function SalesPage({ sales, handleDeleteItem, openModal }) {
         <button className="cg-btn-primary" onClick={() => openModal('sale')}><IconPlus /> Record sale</button>
       } />
       <div style={cardStyle}>
-        <table className="w-full" style={{ borderCollapse: 'collapse' }}>
-          <thead><tr style={{ background: COLORS.surface2 }}>
-            <th style={thStyle}>Date</th><th style={thStyle}>Customer</th><th style={thStyle}>Item</th>
-            <th style={thStyle}>Branch</th><th style={thStyle}>Amount</th><th style={thStyle}>Payment</th>
-            <th style={thStyle}>Method</th><th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-          </tr></thead>
-          <tbody>
-            {sales.slice().reverse().map((s) => (
-              <tr key={s.id} className="cg-table-row">
-                <td style={{ ...tdStyle, fontFamily: fontMono, color: COLORS.muted }}>{s.date}</td>
-                <td style={tdStyle}>{s.customer}</td>
-                <td style={{ ...tdStyle, color: COLORS.muted }}>{s.item}</td>
-                <td style={tdStyle}>{s.branch}</td>
-                <td style={{ ...tdStyle, fontFamily: fontMono }}>{fmt(s.amount)}</td>
-                <td style={tdStyle}><Badge color={paymentColor[s.payment]}>{s.payment}</Badge></td>
-                <td style={{ ...tdStyle, color: COLORS.muted }}>{s.method}</td>
-                <td style={{ ...tdStyle, textAlign: 'right' }}>
-                  <button className="cg-icon-btn" onClick={() => handleDeleteItem('sales', s.id)} aria-label="Delete"><IconTrash /></button>
-                </td>
-              </tr>
-            ))}
-            {sales.length === 0 && <tr><td colSpan={8}><EmptyRow text="No sales recorded yet. Record one above." /></td></tr>}
-          </tbody>
-        </table>
+        <div className="cg-table-wrap">
+          <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 640 }}>
+            <thead><tr style={{ background: COLORS.surface2 }}>
+              <th style={thStyle}>Date</th><th style={thStyle}>Customer</th><th style={thStyle}>Item</th>
+              <th style={thStyle}>Branch</th><th style={thStyle}>Amount</th><th style={thStyle}>Payment</th>
+              <th style={thStyle}>Method</th><th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
+            </tr></thead>
+            <tbody>
+              {sales.slice().reverse().map((s) => (
+                <tr key={s.id} className="cg-table-row">
+                  <td style={{ ...tdStyle, fontFamily: fontMono, color: COLORS.muted, whiteSpace: 'nowrap' }}>{s.date}</td>
+                  <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{s.customer}</td>
+                  <td style={{ ...tdStyle, color: COLORS.muted }}>{s.item}</td>
+                  <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{s.branch}</td>
+                  <td style={{ ...tdStyle, fontFamily: fontMono, whiteSpace: 'nowrap' }}>{fmt(s.amount)}</td>
+                  <td style={tdStyle}><Badge color={paymentColor[s.payment]}>{s.payment}</Badge></td>
+                  <td style={{ ...tdStyle, color: COLORS.muted, whiteSpace: 'nowrap' }}>{s.method}</td>
+                  <td style={{ ...tdStyle, textAlign: 'right' }}>
+                    <button className="cg-icon-btn" onClick={() => handleDeleteItem('sales', s.id)} aria-label="Delete"><IconTrash /></button>
+                  </td>
+                </tr>
+              ))}
+              {sales.length === 0 && <tr><td colSpan={8}><EmptyRow text="No sales recorded yet. Record one above." /></td></tr>}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -775,42 +775,44 @@ function CreditPage({ credit, handleDeleteItem, openModal, openPayment }) {
         <button className="cg-btn-primary" onClick={() => openModal('credit')}><IconPlus /> Add credit sale</button>
       } />
       <div style={cardStyle}>
-        <table className="w-full" style={{ borderCollapse: 'collapse' }}>
-          <thead><tr style={{ background: COLORS.surface2 }}>
-            <th style={thStyle}>Customer</th><th style={thStyle}>Phone</th><th style={thStyle}>Item</th>
-            <th style={thStyle}>Total</th><th style={thStyle}>Paid</th><th style={thStyle}>Balance</th>
-            <th style={thStyle}>Due date</th><th style={thStyle}>Branch</th><th style={thStyle}>Status</th>
-            <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-          </tr></thead>
-          <tbody>
-            {credit.slice().reverse().map((c) => {
-              const balance = c.total - c.paid;
-              const overdue = balance > 0 && c.dueDate < TODAY;
-              const status = balance <= 0 ? 'Settled' : overdue ? 'Overdue' : 'Current';
-              const statusColor = balance <= 0 ? COLORS.green : overdue ? COLORS.rust : COLORS.amber;
-              return (
-                <tr key={c.id} className="cg-table-row">
-                  <td style={tdStyle}>{c.customer}</td>
-                  <td style={{ ...tdStyle, fontFamily: fontMono, color: COLORS.muted }}>{c.phone}</td>
-                  <td style={{ ...tdStyle, color: COLORS.muted }}>{c.item}</td>
-                  <td style={{ ...tdStyle, fontFamily: fontMono }}>{fmt(c.total)}</td>
-                  <td style={{ ...tdStyle, fontFamily: fontMono }}>{fmt(c.paid)}</td>
-                  <td style={{ ...tdStyle, fontFamily: fontMono, color: balance > 0 ? COLORS.amber : COLORS.muted }}>{fmt(balance)}</td>
-                  <td style={{ ...tdStyle, fontFamily: fontMono, color: COLORS.muted }}>{c.dueDate}</td>
-                  <td style={tdStyle}>{c.branch}</td>
-                  <td style={tdStyle}><Badge color={statusColor}>{status}</Badge></td>
-                  <td style={{ ...tdStyle, textAlign: 'right' }}>
-                    <div className="flex justify-end gap-1">
-                      {balance > 0 && <button className="cg-icon-btn" style={{ color: COLORS.gold }} onClick={() => openPayment(c.id)} aria-label="Record payment"><IconBanknote /></button>}
-                      <button className="cg-icon-btn" onClick={() => handleDeleteItem('credit', c.id)} aria-label="Delete"><IconTrash /></button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-            {credit.length === 0 && <tr><td colSpan={10}><EmptyRow text="No credit accounts yet. Add one above." /></td></tr>}
-          </tbody>
-        </table>
+        <div className="cg-table-wrap">
+          <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 760 }}>
+            <thead><tr style={{ background: COLORS.surface2 }}>
+              <th style={thStyle}>Customer</th><th style={thStyle}>Phone</th><th style={thStyle}>Item</th>
+              <th style={thStyle}>Total</th><th style={thStyle}>Paid</th><th style={thStyle}>Balance</th>
+              <th style={thStyle}>Due date</th><th style={thStyle}>Branch</th><th style={thStyle}>Status</th>
+              <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
+            </tr></thead>
+            <tbody>
+              {credit.slice().reverse().map((c) => {
+                const balance = c.total - c.paid;
+                const overdue = balance > 0 && c.dueDate < TODAY;
+                const status = balance <= 0 ? 'Settled' : overdue ? 'Overdue' : 'Current';
+                const statusColor = balance <= 0 ? COLORS.green : overdue ? COLORS.rust : COLORS.amber;
+                return (
+                  <tr key={c.id} className="cg-table-row">
+                    <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{c.customer}</td>
+                    <td style={{ ...tdStyle, fontFamily: fontMono, color: COLORS.muted, whiteSpace: 'nowrap' }}>{c.phone}</td>
+                    <td style={{ ...tdStyle, color: COLORS.muted }}>{c.item}</td>
+                    <td style={{ ...tdStyle, fontFamily: fontMono, whiteSpace: 'nowrap' }}>{fmt(c.total)}</td>
+                    <td style={{ ...tdStyle, fontFamily: fontMono, whiteSpace: 'nowrap' }}>{fmt(c.paid)}</td>
+                    <td style={{ ...tdStyle, fontFamily: fontMono, color: balance > 0 ? COLORS.amber : COLORS.muted, whiteSpace: 'nowrap' }}>{fmt(balance)}</td>
+                    <td style={{ ...tdStyle, fontFamily: fontMono, color: COLORS.muted, whiteSpace: 'nowrap' }}>{c.dueDate}</td>
+                    <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{c.branch}</td>
+                    <td style={tdStyle}><Badge color={statusColor}>{status}</Badge></td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}>
+                      <div className="flex justify-end gap-1">
+                        {balance > 0 && <button className="cg-icon-btn" style={{ color: COLORS.gold }} onClick={() => openPayment(c.id)} aria-label="Record payment"><IconBanknote /></button>}
+                        <button className="cg-icon-btn" onClick={() => handleDeleteItem('credit', c.id)} aria-label="Delete"><IconTrash /></button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              {credit.length === 0 && <tr><td colSpan={10}><EmptyRow text="No credit accounts yet. Add one above." /></td></tr>}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -827,27 +829,29 @@ function ExpensesPage({ expenses, handleDeleteItem, openModal }) {
         <StatCard label="Total recorded" value={fmt(total)} sub={`${expenses.length} entries`} accent={COLORS.rust} />
       </div>
       <div style={cardStyle}>
-        <table className="w-full" style={{ borderCollapse: 'collapse' }}>
-          <thead><tr style={{ background: COLORS.surface2 }}>
-            <th style={thStyle}>Date</th><th style={thStyle}>Category</th><th style={thStyle}>Description</th>
-            <th style={thStyle}>Branch</th><th style={thStyle}>Amount</th><th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-          </tr></thead>
-          <tbody>
-            {expenses.slice().reverse().map((e) => (
-              <tr key={e.id} className="cg-table-row">
-                <td style={{ ...tdStyle, fontFamily: fontMono, color: COLORS.muted }}>{e.date}</td>
-                <td style={tdStyle}><Badge color={COLORS.gold}>{e.category}</Badge></td>
-                <td style={{ ...tdStyle, color: COLORS.muted }}>{e.description}</td>
-                <td style={tdStyle}>{e.branch}</td>
-                <td style={{ ...tdStyle, fontFamily: fontMono, color: COLORS.rust }}>{fmt(e.amount)}</td>
-                <td style={{ ...tdStyle, textAlign: 'right' }}>
-                  <button className="cg-icon-btn" onClick={() => handleDeleteItem('expenses', e.id)} aria-label="Delete"><IconTrash /></button>
-                </td>
-              </tr>
-            ))}
-            {expenses.length === 0 && <tr><td colSpan={6}><EmptyRow text="No expenses recorded yet. Add one above." /></td></tr>}
-          </tbody>
-        </table>
+        <div className="cg-table-wrap">
+          <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 500 }}>
+            <thead><tr style={{ background: COLORS.surface2 }}>
+              <th style={thStyle}>Date</th><th style={thStyle}>Category</th><th style={thStyle}>Description</th>
+              <th style={thStyle}>Branch</th><th style={thStyle}>Amount</th><th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
+            </tr></thead>
+            <tbody>
+              {expenses.slice().reverse().map((e) => (
+                <tr key={e.id} className="cg-table-row">
+                  <td style={{ ...tdStyle, fontFamily: fontMono, color: COLORS.muted, whiteSpace: 'nowrap' }}>{e.date}</td>
+                  <td style={tdStyle}><Badge color={COLORS.gold}>{e.category}</Badge></td>
+                  <td style={{ ...tdStyle, color: COLORS.muted }}>{e.description}</td>
+                  <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{e.branch}</td>
+                  <td style={{ ...tdStyle, fontFamily: fontMono, color: COLORS.rust, whiteSpace: 'nowrap' }}>{fmt(e.amount)}</td>
+                  <td style={{ ...tdStyle, textAlign: 'right' }}>
+                    <button className="cg-icon-btn" onClick={() => handleDeleteItem('expenses', e.id)} aria-label="Delete"><IconTrash /></button>
+                  </td>
+                </tr>
+              ))}
+              {expenses.length === 0 && <tr><td colSpan={6}><EmptyRow text="No expenses recorded yet. Add one above." /></td></tr>}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -868,13 +872,13 @@ function ReportsPage({ sales, credit, expenses }) {
   return (
     <div>
       <PageHeader eyebrow="Business overview" title="Reports" />
-      <div className="grid grid-cols-4 gap-4" style={{ marginBottom: 32 }}>
+      <div className="cg-stat-grid" style={{ marginBottom: 32 }}>
         <StatCard label="Total sales" value={fmt(totalSales)} accent={COLORS.green} />
         <StatCard label="Total expenses" value={fmt(totalExpenses)} accent={COLORS.rust} />
         <StatCard label="Net" value={fmt(net)} accent={net >= 0 ? COLORS.green : COLORS.rust} sub={net >= 0 ? 'Profit' : 'Loss'} />
         <StatCard label="Credit outstanding" value={fmt(outstanding)} accent={COLORS.amber} />
       </div>
-      <div className="grid grid-cols-2 gap-6">
+      <div className="cg-two-col-grid">
         <div>
           <h3 style={sectionTitleStyle}>Sales by branch</h3>
           <div style={{ ...cardStyle, padding: 20 }}>
@@ -904,25 +908,27 @@ function HeroSlidesPage({ heroSlides, handleDeleteItem, handleUploadSlide, uploa
         </label>
       } />
       <div style={cardStyle}>
-        <table className="w-full" style={{ borderCollapse: 'collapse' }}>
-          <thead><tr style={{ background: COLORS.surface2 }}>
-            <th style={thStyle}>Preview</th><th style={thStyle}>Added</th><th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-          </tr></thead>
-          <tbody>
-            {heroSlides.map((h) => (
-              <tr key={h.id} className="cg-table-row">
-                <td style={tdStyle}>
-                  <img src={h.image} alt="Slide" style={{ width: 160, height: 90, objectFit: 'cover', borderRadius: 4 }} />
-                </td>
-                <td style={{ ...tdStyle, color: COLORS.muted }}>{new Date(h.created_at).toLocaleDateString()}</td>
-                <td style={{ ...tdStyle, textAlign: 'right' }}>
-                  <button className="cg-icon-btn" onClick={() => handleDeleteItem('hero_slides', h.id)} aria-label="Delete"><IconTrash /></button>
-                </td>
-              </tr>
-            ))}
-            {heroSlides.length === 0 && <tr><td colSpan={3}><EmptyRow text="No slides added yet. Upload one above." /></td></tr>}
-          </tbody>
-        </table>
+        <div className="cg-table-wrap">
+          <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 320 }}>
+            <thead><tr style={{ background: COLORS.surface2 }}>
+              <th style={thStyle}>Preview</th><th style={thStyle}>Added</th><th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
+            </tr></thead>
+            <tbody>
+              {heroSlides.map((h) => (
+                <tr key={h.id} className="cg-table-row">
+                  <td style={tdStyle}>
+                    <img src={h.image} alt="Slide" style={{ width: 120, height: 68, objectFit: 'cover', borderRadius: 4 }} />
+                  </td>
+                  <td style={{ ...tdStyle, color: COLORS.muted }}>{new Date(h.created_at).toLocaleDateString()}</td>
+                  <td style={{ ...tdStyle, textAlign: 'right' }}>
+                    <button className="cg-icon-btn" onClick={() => handleDeleteItem('hero_slides', h.id)} aria-label="Delete"><IconTrash /></button>
+                  </td>
+                </tr>
+              ))}
+              {heroSlides.length === 0 && <tr><td colSpan={3}><EmptyRow text="No slides added yet. Upload one above." /></td></tr>}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -941,58 +947,60 @@ function OrdersPage({ orders, handleUpdateOrderStatus, handleResendWhatsApp }) {
         <div style={{ ...cardStyle, padding: '48px 16px', textAlign: 'center', color: COLORS.muted, fontSize: 13 }}>No orders yet.</div>
       ) : (
         <div style={cardStyle}>
-          <table className="w-full" style={{ borderCollapse: 'collapse' }}>
-            <thead><tr style={{ background: COLORS.surface2 }}>
-              <th style={thStyle}>Order #</th><th style={thStyle}>Customer</th><th style={thStyle}>Items</th>
-              <th style={thStyle}>Total</th><th style={thStyle}>Payment</th><th style={thStyle}>Delivery</th>
-              <th style={thStyle}>Status</th><th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-            </tr></thead>
-            <tbody>
-              {orders.map((o) => (
-                <tr key={o.id} className="cg-table-row">
-                  <td style={{ ...tdStyle, fontFamily: fontMono, fontSize: 12 }}>{o.order_number}</td>
-                  <td style={tdStyle}>
-                    <div style={{ fontWeight: 500 }}>{o.customer_name}</div>
-                    <div style={{ fontSize: 11, color: COLORS.muted }}>{o.customer_phone}</div>
-                  </td>
-                  <td style={{ ...tdStyle, fontSize: 12, color: COLORS.muted, maxWidth: 200 }}>
-                    {(o.items || []).map((it, i) => <div key={i}>{it.name} ×{it.quantity}</div>)}
-                  </td>
-                  <td style={{ ...tdStyle, fontFamily: fontMono, fontWeight: 500 }}>{fmt(o.grand_total)}</td>
-                  <td style={tdStyle}>
-                    <Badge color={paymentColors[o.payment_status] || COLORS.muted}>{(o.payment_status || 'pending').toUpperCase()}</Badge>
-                    <div style={{ fontSize: 10, color: COLORS.muted, marginTop: 2 }}>{(o.payment_method || '').toUpperCase()}</div>
-                  </td>
-                  <td style={{ ...tdStyle, fontSize: 12, color: COLORS.muted }}>
-                    <div>{o.delivery_location}</div>
-                    <div style={{ fontSize: 10 }}>{fmt(o.delivery_fee)} fee</div>
-                  </td>
-                  <td style={tdStyle}>
-                    <select
-                      style={{ ...inputStyle, fontSize: 11, padding: '4px 8px', width: 'auto', minWidth: 110 }}
-                      className="cg-input"
-                      value={o.order_status || 'new'}
-                      onChange={(e) => handleUpdateOrderStatus(o.id, e.target.value)}
-                    >
-                      {ORDER_STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-                    </select>
-                  </td>
-                  <td style={{ ...tdStyle, textAlign: 'right' }}>
-                    <div className="flex justify-end gap-1">
-                      <button
-                        className="cg-icon-btn"
-                        style={{ color: '#25D366' }}
-                        onClick={() => handleResendWhatsApp(o)}
-                        title="Send to WhatsApp"
+          <div className="cg-table-wrap">
+            <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 680 }}>
+              <thead><tr style={{ background: COLORS.surface2 }}>
+                <th style={thStyle}>Order #</th><th style={thStyle}>Customer</th><th style={thStyle}>Items</th>
+                <th style={thStyle}>Total</th><th style={thStyle}>Payment</th><th style={thStyle}>Delivery</th>
+                <th style={thStyle}>Status</th><th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
+              </tr></thead>
+              <tbody>
+                {orders.map((o) => (
+                  <tr key={o.id} className="cg-table-row">
+                    <td style={{ ...tdStyle, fontFamily: fontMono, fontSize: 12, whiteSpace: 'nowrap' }}>{o.order_number}</td>
+                    <td style={tdStyle}>
+                      <div style={{ fontWeight: 500, whiteSpace: 'nowrap' }}>{o.customer_name}</div>
+                      <div style={{ fontSize: 11, color: COLORS.muted }}>{o.customer_phone}</div>
+                    </td>
+                    <td style={{ ...tdStyle, fontSize: 12, color: COLORS.muted, maxWidth: 160 }}>
+                      {(o.items || []).map((it, i) => <div key={i} style={{ whiteSpace: 'nowrap' }}>{it.name} ×{it.quantity}</div>)}
+                    </td>
+                    <td style={{ ...tdStyle, fontFamily: fontMono, fontWeight: 500, whiteSpace: 'nowrap' }}>{fmt(o.grand_total)}</td>
+                    <td style={tdStyle}>
+                      <Badge color={paymentColors[o.payment_status] || COLORS.muted}>{(o.payment_status || 'pending').toUpperCase()}</Badge>
+                      <div style={{ fontSize: 10, color: COLORS.muted, marginTop: 2 }}>{(o.payment_method || '').toUpperCase()}</div>
+                    </td>
+                    <td style={{ ...tdStyle, fontSize: 12, color: COLORS.muted }}>
+                      <div style={{ whiteSpace: 'nowrap' }}>{o.delivery_location}</div>
+                      <div style={{ fontSize: 10 }}>{fmt(o.delivery_fee)} fee</div>
+                    </td>
+                    <td style={tdStyle}>
+                      <select
+                        style={{ ...inputStyle, fontSize: 11, padding: '4px 8px', width: 'auto', minWidth: 100 }}
+                        className="cg-input"
+                        value={o.order_status || 'new'}
+                        onChange={(e) => handleUpdateOrderStatus(o.id, e.target.value)}
                       >
-                        <IconChat />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                        {ORDER_STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                      </select>
+                    </td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}>
+                      <div className="flex justify-end gap-1">
+                        <button
+                          className="cg-icon-btn"
+                          style={{ color: '#25D366' }}
+                          onClick={() => handleResendWhatsApp(o)}
+                          title="Send to WhatsApp"
+                        >
+                          <IconChat />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -1013,47 +1021,76 @@ const NAV_ITEMS = [
   { id: 'hero', label: 'Hero Slides', icon: IconImage },
 ];
 
-function Sidebar({ activeTab, setActiveTab }) {
+function Sidebar({ activeTab, setActiveTab, mobileOpen, onClose }) {
+  /* Lock body scroll on mobile when sidebar open */
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
   return (
-    <aside style={{ width: 240, background: COLORS.surface, borderRight: `1px solid ${COLORS.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-      <div style={{ padding: '22px 20px', borderBottom: `1px solid ${COLORS.border}` }}>
-        <div className="flex items-center gap-3">
-          <LogoMark />
-          <div>
-            <div style={{ fontFamily: fontDisplay, fontWeight: 700, fontSize: 16, color: COLORS.text, lineHeight: 1.15 }}>Elite Furniture</div>
-            <div style={{ fontSize: 11, color: COLORS.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 2 }}>Admin</div>
+    <>
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="cg-sidebar-backdrop"
+          onClick={onClose}
+          aria-label="Close navigation"
+        />
+      )}
+      <aside className={`cg-sidebar${mobileOpen ? ' cg-sidebar--open' : ''}`}>
+        <div style={{ padding: '22px 20px', borderBottom: `1px solid ${COLORS.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="flex items-center gap-3">
+            <LogoMark />
+            <div>
+              <div style={{ fontFamily: fontDisplay, fontWeight: 700, fontSize: 16, color: COLORS.text, lineHeight: 1.15 }}>Elite Furniture</div>
+              <div style={{ fontSize: 11, color: COLORS.muted, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 2 }}>Admin</div>
+            </div>
           </div>
+          {/* Close button — only visible on mobile */}
+          <button className="cg-sidebar-close cg-icon-btn" onClick={onClose} aria-label="Close menu"><IconX /></button>
         </div>
-      </div>
-      <nav style={{ padding: '16px 12px', flex: 1 }}>
-        {NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          const active = activeTab === item.id;
-          return (
-            <button key={item.id} onClick={() => setActiveTab(item.id)} className="cg-nav-item"
-              style={{ position: 'relative', overflow: 'visible', display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '10px 14px', marginBottom: 4, borderRadius: 6, border: 'none', cursor: 'pointer', background: active ? COLORS.goldSoft : 'transparent', color: active ? COLORS.gold : COLORS.muted, fontSize: 14, fontWeight: active ? 600 : 400, textAlign: 'left' }}>
-              {active && <JointTab />}
-              <Icon />
-              {item.label}
-            </button>
-          );
-        })}
-      </nav>
-    </aside>
+        <nav style={{ padding: '16px 12px', flex: 1, overflowY: 'auto' }}>
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const active = activeTab === item.id;
+            return (
+              <button key={item.id} onClick={() => { setActiveTab(item.id); onClose(); }} className="cg-nav-item"
+                style={{ position: 'relative', overflow: 'visible', display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '11px 14px', marginBottom: 4, borderRadius: 6, border: 'none', cursor: 'pointer', background: active ? COLORS.goldSoft : 'transparent', color: active ? COLORS.gold : COLORS.muted, fontSize: 14, fontWeight: active ? 600 : 400, textAlign: 'left' }}>
+                {active && <JointTab />}
+                <Icon />
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
+      </aside>
+    </>
   );
 }
 
-function TopBar({ branch, setBranch, onLogout }) {
+function TopBar({ branch, setBranch, onLogout, onMenuOpen, activeTab }) {
+  const currentPage = NAV_ITEMS.find(i => i.id === activeTab)?.label || 'Dashboard';
   return (
-    <header style={{ height: 64, background: COLORS.surface, borderBottom: `1px solid ${COLORS.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', flexShrink: 0 }}>
-      <div style={{ fontSize: 13, color: COLORS.muted }}>
-        Admin <span style={{ color: COLORS.border, margin: '0 8px' }}>/</span> <span style={{ color: COLORS.text, fontWeight: 500 }}>Elite Furniture</span>
+    <header className="cg-topbar">
+      {/* Hamburger — only visible on mobile (<1024px) */}
+      <button className="cg-hamburger cg-icon-btn" onClick={onMenuOpen} aria-label="Open navigation">
+        <IconMenu />
+      </button>
+      <div className="cg-topbar-title">
+        <span style={{ color: COLORS.muted, fontSize: 13 }}>Admin</span>
+        <span style={{ color: COLORS.border, margin: '0 8px', fontSize: 13 }}>/</span>
+        <span style={{ color: COLORS.text, fontWeight: 600, fontSize: 13 }}>{currentPage}</span>
       </div>
-      <div className="flex items-center gap-3">
-        <select className="cg-input" style={{ ...inputStyle, width: 160 }} value={branch} onChange={(e) => setBranch(e.target.value)}>
+      <div className="cg-topbar-actions">
+        <select className="cg-input cg-branch-select" style={{ ...inputStyle, width: 'auto', minWidth: 110 }} value={branch} onChange={(e) => setBranch(e.target.value)}>
           {['All Branches', ...BRANCHES].map((b) => <option key={b}>{b}</option>)}
         </select>
-        <button className="cg-btn-secondary" onClick={onLogout}><IconLogout /> Logout</button>
+        <button className="cg-btn-secondary cg-logout-btn" onClick={onLogout}><IconLogout /><span className="cg-logout-label">Logout</span></button>
       </div>
     </header>
   );
@@ -1078,6 +1115,7 @@ export default function Admin() {
   const [branch, setBranch] = useState('All Branches');
   const [modal, setModal] = useState(null);
   const [uploadingSlide, setUploadingSlide] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -1162,15 +1200,12 @@ export default function Admin() {
   };
 
   const cleanProductData = (data) => {
-    // Only pass columns that exist in the products schema
     const { 
       name, category, subcategory, price, discount_price, 
       description, in_stock, featured, image, images,
       badge, rating, review_count, delivery_nairobi,
       delivery_outside, transport_method,
-      // strip these — they're stored inside delivery_outside JSON
       size: _size, piece_price: _pp, combo_items: _ci,
-      // strip any other stray fields
       id: _id, created_at: _cat,
       ...rest
     } = data;
@@ -1274,25 +1309,240 @@ export default function Admin() {
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
         * { box-sizing: border-box; }
         select { -webkit-appearance: none; appearance: none; }
-        .cg-btn-primary { background:#0A0A0A; color:#FFFFFF; font-weight:600; padding:10px 18px; border-radius:8px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-size:13px; letter-spacing:0.04em; transition:all .15s; font-family:'Inter',sans-serif; }
+
+        /* ── Buttons ── */
+        .cg-btn-primary { background:#0A0A0A; color:#FFFFFF; font-weight:600; padding:10px 18px; border-radius:8px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-size:13px; letter-spacing:0.04em; transition:all .15s; font-family:'Inter',sans-serif; white-space:nowrap; }
         .cg-btn-primary:hover { background:${COLORS.gold}; color:#0A0A0A; }
-        .cg-btn-secondary { background:transparent; color:${COLORS.text}; border:1px solid ${COLORS.border}; padding:9px 16px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-size:13px; transition: all .15s; font-family:'Inter',sans-serif; }
+        .cg-btn-secondary { background:transparent; color:${COLORS.text}; border:1px solid ${COLORS.border}; padding:9px 14px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-size:13px; transition:all .15s; font-family:'Inter',sans-serif; white-space:nowrap; }
         .cg-btn-secondary:hover { border-color:${COLORS.gold}; color:${COLORS.gold}; }
+        .cg-icon-btn { background:none; border:none; color:${COLORS.muted}; cursor:pointer; padding:6px; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .cg-icon-btn:hover { color:${COLORS.rust}; background:${COLORS.surface2}; }
+
+        /* ── Navigation ── */
         .cg-nav-item:hover { background:${COLORS.surface2} !important; color:${COLORS.text} !important; }
+
+        /* ── Inputs ── */
         .cg-input { transition: border-color .15s; }
         .cg-input:focus { border-color:${COLORS.gold} !important; }
+
+        /* ── Table ── */
         .cg-table-row:hover { background:${COLORS.surface2}; }
-        .cg-icon-btn { background:none; border:none; color:${COLORS.muted}; cursor:pointer; padding:6px; border-radius:4px; display:inline-flex; }
-        .cg-icon-btn:hover { color:${COLORS.rust}; background:${COLORS.surface2}; }
+        .cg-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .cg-list-row:last-child { border-bottom:none !important; }
-        ::-webkit-scrollbar { width:8px; height:8px; }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width:6px; height:6px; }
         ::-webkit-scrollbar-track { background:${COLORS.bg}; }
         ::-webkit-scrollbar-thumb { background:${COLORS.border}; border-radius:4px; }
+
+        /* ══════════════════════════════════════
+           SIDEBAR — off-canvas drawer on mobile
+        ══════════════════════════════════════ */
+        .cg-sidebar {
+          width: 240px;
+          background: ${COLORS.surface};
+          border-right: 1px solid ${COLORS.border};
+          display: flex;
+          flex-direction: column;
+          flex-shrink: 0;
+          transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+          z-index: 200;
+        }
+        .cg-sidebar-backdrop {
+          display: none;
+        }
+        .cg-sidebar-close {
+          display: none;
+        }
+        .cg-hamburger {
+          display: none;
+        }
+
+        /* ══════════════════════════════════════
+           TOPBAR
+        ══════════════════════════════════════ */
+        .cg-topbar {
+          height: 60px;
+          background: ${COLORS.surface};
+          border-bottom: 1px solid ${COLORS.border};
+          display: flex;
+          align-items: center;
+          padding: 0 20px;
+          gap: 12px;
+          flex-shrink: 0;
+          position: sticky;
+          top: 0;
+          z-index: 100;
+        }
+        .cg-topbar-title {
+          flex: 1;
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .cg-topbar-actions {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-shrink: 0;
+        }
+
+        /* ══════════════════════════════════════
+           MAIN CONTENT AREA
+        ══════════════════════════════════════ */
+        .cg-main {
+          flex: 1;
+          padding: 28px 32px;
+          overflow-x: hidden;
+          min-width: 0;
+        }
+
+        /* ══════════════════════════════════════
+           PAGE HEADER
+        ══════════════════════════════════════ */
+        .cg-page-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          flex-wrap: wrap;
+          gap: 12px;
+          margin-bottom: 28px;
+        }
+        .cg-page-title {
+          font-family: ${fontDisplay};
+          font-size: 28px;
+          font-weight: 600;
+          color: ${COLORS.text};
+          margin: 0;
+        }
+        .cg-page-action { flex-shrink: 0; }
+
+        /* ══════════════════════════════════════
+           GRIDS — responsive stat & 2-col
+        ══════════════════════════════════════ */
+        .cg-stat-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 16px;
+        }
+        .cg-two-col-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 24px;
+        }
+
+        /* ══════════════════════════════════════
+           FILTER BAR
+        ══════════════════════════════════════ */
+        .cg-filter-bar {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        /* ══════════════════════════════════════
+           COMBO ITEM ROW
+        ══════════════════════════════════════ */
+        .cg-combo-row {
+          display: flex;
+          gap: 8px;
+          align-items: flex-end;
+          margin-bottom: 12px;
+          flex-wrap: wrap;
+        }
+        .cg-combo-price { width: 110px; flex-shrink: 0; }
+        .cg-combo-del { margin-bottom: 2px; }
+
+        /* ══════════════════════════════════════
+           MODAL — bottom-sheet style on mobile
+        ══════════════════════════════════════ */
+        .cg-modal-card {
+          background: ${COLORS.surface};
+          border: 1px solid ${COLORS.border};
+          border-radius: 12px;
+          padding: 24px;
+          width: 100%;
+          max-width: 520px;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+          margin: 16px;
+        }
+
+        /* ══════════════════════════════════════
+           MOBILE BREAKPOINT — ≤ 1023px
+        ══════════════════════════════════════ */
+        @media (max-width: 1023px) {
+          /* Sidebar becomes a fixed drawer */
+          .cg-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            transform: translateX(-100%);
+            box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+          }
+          .cg-sidebar--open {
+            transform: translateX(0);
+          }
+          .cg-sidebar-backdrop {
+            display: block;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 199;
+            -webkit-tap-highlight-color: transparent;
+          }
+          .cg-sidebar-close {
+            display: inline-flex;
+          }
+          .cg-hamburger {
+            display: inline-flex;
+            flex-shrink: 0;
+          }
+          .cg-main { padding: 20px 16px; }
+          .cg-page-title { font-size: 22px; }
+          .cg-stat-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+          .cg-two-col-grid { grid-template-columns: 1fr; gap: 20px; }
+          .cg-logout-label { display: none; }
+          .cg-branch-select { min-width: 90px !important; font-size: 12px; }
+        }
+
+        /* ══════════════════════════════════════
+           SMALL MOBILE — ≤ 479px
+        ══════════════════════════════════════ */
+        @media (max-width: 479px) {
+          .cg-stat-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+          .cg-page-title { font-size: 20px; }
+          .cg-main { padding: 16px 12px; }
+          .cg-topbar { padding: 0 12px; height: 56px; }
+          .cg-modal-card { margin: 0; border-radius: 16px 16px 0 0; max-height: 94vh; max-width: 100%; }
+          .cg-modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+          .cg-btn-primary { padding: 9px 14px; font-size: 12px; }
+          .cg-btn-secondary { padding: 8px 10px; font-size: 12px; }
+          .cg-combo-price { width: 90px; }
+          .cg-combo-row { flex-wrap: wrap; }
+          .cg-filter-bar { flex-direction: column; }
+        }
       `}</style>
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        mobileOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <TopBar branch={branch} setBranch={setBranch} onLogout={signOut} />
-        <main style={{ flex: 1, padding: 32, overflowX: 'auto' }}>
+        <TopBar
+          branch={branch}
+          setBranch={setBranch}
+          onLogout={signOut}
+          onMenuOpen={() => setSidebarOpen(true)}
+          activeTab={activeTab}
+        />
+        <main className="cg-main">
           {activeTab === 'dashboard' && <DashboardPage products={products} sales={sales} credit={credit} expenses={expenses} />}
           {activeTab === 'orders' && <OrdersPage orders={orders} handleUpdateOrderStatus={handleUpdateOrderStatus} handleResendWhatsApp={handleResendWhatsApp} />}
           {activeTab === 'products' && <ProductsPage products={products} handleDeleteProduct={handleDeleteProduct} openModal={openModal} />}

@@ -202,9 +202,9 @@ export default function Home() {
       </section>
 
       {/* Trust Banner Below Hero */}
-      <div className="bg-white py-6 border-b border-gray-200 hidden md:block">
+      <div className="bg-white py-6 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-4 gap-4 text-center divide-x divide-gray-200">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center md:divide-x divide-gray-200">
             <div className="flex items-center justify-center space-x-3 px-2">
               <Lock strokeWidth={1.5} className="w-8 h-8 text-[#D4AF37]" />
               <div className="text-left">
@@ -267,9 +267,9 @@ export default function Home() {
       <div style={{ borderBottom: '1px solid #2A2A2A' }} />
 
       {/* Why Choose Us */}
-      <section style={{ backgroundColor: '#111111', padding: '6rem 2rem' }}>
+      <section style={{ backgroundColor: '#111111', padding: '5rem 2rem' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }} className="md:grid-cols-2 grid-cols-1">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div>
               <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '10px', letterSpacing: '0.3em', color: '#555555', textTransform: 'uppercase', marginBottom: '1rem' }}>
                 OUR STANDARDS
