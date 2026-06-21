@@ -80,8 +80,8 @@ export default function SiteFooter() {
               <a href="tel:+254141484249" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', color: '#777777', textDecoration: 'none', fontSize: '13px' }}>
                 <Phone size={14} /> 0141 484 249
               </a>
-              <a href="mailto:info@furnitureelitespace.co.ke" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', color: '#777777', textDecoration: 'none', fontSize: '13px' }}>
-                <Mail size={14} /> info@furnitureelitespace.co.ke
+              <a href="mailto:sales@furnitureelitespace.co.ke" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', color: '#777777', textDecoration: 'none', fontSize: '13px' }}>
+                <Mail size={14} /> sales@furnitureelitespace.co.ke
               </a>
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', color: '#777777', fontSize: '13px' }}>
                 <MapPin size={14} /> Nairobi, Kenya

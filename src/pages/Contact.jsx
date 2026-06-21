@@ -43,7 +43,7 @@ export default function Contact() {
       name: 'Nairobi Main Branch',
       address: 'Nairobi',
       phone: '+254 141 484 249',
-      email: 'info@furnitureelitespace.co.ke',
+      email: 'sales@furnitureelitespace.co.ke',
       hours: 'Mon-Sat: 8:00 AM - 6:00 PM',
       mapUrl: 'https://maps.google.com/maps?q=PV6W%2B4Q,Nairobi'
     },
@@ -51,7 +51,7 @@ export default function Contact() {
       name: 'Tena Estate Branch',
       address: 'Manyanja Road, Tena Estate',
       phone: '+254 141 484 249',
-      email: 'tena@furnitureelitespace.co.ke',
+      email: 'sales@furnitureelitespace.co.ke',
       hours: 'Mon-Sun: 9:00 AM - 7:00 PM',
       mapUrl: 'https://maps.google.com/?q=Manyanja+Road,Tena+Estate'
     }

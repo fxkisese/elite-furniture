@@ -15,6 +15,10 @@ CREATE TABLE IF NOT EXISTS public.products (
     in_stock BOOLEAN DEFAULT true,
     featured BOOLEAN DEFAULT false,
     image TEXT,
+    badge TEXT,
+    rating NUMERIC DEFAULT 5.0,
+    review_count INTEGER DEFAULT 0,
+    discount_price NUMERIC,
     delivery_nairobi NUMERIC DEFAULT 600,
     delivery_outside TEXT,
     transport_method TEXT
