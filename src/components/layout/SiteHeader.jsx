@@ -21,31 +21,30 @@ export default function SiteHeader() {
 
   return (
     <>
-      <header style={{
+      <header className="px-4 sm:px-6 md:px-8" style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
         height: '70px', backgroundColor: '#0A0A0A',
         borderBottom: '1px solid #1A1A1A',
-        display: 'flex', alignItems: 'center', padding: '0 2rem',
+        display: 'flex', alignItems: 'center',
         justifyContent: 'space-between',
       }}>
         {/* Logo */}
-        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <Link to="/" className="flex items-center gap-2 sm:gap-3" style={{ textDecoration: 'none' }}>
           <img 
             src="/logo.png" 
             alt="Logo" 
+            className="w-[34px] h-[34px] sm:w-[42px] sm:h-[42px]"
             style={{ 
-              width: '42px', 
-              height: '42px', 
               objectFit: 'cover', 
               borderRadius: '4px',
               border: '1px solid #D4AF37'
             }} 
           />
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-            <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '14px', letterSpacing: '0.12em', color: '#FFFFFF', textTransform: 'uppercase' }}>
+            <span className="text-[11px] sm:text-[14px]" style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, letterSpacing: '0.12em', color: '#FFFFFF', textTransform: 'uppercase' }}>
               FURNITURE <span style={{ color: '#D4AF37' }}>ELITE SPACE</span>
             </span>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 300, fontSize: '9px', letterSpacing: '0.2em', color: '#888888', textTransform: 'uppercase' }}>
+            <span className="text-[7px] sm:text-[9px]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 300, letterSpacing: '0.2em', color: '#888888', textTransform: 'uppercase', marginTop: '1px' }}>
               Elegance. Comfort. Quality.
             </span>
           </div>
@@ -128,7 +127,7 @@ export default function SiteHeader() {
         </div>
 
         {/* Mobile Menu Button & Cart */}
-        <div className="md:hidden flex items-center gap-4">
+        <div className="md:hidden flex items-center gap-3">
           <button 
             onClick={() => setIsCartOpen(true)}
             style={{ 
