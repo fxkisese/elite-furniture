@@ -179,7 +179,7 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
 
   const defaultValues = { 
     name: '', category: 'Living Room', subcategory: '', 
-    price: '', discount_price: '',
+    price: '',
     description: '', in_stock: true, featured: false, 
     image: '', badge: '', rating: 5.0, review_count: 0,
     delivery_nairobi: '600', transport_method: '', delivery_outside: '{}',
@@ -309,10 +309,9 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
           </div>
         </div>
         
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div><label style={labelStyle}>Combo/Regular Price</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.price} onChange={set('price')} placeholder="Leave blank for POA" /></div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div><label style={labelStyle}>Price (KSh)</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.price} onChange={set('price')} placeholder="Leave blank for POA" /></div>
           <div><label style={labelStyle}>Price Per Piece</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.piece_price || ''} onChange={set('piece_price')} placeholder="Optional" /></div>
-          <div><label style={labelStyle}>Discount Price</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.discount_price} onChange={set('discount_price')} placeholder="Optional" /></div>
           <div>
             <label style={labelStyle}>Status</label>
             <select style={inputStyle} className="cg-input" value={v.in_stock ? 'In Stock' : 'Out of Stock'} onChange={(e) => setValues(prev => ({ ...prev, in_stock: e.target.value === 'In Stock' }))}>
