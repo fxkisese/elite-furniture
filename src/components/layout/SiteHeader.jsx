@@ -29,7 +29,7 @@ export default function SiteHeader() {
         justifyContent: 'space-between',
       }}>
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 sm:gap-3" style={{ textDecoration: 'none' }}>
+        <Link to="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 sm:gap-3" style={{ textDecoration: 'none' }}>
           <img 
             src="/logo.png" 
             alt="Logo" 
@@ -182,7 +182,7 @@ export default function SiteHeader() {
         </button>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {NAV_LINKS.map(link => (
-            <Link key={link.to} to={link.to} style={{
+            <Link key={link.to} to={link.to} onClick={() => setMobileOpen(false)} style={{
               fontFamily: 'Space Grotesk, sans-serif', fontSize: '2.5rem', fontWeight: 700,
               letterSpacing: '-0.03em', color: location.pathname === link.to ? '#D4AF37' : '#FFFFFF',
               textDecoration: 'none', borderBottom: '1px solid #222222', paddingBottom: '1.5rem',
