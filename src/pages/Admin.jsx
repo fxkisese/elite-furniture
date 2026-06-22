@@ -7,8 +7,6 @@ import { toast } from 'sonner';
 import { sendOrderToAdminWhatsApp } from '@/utils/whatsapp';
 
 /* ---------- Constants ---------- */
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'elitespace2024';
 const CATEGORIES = ['Living Room', 'Bedroom', 'Dining', 'Office', 'Storage', 'Combo Items'];
 const SUBCATEGORIES = {
   'Living Room': ['Sofas', 'Coffee Tables', 'TV Stands'],

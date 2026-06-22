@@ -60,7 +60,7 @@ export async function generateInvoicePDF(orderData, items) {
   doc.setTextColor(100, 100, 100);
   doc.text('Nairobi, Kenya', 14, 32);
   doc.text('Tel: +254 793 816 450', 14, 38);
-  doc.text('Email: info@furnitureelitespace.com', 14, 44);
+  doc.text('Email: sales@furnitureelitespace.co.ke', 14, 44);
 
   // 2. Add Invoice Details
   doc.setFontSize(20);
@@ -177,7 +177,7 @@ export async function generateInvoicePDF(orderData, items) {
   doc.line(14, footerY, 196, footerY); // Horizontal line
   
   doc.text('Payment Instructions:', 14, footerY + 8);
-  doc.text('Pay via M-PESA Till Number: XXXXXX', 14, footerY + 14);
+  doc.text('Pay via M-PESA Paybill/Till — Call us on 0141 484 249 for details.', 14, footerY + 14);
   doc.text('Thank you for your business!', 14, footerY + 20);
 
   // 9. Save PDF

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import FeaturedCollection from '@/components/showroom-components/FeaturedCollection';
@@ -356,7 +356,7 @@ export default function Home() {
 
       {/* TikTok Section */}
       <section style={{ backgroundColor: '#0A0A0A', padding: '5rem 2rem', borderTop: '1px solid #2A2A2A' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', textAlign: 'center' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
           <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '10px', letterSpacing: '0.3em', color: '#555555', textTransform: 'uppercase', marginBottom: '1rem' }}>
             FOLLOW US
           </div>
@@ -373,6 +373,22 @@ export default function Home() {
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <TikTokEmbed />
           </div>
+          <a
+            href="https://www.tiktok.com/@elitespacefurniture"
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '8px',
+              marginTop: '2rem',
+              backgroundColor: '#D4AF37', color: '#0A0A0A',
+              padding: '12px 28px',
+              fontFamily: 'Space Grotesk, sans-serif',
+              fontSize: '11px', fontWeight: 700, letterSpacing: '0.2em',
+              textDecoration: 'none', textTransform: 'uppercase',
+            }}
+          >
+            FOLLOW US ON TIKTOK →
+          </a>
         </div>
       </section>
 
@@ -418,37 +434,28 @@ export default function Home() {
 }
 
 function TikTokEmbed() {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    // Load TikTok embed script
-    const script = document.createElement('script');
-    script.src = 'https://www.tiktok.com/embed.js';
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      // Clean up script on unmount
-      const existingScript = document.querySelector('script[src="https://www.tiktok.com/embed.js"]');
-      if (existingScript) existingScript.remove();
-    };
-  }, []);
-
   return (
-    <blockquote
-      ref={ref}
-      className="tiktok-embed"
-      cite="https://www.tiktok.com/@elitespacefurniture"
-      data-unique-id="elitespacefurniture"
-      data-embed-from="embed_page"
-      data-embed-type="creator"
-      style={{ maxWidth: '1100px', minWidth: '288px', width: '100%' }}
-    >
-      <section>
-        <a target="_blank" rel="noreferrer" href="https://www.tiktok.com/@elitespacefurniture?refer=creator_embed">
-          @elitespacefurniture
-        </a>
-      </section>
-    </blockquote>
+    <div style={{
+      width: '100%',
+      maxWidth: '1100px',
+      borderRadius: '12px',
+      overflow: 'hidden',
+      border: '1px solid #2A2A2A',
+      backgroundColor: '#111',
+    }}>
+      <iframe
+        src="https://www.tiktok.com/embed/@elitespacefurniture"
+        style={{
+          width: '100%',
+          height: '700px',
+          border: 'none',
+          display: 'block',
+        }}
+        allow="autoplay; encrypted-media"
+        allowFullScreen
+        title="Elite Space Furniture on TikTok"
+        loading="lazy"
+      />
+    </div>
   );
 }

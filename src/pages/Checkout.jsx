@@ -28,8 +28,8 @@ const PAYMENT_METHODS = [
 
 const BANK_DETAILS = {
   bank: 'Equity Bank Kenya',
-  account: '0123456789',
-  name: 'Elite Furniture Ltd',
+  account: import.meta.env.VITE_BANK_ACCOUNT || 'Contact us for account details',
+  name: 'Furniture Elite Space',
   branch: 'Nairobi CBD',
 };
 
@@ -163,7 +163,7 @@ export default function Checkout() {
 
     const intasend = new window.IntaSend({
       publicAPIKey: INTASEND_PUBLIC_KEY,
-      live: false, // Set to true in production
+      live: import.meta.env.VITE_INTASEND_LIVE === 'true', // Set VITE_INTASEND_LIVE=true in production .env
     });
 
     intasend

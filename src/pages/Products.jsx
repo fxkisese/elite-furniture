@@ -57,7 +57,21 @@ export default function Products() {
       try {
         const { data, error } = await supabase.from('products').select('*').eq('in_stock', true);
         if (!error && data && data.length > 0) {
-          setDbProducts(data);
+          // Map DB products: extract metadata images from delivery_outside so ProductCard shows them
+          const mapped = data.map(p => {
+            let meta = {};
+            try { meta = JSON.parse(p.delivery_outside || '{}').metadata || {}; } catch (e) {}
+            return {
+              ...p,
+              images: meta.images && meta.images.length > 0 ? meta.images : (p.image ? [p.image] : []),
+              price: p.discount_price || p.price,
+              originalPrice: p.discount_price ? p.price : null,
+              piece_price: meta.piece_price || p.piece_price,
+              size: meta.size || p.size,
+              combo_items: meta.combo_items || [],
+            };
+          });
+          setDbProducts(mapped);
         }
       } catch (err) {
         console.error('Failed to load products from Supabase:', err);

@@ -12,12 +12,12 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Listen for the hash fragment from the email link
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event == "PASSWORD_RECOVERY") {
-        console.log("Password recovery mode active");
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        console.log('Password recovery mode active');
       }
     });
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleUpdate = async (e) => {
