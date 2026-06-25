@@ -228,8 +228,26 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-gray-100 text-center">
-            <Link to="/" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+          <div className="mt-6 pt-5 border-t border-gray-100 text-center flex flex-col gap-3">
+            {mode === 'login' && (
+              <button
+                type="button"
+                onClick={() => setMode('register')}
+                className="text-sm font-medium text-[#C8A570] hover:text-[#B5925F] transition-colors"
+              >
+                Need an admin account? Sign up with an invite code
+              </button>
+            )}
+            {mode === 'register' && (
+              <button
+                type="button"
+                onClick={() => setMode('login')}
+                className="text-sm font-medium text-[#C8A570] hover:text-[#B5925F] transition-colors"
+              >
+                Already have an account? Sign in here
+              </button>
+            )}
+            <Link to="/" className="text-xs text-gray-400 hover:text-gray-600 transition-colors mt-2">
               ← Back to Elite Furniture website
             </Link>
           </div>
