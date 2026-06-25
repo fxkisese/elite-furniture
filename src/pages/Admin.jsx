@@ -1254,7 +1254,7 @@ export default function Admin() {
        if (dataUrl) {
          const deliveryOutside = JSON.stringify({ metadata: { images: [dataUrl] } });
          const { error } = await supabase.from('products').insert([{
-           title: 'Draft Product',
+           name: 'Draft Product',
            category: 'Uncategorized',
            price: 0,
            in_stock: true,
@@ -1263,6 +1263,10 @@ export default function Admin() {
            delivery_outside: deliveryOutside
          }]);
          if (!error) successCount++;
+         else {
+           console.error('Bulk Upload Insert Error:', error);
+           toast.error(`Upload error: ${error.message}`);
+         }
        }
     }
     setUploadingBulk(false);
