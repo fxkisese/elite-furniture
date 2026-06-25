@@ -111,9 +111,19 @@ function PageHeader({ eyebrow, title, action }) {
     </div>
   );
 }
-function StatCard({ label, value, sub, accent }) {
+function StatCard({ label, value, sub, accent, onClick }) {
   return (
-    <div style={{ ...cardStyle, padding: '18px 20px', borderTop: `2px solid ${accent}` }}>
+    <div 
+      onClick={onClick}
+      style={{ 
+        ...cardStyle, 
+        padding: '18px 20px', 
+        borderTop: `2px solid ${accent}`,
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+      }}
+      className={onClick ? 'hover:shadow-md hover:-translate-y-1' : ''}
+    >
       <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: COLORS.muted, marginBottom: 8, fontWeight: 600 }}>{label}</div>
       <div style={{ fontFamily: fontMono, fontSize: 22, fontWeight: 500, color: COLORS.text }}>{value}</div>
       {sub && <div style={{ fontSize: 12, color: COLORS.muted, marginTop: 4 }}>{sub}</div>}
@@ -443,7 +453,7 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
 function SaleForm({ onSubmit, onCancel }) {
   const [v, set] = useForm({ customer: '', item: '', branch: 'Nairobi', amount: '', payment: 'Full', method: 'M-PESA' });
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, amount: Number(v.amount) || 0, date: TODAY, id: Date.now() }); }}>
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, amount: Number(v.amount) || 0, date: TODAY }); }}>
       <div className="space-y-4">
         <div><label style={labelStyle}>Customer name</label><input style={inputStyle} className="cg-input" value={v.customer} onChange={set('customer')} required /></div>
         <div><label style={labelStyle}>Item(s) sold</label><input style={inputStyle} className="cg-input" value={v.item} onChange={set('item')} required placeholder="e.g. Glass Coffee Table" /></div>
@@ -472,7 +482,7 @@ function SaleForm({ onSubmit, onCancel }) {
 function CreditForm({ onSubmit, onCancel }) {
   const [v, set] = useForm({ customer: '', phone: '', item: '', total: '', deposit: '', dueDate: '', branch: 'Nairobi' });
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, total: Number(v.total) || 0, paid: Number(v.deposit) || 0, id: Date.now() }); }}>
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, total: Number(v.total) || 0, paid: Number(v.deposit) || 0 }); }}>
       <div className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label style={labelStyle}>Customer name</label><input style={inputStyle} className="cg-input" value={v.customer} onChange={set('customer')} required /></div>
@@ -500,7 +510,7 @@ function CreditForm({ onSubmit, onCancel }) {
 function ExpenseForm({ onSubmit, onCancel }) {
   const [v, set] = useForm({ date: TODAY, category: 'Materials', description: '', amount: '', branch: 'Nairobi' });
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, amount: Number(v.amount) || 0, id: Date.now() }); }}>
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, amount: Number(v.amount) || 0 }); }}>
       <div className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label style={labelStyle}>Date</label><input style={inputStyle} className="cg-input" type="date" value={v.date} onChange={set('date')} required /></div>
@@ -544,21 +554,72 @@ function PaymentForm({ record, onSubmit, onCancel }) {
 }
 
 /* ---------- Pages ---------- */
-function DashboardPage({ products, sales, credit, expenses }) {
-  const todaySales = sales.filter((s) => s.date === TODAY).reduce((a, s) => a + s.amount, 0);
+function DashboardPage({ products, sales, credit, expenses, setActiveTab }) {
+  const [filter, setFilter] = useState('today');
+
+  const isDateInFilter = (dateStr) => {
+    if (filter === 'all') return true;
+    const d = new Date(dateStr);
+    const today = new Date();
+    if (filter === 'today') return dateStr === TODAY;
+    if (filter === 'week') {
+      const diff = today - d;
+      return diff <= 7 * 24 * 60 * 60 * 1000;
+    }
+    if (filter === 'month') {
+      return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+    }
+    if (filter === 'year') {
+      return d.getFullYear() === today.getFullYear();
+    }
+    return true;
+  };
+
+  const filteredSales = sales.filter((s) => isDateInFilter(s.date));
+  const filteredSalesTotal = filteredSales.reduce((a, s) => a + s.amount, 0);
+
+  const filteredExpenses = expenses.filter((e) => isDateInFilter(e.date));
+  const filteredExpensesTotal = filteredExpenses.reduce((a, e) => a + e.amount, 0);
+
   const outstanding = credit.filter((c) => c.total > c.paid);
   const outstandingTotal = outstanding.reduce((a, c) => a + (c.total - c.paid), 0);
-  const monthExpenses = expenses.reduce((a, e) => a + e.amount, 0);
   const lowStock = products.filter((p) => p.in_stock === false).length;
+
+  const getFilterLabel = (baseLabel) => {
+    switch (filter) {
+      case 'today': return `Today's ${baseLabel}`;
+      case 'week': return `This week's ${baseLabel}`;
+      case 'month': return `This month's ${baseLabel}`;
+      case 'year': return `This year's ${baseLabel}`;
+      case 'all': return `All time ${baseLabel}`;
+      default: return baseLabel;
+    }
+  };
 
   return (
     <div>
-      <PageHeader eyebrow="Overview" title="Dashboard" />
+      <PageHeader 
+        eyebrow="Overview" 
+        title="Dashboard" 
+        action={
+          <select 
+            style={{ ...inputStyle, width: 140, padding: '6px 12px', fontSize: 12, height: 34 }} 
+            value={filter} 
+            onChange={e => setFilter(e.target.value)}
+          >
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+            <option value="all">All Time</option>
+          </select>
+        } 
+      />
       <div className="cg-stat-grid" style={{ marginBottom: 32 }}>
-        <StatCard label="Today's sales" value={fmt(todaySales)} accent={COLORS.green} />
-        <StatCard label="Credit outstanding" value={fmt(outstandingTotal)} sub={`${outstanding.length} account${outstanding.length === 1 ? '' : 's'}`} accent={COLORS.amber} />
-        <StatCard label="Expenses this month" value={fmt(monthExpenses)} accent={COLORS.rust} />
-        <StatCard label="Out of stock items" value={lowStock} sub="Check Products" accent={COLORS.gold} />
+        <StatCard label={getFilterLabel('sales')} value={fmt(filteredSalesTotal)} accent={COLORS.green} onClick={() => setActiveTab('sales')} />
+        <StatCard label="Credit outstanding" value={fmt(outstandingTotal)} sub={`${outstanding.length} account${outstanding.length === 1 ? '' : 's'}`} accent={COLORS.amber} onClick={() => setActiveTab('credit')} />
+        <StatCard label={getFilterLabel('expenses')} value={fmt(filteredExpensesTotal)} accent={COLORS.rust} onClick={() => setActiveTab('expenses')} />
+        <StatCard label="Out of stock items" value={lowStock} sub="Check Products" accent={COLORS.gold} onClick={() => setActiveTab('products')} />
       </div>
       <div className="cg-two-col-grid">
         <div>
@@ -1540,7 +1601,7 @@ export default function Admin() {
           activeTab={activeTab}
         />
         <main className="cg-main">
-          {activeTab === 'dashboard' && <DashboardPage products={products} sales={sales} credit={credit} expenses={expenses} />}
+          {activeTab === 'dashboard' && <DashboardPage products={products} sales={sales} credit={credit} expenses={expenses} setActiveTab={setActiveTab} />}
           {activeTab === 'orders' && <OrdersPage orders={orders} handleUpdateOrderStatus={handleUpdateOrderStatus} handleResendWhatsApp={handleResendWhatsApp} />}
           {activeTab === 'products' && <ProductsPage products={products} handleDeleteProduct={handleDeleteProduct} openModal={openModal} />}
           {activeTab === 'sales' && <SalesPage sales={sales} handleDeleteItem={handleDeleteItem} openModal={openModal} />}
