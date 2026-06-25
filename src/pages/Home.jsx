@@ -26,8 +26,15 @@ export default function Home() {
   useEffect(() => {
     async function loadData() {
       try {
-        const { data: pData } = await supabase.from('products').select('*').eq('featured', true).limit(5);
-        setProducts(pData || []);
+        const { data: pData } = await supabase.from('products').select('*').eq('featured', true).limit(12);
+        // Only keep products that have admin-uploaded images (stored in metadata)
+        const withImages = (pData || []).filter(p => {
+          try {
+            const meta = JSON.parse(p.delivery_outside || '{}').metadata || {};
+            return meta.images && meta.images.length > 0;
+          } catch (e) { return false; }
+        });
+        setProducts(withImages);
 
         const { data: hData } = await supabase.from('hero_slides').select('image').order('created_at', { ascending: false });
         if (hData && hData.length > 0) {
@@ -76,7 +83,7 @@ export default function Home() {
             />
           ))}
           {/* Dark Overlay */}
-          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(10,10,10,0.65)', zIndex: 1 }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.3) 100%)', zIndex: 1 }} />
         </div>
 
         {/* Text Content */}
@@ -88,27 +95,30 @@ export default function Home() {
           <div style={{ maxWidth: '700px' }}>
             <div style={{
               fontFamily: 'Space Grotesk, sans-serif',
-              fontSize: '11px',
+              fontSize: '13px',
+              fontWeight: 600,
               letterSpacing: '0.35em',
               textTransform: 'uppercase',
-              color: '#888888',
+              color: '#E0E0E0',
               marginBottom: '1.5rem',
               display: 'flex',
               alignItems: 'center',
               gap: '1rem',
+              textShadow: '0 2px 4px rgba(0,0,0,0.5)',
             }}>
-              <span style={{ display: 'inline-block', width: '40px', height: '1px', backgroundColor: '#555555' }} />
+              <span style={{ display: 'inline-block', width: '40px', height: '2px', backgroundColor: '#D4AF37' }} />
               NAIROBI, KENYA
             </div>
 
             <h1 style={{
               fontFamily: 'Space Grotesk, sans-serif',
               fontWeight: 700,
-              fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
-              letterSpacing: '-0.04em',
+              fontSize: 'clamp(2rem, 4vw, 3.5rem)',
+              letterSpacing: '-0.02em',
               color: '#FFFFFF',
-              lineHeight: 1.05,
-              marginBottom: '2.5rem',
+              lineHeight: 1.1,
+              marginBottom: '2rem',
+              textShadow: '0 4px 12px rgba(0,0,0,0.6)',
             }}>
               PREMIUM<br />
               <span style={{ color: '#D4AF37', fontWeight: 300 }}>FURNITURE</span><br />
@@ -116,11 +126,12 @@ export default function Home() {
             </h1>
 
             <p style={{
-              color: '#888888',
-              fontSize: '15px',
+              color: '#CCCCCC',
+              fontSize: '16px',
               lineHeight: 1.8,
               marginBottom: '3.5rem',
-              maxWidth: '460px',
+              maxWidth: '500px',
+              textShadow: '0 2px 4px rgba(0,0,0,0.5)',
             }}>
               Elegant, durable, and affordable furniture solutions crafted for homes, offices, and businesses across Kenya.
             </p>
@@ -236,6 +247,12 @@ export default function Home() {
       {/* Section Divider */}
       <div style={{ borderBottom: '2px solid #D4AF37' }} />
 
+      {/* Shop By Categories */}
+      <ShopByCategories />
+
+      {/* Section Divider */}
+      <div style={{ borderBottom: '1px solid #E5E5E5' }} />
+
       {/* Featured Products */}
       <FeaturedCollection
         products={products.map(p => {
@@ -246,7 +263,7 @@ export default function Home() {
             category: p.category,
             name: p.name,
             description: p.description,
-            images: meta.images && meta.images.length > 0 ? meta.images : (p.image ? [p.image] : []),
+            images: meta.images && meta.images.length > 0 ? meta.images : [],
             price: p.discount_price || p.price,
             originalPrice: p.discount_price ? p.price : null,
             rating: p.rating || 5.0,
@@ -459,3 +476,270 @@ function TikTokEmbed() {
     </div>
   );
 }
+
+// 8 categories shown in "Shop By Categories" — images come from admin-uploaded products
+const CATEGORY_SLUGS = [
+  { name: 'Office',       label: 'Office Furniture',  description: 'Desks, chairs & workstation sets for productivity.' },
+  { name: 'Living Room',  label: 'Living Room',        description: 'Sofas, coffee tables & accent pieces for your lounge.' },
+  { name: 'Bedroom',      label: 'Bedroom',            description: 'Beds, wardrobes & dressers for restful spaces.' },
+  { name: 'Dining Room',  label: 'Dining Room',        description: 'Dining tables & chair sets for every home.' },
+  { name: 'Storage',      label: 'Storage & Shelving', description: 'Bookshelves, cabinets & smart storage solutions.' },
+  { name: 'Combo Items',  label: 'Combo Deals',        description: 'Bundled sets at unbeatable value — buy more, save more.' },
+  { name: 'Wardrobe',     label: 'Wardrobes',          description: 'Sliding & hinged wardrobes for spacious organisation.' },
+  { name: 'Glass',        label: 'Glass Furniture',    description: 'Elegant tempered-glass tables & display pieces.' },
+];
+
+function ShopByCategories() {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('category, image, delivery_outside, in_stock')
+          .eq('in_stock', true);
+
+        if (error || !data) return;
+
+        // Build map: category -> { images: [], count }
+        const map = {};
+        for (const p of data) {
+          const cat = (p.category || '').trim();
+          if (!cat) continue;
+
+          let imgs = [];
+          try {
+            const meta = JSON.parse(p.delivery_outside || '{}').metadata || {};
+            if (meta.images && meta.images.length > 0) imgs = meta.images;
+          } catch (e) {}
+          if (imgs.length === 0 && p.image) imgs = [p.image];
+
+          if (!map[cat]) map[cat] = { images: [], count: 0 };
+          map[cat].count += 1;
+          
+          for (const img of imgs) {
+            if (img && !map[cat].images.includes(img) && map[cat].images.length < 5) {
+              map[cat].images.push(img);
+            }
+          }
+        }
+
+        // Build ordered list — CATEGORY_SLUGS order first, extras appended
+        const ordered = [];
+        for (const { name, label, description } of CATEGORY_SLUGS) {
+          const key = Object.keys(map).find(k =>
+            k.toLowerCase().includes(name.toLowerCase()) ||
+            name.toLowerCase().includes(k.toLowerCase())
+          );
+          if (key && map[key]) {
+            ordered.push({ name: label, slug: name, images: map[key].images, count: map[key].count, description });
+            delete map[key];
+          }
+        }
+        // Any extra DB categories not in our list
+        for (const [key, val] of Object.entries(map)) {
+          ordered.push({ name: key, slug: key, images: val.images, count: val.count, description: `Browse all ${key} products.` });
+        }
+
+        setCategories(ordered);
+      } catch (err) {
+        console.error('Category load error:', err);
+      }
+    }
+    loadCategories();
+  }, []);
+
+  if (categories.length === 0) return null;
+
+  return (
+    <section style={{ backgroundColor: '#FAFAFA', padding: '0 0 5rem 0' }}>
+      {/* Bold Header Banner */}
+      <div style={{
+        backgroundColor: '#0A0A0A',
+        padding: '2rem',
+        textAlign: 'center',
+        marginBottom: '3rem',
+        borderBottom: '3px solid #D4AF37',
+      }}>
+        <h2 style={{
+          fontFamily: 'Space Grotesk, sans-serif',
+          fontWeight: 800,
+          fontSize: 'clamp(1.6rem, 4vw, 2.5rem)',
+          color: '#FFFFFF',
+          letterSpacing: '-0.02em',
+          margin: 0,
+        }}>
+          SHOP BY <span style={{ color: '#D4AF37' }}>CATEGORIES</span>
+        </h2>
+        <p style={{ color: '#888', fontSize: '13px', marginTop: '0.5rem', fontFamily: 'Space Grotesk, sans-serif' }}>
+          Find exactly what you need — browse by room or furniture type
+        </p>
+      </div>
+
+      {/* Category Grid — 4 columns on desktop, 2 on mobile */}
+      <div style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '0 2rem',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '1.25rem',
+      }}
+        className="category-grid"
+      >
+        {categories.slice(0, 8).map((cat) => (
+          <CategoryTile key={cat.name} cat={cat} />
+        ))}
+      </div>
+
+      {/* Responsive override via inline style block */}
+      <style>{`
+        @media (max-width: 900px) { .category-grid { grid-template-columns: repeat(3, 1fr) !important; } }
+        @media (max-width: 600px) { .category-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+      `}</style>
+    </section>
+  );
+}
+
+function CategoryTile({ cat }) {
+  const [hovered, setHovered] = useState(false);
+  const [currentImgIdx, setCurrentImgIdx] = useState(0);
+
+  // Auto-cycle images staggered
+  useEffect(() => {
+    if (!cat.images || cat.images.length <= 1) return;
+    const randomOffset = Math.random() * 2000;
+    let timer;
+    const timeout = setTimeout(() => {
+      setCurrentImgIdx(prev => (prev + 1) % cat.images.length);
+      timer = setInterval(() => {
+        setCurrentImgIdx(prev => (prev + 1) % cat.images.length);
+      }, 3000);
+    }, randomOffset);
+
+    return () => {
+      clearTimeout(timeout);
+      if (timer) clearInterval(timer);
+    };
+  }, [cat.images]);
+
+  return (
+    <Link
+      to={`/products?category=${encodeURIComponent(cat.slug)}`}
+      style={{ textDecoration: 'none', display: 'flex' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        borderRadius: '6px',
+        overflow: 'hidden',
+        border: hovered ? '2px solid #D4AF37' : '2px solid #E5E5E5',
+        transition: 'border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease',
+        transform: hovered ? 'translateY(-5px)' : 'translateY(0)',
+        boxShadow: hovered ? '0 16px 40px rgba(0,0,0,0.14)' : '0 2px 8px rgba(0,0,0,0.06)',
+        cursor: 'pointer',
+        backgroundColor: '#FFFFFF',
+      }}>
+
+        {/* Image area */}
+        <div style={{ position: 'relative', paddingTop: '80%', overflow: 'hidden', backgroundColor: '#F8F8F8', flexShrink: 0 }}>
+          {cat.images && cat.images.length > 0 ? (
+            <img
+              src={cat.images[currentImgIdx]}
+              alt={cat.name}
+              loading="lazy"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                objectPosition: 'center',
+                padding: '8px',
+                transition: 'transform 0.4s ease',
+                transform: hovered ? 'scale(1.04)' : 'scale(1)',
+              }}
+            />
+          ) : (
+            /* Placeholder when no image uploaded yet */
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <span style={{ color: '#D4AF37', fontSize: '11px', fontFamily: 'Space Grotesk, sans-serif', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                No Image Yet
+              </span>
+            </div>
+          )}
+          {/* Product count badge */}
+          <div style={{
+            position: 'absolute', top: '8px', right: '8px',
+            backgroundColor: '#D4AF37',
+            color: '#0A0A0A',
+            fontFamily: 'Space Grotesk, sans-serif',
+            fontSize: '10px', fontWeight: 700,
+            padding: '3px 8px',
+            borderRadius: '2px',
+            letterSpacing: '0.05em',
+          }}>
+            {cat.count} {cat.count === 1 ? 'item' : 'items'}
+          </div>
+        </div>
+
+        {/* Text content */}
+        <div style={{
+          padding: '0.9rem 1rem 1rem',
+          backgroundColor: hovered ? '#0A0A0A' : '#FFFFFF',
+          transition: 'background-color 0.25s ease',
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+        }}>
+          <p style={{
+            fontFamily: 'Space Grotesk, sans-serif',
+            fontWeight: 700,
+            fontSize: '14px',
+            color: hovered ? '#FFFFFF' : '#0A0A0A',
+            margin: 0,
+            transition: 'color 0.25s ease',
+          }}>
+            {cat.name}
+          </p>
+          <p style={{
+            fontFamily: 'Space Grotesk, sans-serif',
+            fontSize: '11.5px',
+            lineHeight: 1.5,
+            color: hovered ? '#BBBBBB' : '#666666',
+            margin: 0,
+            transition: 'color 0.25s ease',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}>
+            {cat.description}
+          </p>
+          <p style={{
+            fontFamily: 'Space Grotesk, sans-serif',
+            fontSize: '11px',
+            fontWeight: 600,
+            color: hovered ? '#D4AF37' : '#D4AF37',
+            margin: '4px 0 0',
+            letterSpacing: '0.05em',
+          }}>
+            SHOP NOW →
+          </p>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+
+
