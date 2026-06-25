@@ -657,7 +657,7 @@ function DashboardPage({ products, sales, credit, expenses, setActiveTab }) {
   );
 }
 
-function ProductsPage({ products, handleDeleteProduct, openModal }) {
+function ProductsPage({ products, handleDeleteProduct, openModal, handleBulkUpload, uploadingBulk }) {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
   const categories = ['All', ...Array.from(new Set(products.map((p) => p.category)))];
@@ -667,7 +667,15 @@ function ProductsPage({ products, handleDeleteProduct, openModal }) {
   return (
     <div>
       <PageHeader eyebrow="Inventory" title="Products" action={
-        <button className="cg-btn-primary" onClick={() => openModal('product')}><IconPlus /> Add product</button>
+        <div className="flex items-center gap-3">
+          <label className="cg-btn-secondary" style={{ cursor: uploadingBulk ? 'wait' : 'pointer' }}>
+            <Upload style={{ width: 16, height: 16 }} /> {uploadingBulk ? 'Uploading...' : 'Bulk Upload Images'}
+            <input type="file" accept="image/*" multiple onChange={handleBulkUpload} style={{ display: 'none' }} disabled={uploadingBulk} />
+          </label>
+          <button className="cg-btn-primary" onClick={() => openModal('product')}>
+            <IconPlus /> Add product
+          </button>
+        </div>
       } />
       <div className="cg-filter-bar" style={{ marginBottom: 16 }}>
         <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
@@ -1173,6 +1181,7 @@ export default function Admin() {
   const [branch, setBranch] = useState('All Branches');
   const [modal, setModal] = useState(null);
   const [uploadingSlide, setUploadingSlide] = useState(false);
+  const [uploadingBulk, setUploadingBulk] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -1209,6 +1218,56 @@ export default function Admin() {
       console.error(err);
       toast.error('Failed to load data from Supabase');
     }
+  };
+
+  const handleBulkUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    toast.info(`Uploading ${files.length} images...`);
+    setUploadingBulk(true);
+
+    let successCount = 0;
+    for (const file of files) {
+       const dataUrl = await new Promise((resolve) => {
+         const reader = new FileReader();
+         reader.onload = (event) => {
+           const img = new Image();
+           img.onload = () => {
+             const canvas = document.createElement('canvas');
+             const MAX_WIDTH = 1200; 
+             const MAX_HEIGHT = 1200;
+             let width = img.width; 
+             let height = img.height;
+             if (width > height && width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+             else if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+             canvas.width = width; canvas.height = height;
+             const ctx = canvas.getContext('2d');
+             ctx.drawImage(img, 0, 0, width, height);
+             resolve(canvas.toDataURL('image/jpeg', 0.6));
+           };
+           img.onerror = () => resolve(null);
+           img.src = event.target.result;
+         };
+         reader.readAsDataURL(file);
+       });
+
+       if (dataUrl) {
+         const deliveryOutside = JSON.stringify({ metadata: { images: [dataUrl] } });
+         const { error } = await supabase.from('products').insert([{
+           title: 'Draft Product',
+           category: 'Uncategorized',
+           price: 0,
+           in_stock: true,
+           image: dataUrl,
+           featured: false,
+           delivery_outside: deliveryOutside
+         }]);
+         if (!error) successCount++;
+       }
+    }
+    setUploadingBulk(false);
+    toast.success(`Successfully uploaded ${successCount} draft products.`);
+    loadData();
   };
 
   const handleUploadSlide = async (e) => {
@@ -1603,7 +1662,7 @@ export default function Admin() {
         <main className="cg-main">
           {activeTab === 'dashboard' && <DashboardPage products={products} sales={sales} credit={credit} expenses={expenses} setActiveTab={setActiveTab} />}
           {activeTab === 'orders' && <OrdersPage orders={orders} handleUpdateOrderStatus={handleUpdateOrderStatus} handleResendWhatsApp={handleResendWhatsApp} />}
-          {activeTab === 'products' && <ProductsPage products={products} handleDeleteProduct={handleDeleteProduct} openModal={openModal} />}
+          {activeTab === 'products' && <ProductsPage products={products} handleDeleteProduct={handleDeleteProduct} openModal={openModal} handleBulkUpload={handleBulkUpload} uploadingBulk={uploadingBulk} />}
           {activeTab === 'sales' && <SalesPage sales={sales} handleDeleteItem={handleDeleteItem} openModal={openModal} />}
           {activeTab === 'credit' && <CreditPage credit={credit} handleDeleteItem={handleDeleteItem} openModal={openModal} openPayment={openPayment} />}
           {activeTab === 'expenses' && <ExpensesPage expenses={expenses} handleDeleteItem={handleDeleteItem} openModal={openModal} />}

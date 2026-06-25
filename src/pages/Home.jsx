@@ -19,6 +19,7 @@ const TRUST_POINTS = [
 
 export default function Home() {
   const [products, setProducts] = useState([]);
+  const [uncategorizedProducts, setUncategorizedProducts] = useState([]);
   const [heroSlides, setHeroSlides] = useState([]);
   const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
   const { addToCart } = useCart();
@@ -42,6 +43,15 @@ export default function Home() {
         } else {
           setHeroSlides(['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1600&q=90']);
         }
+
+        const { data: uncatData } = await supabase.from('products').select('*').eq('category', 'Uncategorized').limit(16);
+        const uncatWithImages = (uncatData || []).filter(p => {
+          try {
+            const meta = JSON.parse(p.delivery_outside || '{}').metadata || {};
+            return (meta.images && meta.images.length > 0) || p.image;
+          } catch (e) { return p.image; }
+        });
+        setUncategorizedProducts(uncatWithImages);
       } catch (err) {
         console.error(err);
       }
@@ -246,6 +256,35 @@ export default function Home() {
 
       {/* Section Divider */}
       <div style={{ borderBottom: '2px solid #D4AF37' }} />
+
+      {/* New Arrivals Showcase */}
+      {uncategorizedProducts.length > 0 && (
+        <section className="py-16 bg-white sm:py-24 border-b border-gray-100">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl" style={{ fontFamily: 'Cinzel, serif' }}>
+                New Arrivals Gallery
+              </h2>
+              <p className="mt-4 text-lg leading-8 text-gray-600">A sneak peek at our latest showroom additions.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {uncategorizedProducts.map(p => {
+                let imgUrl = p.image;
+                try {
+                  const meta = JSON.parse(p.delivery_outside || '{}').metadata || {};
+                  if (meta.images && meta.images.length > 0) imgUrl = meta.images[0];
+                } catch (e) {}
+                
+                return (
+                  <div key={p.id} className="relative group overflow-hidden rounded-lg bg-gray-100 aspect-square shadow-sm">
+                    <img src={imgUrl} alt="New Arrival" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Shop By Categories */}
       <ShopByCategories />
