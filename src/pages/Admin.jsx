@@ -556,6 +556,7 @@ function PaymentForm({ record, onSubmit, onCancel }) {
 /* ---------- Pages ---------- */
 function DashboardPage({ products, sales, credit, expenses, setActiveTab }) {
   const [filter, setFilter] = useState('today');
+  const [customDate, setCustomDate] = useState(TODAY);
 
   const isDateInFilter = (dateStr) => {
     if (filter === 'all') return true;
@@ -571,6 +572,9 @@ function DashboardPage({ products, sales, credit, expenses, setActiveTab }) {
     }
     if (filter === 'year') {
       return d.getFullYear() === today.getFullYear();
+    }
+    if (filter === 'custom') {
+      return dateStr === customDate;
     }
     return true;
   };
@@ -592,6 +596,7 @@ function DashboardPage({ products, sales, credit, expenses, setActiveTab }) {
       case 'month': return `This month's ${baseLabel}`;
       case 'year': return `This year's ${baseLabel}`;
       case 'all': return `All time ${baseLabel}`;
+      case 'custom': return `${customDate} ${baseLabel}`;
       default: return baseLabel;
     }
   };
@@ -602,17 +607,28 @@ function DashboardPage({ products, sales, credit, expenses, setActiveTab }) {
         eyebrow="Overview" 
         title="Dashboard" 
         action={
-          <select 
-            style={{ ...inputStyle, width: 140, padding: '6px 12px', fontSize: 12, height: 34 }} 
-            value={filter} 
-            onChange={e => setFilter(e.target.value)}
-          >
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="year">This Year</option>
-            <option value="all">All Time</option>
-          </select>
+          <div className="flex items-center gap-2">
+            {filter === 'custom' && (
+              <input 
+                type="date" 
+                style={{ ...inputStyle, width: 140, padding: '6px 12px', fontSize: 12, height: 34 }} 
+                value={customDate} 
+                onChange={e => setCustomDate(e.target.value)}
+              />
+            )}
+            <select 
+              style={{ ...inputStyle, width: 140, padding: '6px 12px', fontSize: 12, height: 34 }} 
+              value={filter} 
+              onChange={e => setFilter(e.target.value)}
+            >
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="year">This Year</option>
+              <option value="all">All Time</option>
+              <option value="custom">Custom Date</option>
+            </select>
+          </div>
         } 
       />
       <div className="cg-stat-grid" style={{ marginBottom: 32 }}>
