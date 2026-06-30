@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { sendOrderToAdminWhatsApp } from '@/utils/whatsapp';
+import { sendOrderToAdminWhatsApp, sendCreditReminderWhatsApp } from '@/utils/whatsapp';
 
 /* ---------- Constants ---------- */
 const CATEGORIES = ['Living Room', 'Bedroom', 'Dining', 'Office', 'Storage', 'Combo Items'];
@@ -57,6 +57,7 @@ const IconImage = (p) => <svg {...ic} {...p}><rect x="3" y="3" width="18" height
 const IconEdit = (p) => <svg {...ic} {...p}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>;
 const IconMenu = (p) => <svg {...ic} {...p}><path d="M4 6h16M4 12h16M4 18h16" /></svg>;
 const IconX = (p) => <svg {...ic} {...p}><path d="M18 6 6 18M6 6l12 12" /></svg>;
+const IconWhatsApp = (p) => <svg {...ic} {...p} viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.975-1.417A9.953 9.953 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.946 7.946 0 0 1-4.073-1.117l-.292-.173-3.03.863.877-3.04-.19-.312A7.944 7.944 0 0 1 4 12c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8z"/></svg>;
 
 /* Signature joint/tenon mark — used for active nav state */
 function JointTab() {
@@ -850,7 +851,7 @@ function SalesPage({ sales, handleDeleteItem, openModal }) {
   );
 }
 
-function CreditPage({ credit, handleDeleteItem, openModal, openPayment }) {
+function CreditPage({ credit, handleDeleteItem, openModal, openPayment, onSendReminder }) {
   return (
     <div>
       <PageHeader eyebrow="Accounts receivable" title="Credit Book" action={
@@ -884,6 +885,17 @@ function CreditPage({ credit, handleDeleteItem, openModal, openPayment }) {
                     <td style={tdStyle}><Badge color={statusColor}>{status}</Badge></td>
                     <td style={{ ...tdStyle, textAlign: 'right' }}>
                       <div className="flex justify-end gap-1">
+                        {balance > 0 && (
+                          <button
+                            className="cg-icon-btn"
+                            style={{ color: '#25D366' }}
+                            onClick={() => onSendReminder(c)}
+                            aria-label="Send WhatsApp payment reminder"
+                            title="Send payment reminder via WhatsApp"
+                          >
+                            <IconWhatsApp />
+                          </button>
+                        )}
                         {balance > 0 && <button className="cg-icon-btn" style={{ color: COLORS.gold }} onClick={() => openPayment(c.id)} aria-label="Record payment"><IconBanknote /></button>}
                         <button className="cg-icon-btn" onClick={() => handleDeleteItem('credit', c.id)} aria-label="Delete"><IconTrash /></button>
                       </div>
@@ -1684,7 +1696,7 @@ export default function Admin() {
           {activeTab === 'orders' && <OrdersPage orders={orders} handleUpdateOrderStatus={handleUpdateOrderStatus} handleResendWhatsApp={handleResendWhatsApp} />}
           {activeTab === 'products' && <ProductsPage products={products} handleDeleteProduct={handleDeleteProduct} openModal={openModal} handleBulkUpload={handleBulkUpload} uploadingBulk={uploadingBulk} />}
           {activeTab === 'sales' && <SalesPage sales={sales} handleDeleteItem={handleDeleteItem} openModal={openModal} />}
-          {activeTab === 'credit' && <CreditPage credit={credit} handleDeleteItem={handleDeleteItem} openModal={openModal} openPayment={openPayment} />}
+          {activeTab === 'credit' && <CreditPage credit={credit} handleDeleteItem={handleDeleteItem} openModal={openModal} openPayment={openPayment} onSendReminder={(record) => { sendCreditReminderWhatsApp(record); toast.success(`Reminder sent to ${record.customer}`); }} />}
           {activeTab === 'expenses' && <ExpensesPage expenses={expenses} handleDeleteItem={handleDeleteItem} openModal={openModal} />}
           {activeTab === 'reports' && <ReportsPage sales={sales} credit={credit} expenses={expenses} />}
           {activeTab === 'messages' && <MessagesPage messages={messages} />}

@@ -74,6 +74,65 @@ export function formatCartForWhatsApp(cartItems, cartTotal) {
 }
 
 /**
+ * Format a credit record into a detailed WhatsApp payment reminder receipt
+ * for the admin to send to the customer.
+ */
+export function formatCreditReceiptForWhatsApp(record) {
+  const balance = (record.total || 0) - (record.paid || 0);
+  const isOverdue = record.dueDate && record.dueDate < new Date().toISOString().split('T')[0];
+
+  let msg = `🛋️ *ELITE FURNITURE — PAYMENT REMINDER*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+  msg += `Dear *${record.customer}*,\n\n`;
+  msg += `We hope you are enjoying your furniture! This is a friendly reminder regarding your outstanding balance with *Elite Furniture — ${record.branch || 'Nairobi'}* branch.\n\n`;
+
+  msg += `📋 *RECEIPT DETAILS*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `📦 Item(s): ${record.item}\n`;
+  msg += `💰 Total Amount: *${formatPrice(record.total)}*\n`;
+  msg += `✅ Amount Paid: ${formatPrice(record.paid)}\n`;
+  msg += `⚠️ Outstanding Balance: *${formatPrice(balance)}*\n`;
+  msg += `📅 Payment Due: *${record.dueDate || 'As agreed'}*\n`;
+  if (record.branch) msg += `🏪 Branch: ${record.branch}\n`;
+  msg += `\n`;
+
+  if (isOverdue) {
+    msg += `🔴 *OVERDUE NOTICE*\n`;
+    msg += `Your payment was due on ${record.dueDate}. Please settle the outstanding balance of *${formatPrice(balance)}* as soon as possible to avoid further inconvenience.\n\n`;
+  } else {
+    msg += `We kindly request you to settle the outstanding balance of *${formatPrice(balance)}* by *${record.dueDate || 'the agreed date'}*.\n\n`;
+  }
+
+  msg += `💳 *HOW TO PAY*\n`;
+  msg += `• M-PESA: Send to our till/number and quote your name\n`;
+  msg += `• Cash: Visit any Elite Furniture branch\n\n`;
+
+  msg += `Thank you for your business and continued trust in Elite Furniture. We look forward to serving you again!\n\n`;
+  msg += `📞 For queries, reply to this message.\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `_Elite Furniture — Quality You Can Sit On_ 🛋️`;
+
+  return msg;
+}
+
+/**
+ * Open WhatsApp with a credit payment reminder sent directly to the customer's phone
+ */
+export function sendCreditReminderWhatsApp(record) {
+  // Normalise Kenyan phone numbers: strip spaces/dashes, convert 07xx → 2547xx
+  let phone = (record.phone || '').replace(/[\s\-()]/g, '');
+  if (phone.startsWith('0')) phone = '254' + phone.slice(1);
+  if (!phone.startsWith('+')) phone = phone.replace(/^\+/, '');
+
+  const message = formatCreditReceiptForWhatsApp(record);
+  const encoded = encodeURIComponent(message);
+  const url = `https://wa.me/${phone}?text=${encoded}`;
+  window.open(url, '_blank');
+  return true;
+}
+
+/**
  * Generate a unique order number
  */
 export function generateOrderNumber() {
