@@ -1403,9 +1403,16 @@ export default function Admin() {
   };
 
   const handleAddCredit = async (data) => {
-    const { error } = await supabase.from('credit').insert([data]);
-    if (error) toast.error('Error adding credit');
-    else { toast.success('Credit added'); loadData(); }
+    // Strip the 'deposit' field — it's a form-only alias for 'paid' and is not a DB column
+    const { deposit: _dep, ...insertData } = data;
+    const { error } = await supabase.from('credit').insert([insertData]);
+    if (error) {
+      console.error('Credit insert error:', error);
+      toast.error(`Error adding credit: ${error.message}`);
+    } else {
+      toast.success('Credit added');
+      loadData();
+    }
   };
 
   const handleAddExpense = async (data) => {
