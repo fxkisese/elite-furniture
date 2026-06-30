@@ -79,7 +79,8 @@ export function formatCartForWhatsApp(cartItems, cartTotal) {
  */
 export function formatCreditReceiptForWhatsApp(record) {
   const balance = (record.total || 0) - (record.paid || 0);
-  const isOverdue = record.dueDate && record.dueDate < new Date().toISOString().split('T')[0];
+  const dueDate = record.due_date || record.dueDate;
+  const isOverdue = dueDate && dueDate < new Date().toISOString().split('T')[0];
 
   let msg = `🛋️ *ELITE FURNITURE — PAYMENT REMINDER*\n`;
   msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
@@ -93,15 +94,15 @@ export function formatCreditReceiptForWhatsApp(record) {
   msg += `💰 Total Amount: *${formatPrice(record.total)}*\n`;
   msg += `✅ Amount Paid: ${formatPrice(record.paid)}\n`;
   msg += `⚠️ Outstanding Balance: *${formatPrice(balance)}*\n`;
-  msg += `📅 Payment Due: *${record.dueDate || 'As agreed'}*\n`;
+  msg += `📅 Payment Due: *${dueDate || 'As agreed'}*\n`;
   if (record.branch) msg += `🏪 Branch: ${record.branch}\n`;
   msg += `\n`;
 
   if (isOverdue) {
     msg += `🔴 *OVERDUE NOTICE*\n`;
-    msg += `Your payment was due on ${record.dueDate}. Please settle the outstanding balance of *${formatPrice(balance)}* as soon as possible to avoid further inconvenience.\n\n`;
+    msg += `Your payment was due on ${dueDate}. Please settle the outstanding balance of *${formatPrice(balance)}* as soon as possible to avoid further inconvenience.\n\n`;
   } else {
-    msg += `We kindly request you to settle the outstanding balance of *${formatPrice(balance)}* by *${record.dueDate || 'the agreed date'}*.\n\n`;
+    msg += `We kindly request you to settle the outstanding balance of *${formatPrice(balance)}* by *${dueDate || 'the agreed date'}*.\n\n`;
   }
 
   msg += `💳 *HOW TO PAY*\n`;

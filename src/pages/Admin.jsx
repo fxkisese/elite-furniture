@@ -481,9 +481,9 @@ function SaleForm({ onSubmit, onCancel }) {
   );
 }
 function CreditForm({ onSubmit, onCancel }) {
-  const [v, set] = useForm({ customer: '', phone: '', item: '', total: '', deposit: '', dueDate: '', branch: 'Nairobi' });
+  const [v, set] = useForm({ customer: '', phone: '', item: '', total: '', deposit: '', due_date: '', branch: 'Nairobi' });
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, total: Number(v.total) || 0, paid: Number(v.deposit) || 0 }); }}>
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit({ customer: v.customer, phone: v.phone, item: v.item, total: Number(v.total) || 0, paid: Number(v.deposit) || 0, due_date: v.due_date, branch: v.branch }); }}>
       <div className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label style={labelStyle}>Customer name</label><input style={inputStyle} className="cg-input" value={v.customer} onChange={set('customer')} required /></div>
@@ -495,7 +495,7 @@ function CreditForm({ onSubmit, onCancel }) {
           <div><label style={labelStyle}>Deposit paid (KSh)</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.deposit} onChange={set('deposit')} /></div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div><label style={labelStyle}>Balance due date</label><input style={inputStyle} className="cg-input" type="date" value={v.dueDate} onChange={set('dueDate')} required /></div>
+          <div><label style={labelStyle}>Balance due date</label><input style={inputStyle} className="cg-input" type="date" value={v.due_date} onChange={set('due_date')} required /></div>
           <div><label style={labelStyle}>Branch</label>
             <select style={inputStyle} className="cg-input" value={v.branch} onChange={set('branch')}>{BRANCHES.map((b) => <option key={b}>{b}</option>)}</select>
           </div>
@@ -662,7 +662,7 @@ function DashboardPage({ products, sales, credit, expenses, setActiveTab }) {
               <div key={c.id} className="flex justify-between items-center cg-list-row" style={rowItemStyle}>
                 <div>
                   <div style={{ fontWeight: 500 }}>{c.customer}</div>
-                  <div style={{ fontSize: 12, color: COLORS.muted }}>Due {c.dueDate} · {c.branch}</div>
+                  <div style={{ fontSize: 12, color: COLORS.muted }}>Due {c.due_date || c.dueDate} · {c.branch}</div>
                 </div>
                 <div style={{ fontFamily: fontMono, fontWeight: 500, color: COLORS.amber }}>{fmt(c.total - c.paid)}</div>
               </div>
@@ -869,7 +869,7 @@ function CreditPage({ credit, handleDeleteItem, openModal, openPayment, onSendRe
             <tbody>
               {credit.slice().reverse().map((c) => {
                 const balance = c.total - c.paid;
-                const overdue = balance > 0 && c.dueDate < TODAY;
+                const overdue = balance > 0 && (c.due_date || c.dueDate) < TODAY;
                 const status = balance <= 0 ? 'Settled' : overdue ? 'Overdue' : 'Current';
                 const statusColor = balance <= 0 ? COLORS.green : overdue ? COLORS.rust : COLORS.amber;
                 return (
@@ -880,7 +880,7 @@ function CreditPage({ credit, handleDeleteItem, openModal, openPayment, onSendRe
                     <td style={{ ...tdStyle, fontFamily: fontMono, whiteSpace: 'nowrap' }}>{fmt(c.total)}</td>
                     <td style={{ ...tdStyle, fontFamily: fontMono, whiteSpace: 'nowrap' }}>{fmt(c.paid)}</td>
                     <td style={{ ...tdStyle, fontFamily: fontMono, color: balance > 0 ? COLORS.amber : COLORS.muted, whiteSpace: 'nowrap' }}>{fmt(balance)}</td>
-                    <td style={{ ...tdStyle, fontFamily: fontMono, color: COLORS.muted, whiteSpace: 'nowrap' }}>{c.dueDate}</td>
+                    <td style={{ ...tdStyle, fontFamily: fontMono, color: COLORS.muted, whiteSpace: 'nowrap' }}>{c.due_date || c.dueDate}</td>
                     <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{c.branch}</td>
                     <td style={tdStyle}><Badge color={statusColor}>{status}</Badge></td>
                     <td style={{ ...tdStyle, textAlign: 'right' }}>
@@ -1403,11 +1403,11 @@ export default function Admin() {
   };
 
   const handleAddCredit = async (data) => {
-    // Strip the 'deposit' field — it's a form-only alias for 'paid' and is not a DB column
-    const { deposit: _dep, ...insertData } = data;
-    const { error } = await supabase.from('credit').insert([insertData]);
+    // data is already clean: { customer, phone, item, total, paid, due_date, branch }
+    console.log('📋 Inserting credit record:', data);
+    const { data: inserted, error } = await supabase.from('credit').insert([data]).select();
+    console.log('📋 Insert result — data:', inserted, '| error:', error);
     if (error) {
-      console.error('Credit insert error:', error);
       toast.error(`Error adding credit: ${error.message}`);
     } else {
       toast.success('Credit added');
