@@ -195,6 +195,57 @@ export function sendNewCreditReceiptWhatsApp(record, existingWindow) {
 }
 
 /**
+ * Format a completed sale into a WhatsApp receipt for the customer.
+ */
+export function formatSaleReceiptForWhatsApp(record) {
+  let msg = `🛋️ *ELITE FURNITURE — SALE RECEIPT*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+  msg += `Dear *${record.customer}*,\n\n`;
+  msg += `Thank you for your purchase at *Elite Furniture — ${record.branch || 'Nairobi'}* branch! Here is your receipt.\n\n`;
+
+  msg += `🧾 *RECEIPT DETAILS*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `📦 Item(s): ${record.item}\n`;
+  msg += `💰 Amount Paid: *${formatPrice(record.amount)}*\n`;
+  msg += `💳 Payment Type: ${record.payment}\n`;
+  msg += `🏦 Method: ${record.method}\n`;
+  msg += `📅 Date: ${record.date}\n`;
+  if (record.branch) msg += `🏪 Branch: ${record.branch}\n`;
+  msg += `\n`;
+
+  msg += `Please keep this message as your proof of purchase.\n\n`;
+  msg += `We look forward to serving you again! 🙏\n`;
+  msg += `📞 For queries, reply to this message.\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `_Elite Furniture — Quality You Can Sit On_ 🛋️`;
+
+  return msg;
+}
+
+/**
+ * Open WhatsApp with a sale receipt sent to the customer's phone.
+ * Pass `existingWindow` (opened synchronously before the await) to bypass popup blockers.
+ */
+export function sendSaleReceiptWhatsApp(record, existingWindow) {
+  // Normalise Kenyan phone numbers: strip spaces/dashes, convert 07xx → 2547xx
+  let phone = (record.phone || '').replace(/[\s\-()]/g, '');
+  if (phone.startsWith('0')) phone = '254' + phone.slice(1);
+  if (!phone.startsWith('+')) phone = phone.replace(/^\+/, '');
+
+  const message = formatSaleReceiptForWhatsApp(record);
+  const encoded = encodeURIComponent(message);
+  const url = `https://wa.me/${phone}?text=${encoded}`;
+
+  if (existingWindow && !existingWindow.closed) {
+    existingWindow.location.href = url;
+  } else {
+    window.open(url, '_blank');
+  }
+  return true;
+}
+
+/**
  * Generate a unique order number
  */
 export function generateOrderNumber() {

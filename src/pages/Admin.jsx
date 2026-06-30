@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { sendOrderToAdminWhatsApp, sendCreditReminderWhatsApp, sendNewCreditReceiptWhatsApp } from '@/utils/whatsapp';
+import { sendOrderToAdminWhatsApp, sendCreditReminderWhatsApp, sendNewCreditReceiptWhatsApp, sendSaleReceiptWhatsApp } from '@/utils/whatsapp';
 
 /* ---------- Constants ---------- */
 const CATEGORIES = ['Living Room', 'Bedroom', 'Dining', 'Office', 'Storage', 'Combo Items'];
@@ -452,11 +452,14 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
 }
 
 function SaleForm({ onSubmit, onCancel }) {
-  const [v, set] = useForm({ customer: '', item: '', branch: 'Nairobi', amount: '', payment: 'Full', method: 'M-PESA' });
+  const [v, set, setValues] = useForm({ customer: '', phone: '', item: '', branch: 'Nairobi', amount: '', payment: 'Full', method: 'M-PESA', sendReceipt: false });
   return (
     <form onSubmit={(e) => { e.preventDefault(); onSubmit({ ...v, amount: Number(v.amount) || 0, date: TODAY }); }}>
       <div className="space-y-4">
-        <div><label style={labelStyle}>Customer name</label><input style={inputStyle} className="cg-input" value={v.customer} onChange={set('customer')} required /></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div><label style={labelStyle}>Customer name</label><input style={inputStyle} className="cg-input" value={v.customer} onChange={set('customer')} required /></div>
+          <div><label style={labelStyle}>Phone (for receipt)</label><input style={inputStyle} className="cg-input" value={v.phone} onChange={set('phone')} placeholder="07xx xxx xxx" /></div>
+        </div>
         <div><label style={labelStyle}>Item(s) sold</label><input style={inputStyle} className="cg-input" value={v.item} onChange={set('item')} required placeholder="e.g. Glass Coffee Table" /></div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label style={labelStyle}>Amount (KSh)</label><input style={inputStyle} className="cg-input" type="number" min="0" value={v.amount} onChange={set('amount')} required /></div>
@@ -472,6 +475,14 @@ function SaleForm({ onSubmit, onCancel }) {
             <select style={inputStyle} className="cg-input" value={v.method} onChange={set('method')}><option>M-PESA</option><option>Cash</option><option>Bank Transfer</option></select>
           </div>
         </div>
+        {/* Optional WhatsApp receipt toggle */}
+        <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 8, border: `1px solid ${v.sendReceipt ? '#25D366' : COLORS.border}`, background: v.sendReceipt ? '#f0fdf4' : COLORS.surface, cursor: 'pointer', transition: 'all 0.2s' }}>
+          <input type="checkbox" checked={v.sendReceipt} onChange={set('sendReceipt')} style={{ accentColor: '#25D366', width: 16, height: 16 }} />
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: v.sendReceipt ? '#16a34a' : COLORS.muted, fontWeight: 500 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill={v.sendReceipt ? '#25D366' : COLORS.muted} stroke="none"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.975-1.417A9.953 9.953 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.946 7.946 0 0 1-4.073-1.117l-.292-.173-3.03.863.877-3.04-.19-.312A7.944 7.944 0 0 1 4 12c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8z"/></svg>
+            Send WhatsApp receipt to customer
+          </span>
+        </label>
       </div>
       <div className="flex justify-end gap-3" style={{ marginTop: 24 }}>
         <button type="button" className="cg-btn-secondary" onClick={onCancel}>Cancel</button>
@@ -1396,10 +1407,21 @@ export default function Admin() {
     else { toast.success('Product deleted'); loadData(); }
   };
 
-  const handleRecordSale = async (data) => {
-    const { error } = await supabase.from('sales').insert([data]);
-    if (error) toast.error('Error recording sale');
-    else { toast.success('Sale recorded'); loadData(); }
+  const handleRecordSale = async (data, waTab) => {
+    const { sendReceipt, phone, ...insertData } = data;
+    const { error } = await supabase.from('sales').insert([insertData]);
+    if (error) {
+      if (waTab && !waTab.closed) waTab.close();
+      toast.error(`Error recording sale: ${error.message}`);
+    } else {
+      toast.success(sendReceipt && phone ? 'Sale recorded — sending receipt...' : 'Sale recorded');
+      loadData();
+      if (sendReceipt && phone && waTab) {
+        sendSaleReceiptWhatsApp({ ...data, date: insertData.date }, waTab);
+      } else if (waTab && !waTab.closed) {
+        waTab.close();
+      }
+    }
   };
 
   const handleAddCredit = async (data) => {
@@ -1724,7 +1746,11 @@ export default function Admin() {
 
       {modal === 'product' && <Modal title="Add product" onClose={closeModal}><ProductForm onSubmit={(p) => { handleCreateProduct(p); closeModal(); }} onCancel={closeModal} /></Modal>}
       {modal?.type === 'edit_product' && <Modal title="Edit product" onClose={closeModal}><ProductForm initialData={modal.product} onSubmit={(p) => { handleUpdateProduct(modal.product.id, p); closeModal(); }} onCancel={closeModal} /></Modal>}
-      {modal === 'sale' && <Modal title="Record sale" onClose={closeModal}><SaleForm onSubmit={(s) => { handleRecordSale(s); closeModal(); }} onCancel={closeModal} /></Modal>}
+      {modal === 'sale' && <Modal title="Record sale" onClose={closeModal}><SaleForm onSubmit={(s) => {
+        const waTab = s.sendReceipt && s.phone ? window.open('', '_blank') : null;
+        handleRecordSale(s, waTab);
+        closeModal();
+      }} onCancel={closeModal} /></Modal>}
       {modal === 'credit' && <Modal title="Add credit sale" onClose={closeModal}><CreditForm onSubmit={(c) => { handleAddCredit(c); closeModal(); }} onCancel={closeModal} /></Modal>}
       {modal === 'expense' && <Modal title="Add expense" onClose={closeModal}><ExpenseForm onSubmit={(e) => { handleAddExpense(e); closeModal(); }} onCancel={closeModal} /></Modal>}
       {modal && modal.type === 'payment' && (
