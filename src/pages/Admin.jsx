@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { sendOrderToAdminWhatsApp, sendCreditReminderWhatsApp } from '@/utils/whatsapp';
+import { sendOrderToAdminWhatsApp, sendCreditReminderWhatsApp, sendNewCreditReceiptWhatsApp } from '@/utils/whatsapp';
 
 /* ---------- Constants ---------- */
 const CATEGORIES = ['Living Room', 'Bedroom', 'Dining', 'Office', 'Storage', 'Combo Items'];
@@ -1403,17 +1403,27 @@ export default function Admin() {
   };
 
   const handleAddCredit = async (data) => {
+    // Open a blank tab synchronously (before the await) so popup blockers don't kill it
+    const waTab = window.open('', '_blank');
+
     // data is already clean: { customer, phone, item, total, paid, due_date, branch }
     console.log('📋 Inserting credit record:', data);
     const { data: inserted, error } = await supabase.from('credit').insert([data]).select();
     console.log('📋 Insert result — data:', inserted, '| error:', error);
+
     if (error) {
+      // Insert failed — close the blank tab we opened
+      if (waTab && !waTab.closed) waTab.close();
       toast.error(`Error adding credit: ${error.message}`);
     } else {
-      toast.success('Credit added');
+      toast.success('Credit sale saved — sending receipt to customer...');
       loadData();
+      // Redirect the pre-opened tab to the customer's WhatsApp receipt
+      const saved = inserted?.[0] || data;
+      sendNewCreditReceiptWhatsApp(saved, waTab);
     }
   };
+
 
   const handleAddExpense = async (data) => {
     const { error } = await supabase.from('expenses').insert([data]);

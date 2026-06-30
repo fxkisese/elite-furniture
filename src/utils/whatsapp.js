@@ -134,6 +134,67 @@ export function sendCreditReminderWhatsApp(record) {
 }
 
 /**
+ * Format a brand-new credit sale into a WhatsApp receipt message for the customer.
+ * Sent the moment a credit sale is recorded (distinct from the later payment reminder).
+ */
+export function formatNewCreditReceiptForWhatsApp(record) {
+  const balance = (record.total || 0) - (record.paid || 0);
+  const dueDate = record.due_date || record.dueDate;
+
+  let msg = `🛋️ *ELITE FURNITURE — CREDIT SALE RECEIPT*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+  msg += `Dear *${record.customer}*,\n\n`;
+  msg += `Thank you for your purchase! This confirms your credit sale with *Elite Furniture — ${record.branch || 'Nairobi'}* branch.\n\n`;
+
+  msg += `📋 *RECEIPT DETAILS*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `📦 Item(s): ${record.item}\n`;
+  msg += `💰 Total Amount: *${formatPrice(record.total)}*\n`;
+  msg += `✅ Deposit Paid: ${formatPrice(record.paid)}\n`;
+  msg += `⚠️ Balance Remaining: *${formatPrice(balance)}*\n`;
+  msg += `📅 Balance Due: *${dueDate || 'As agreed'}*\n`;
+  if (record.branch) msg += `🏪 Branch: ${record.branch}\n`;
+  msg += `\n`;
+
+  msg += `💳 *HOW TO CLEAR YOUR BALANCE*\n`;
+  msg += `• M-PESA: Send to our till/number and quote your name\n`;
+  msg += `• Cash: Visit any Elite Furniture branch\n\n`;
+
+  msg += `Please keep this message as your receipt. Thank you for choosing Elite Furniture!\n\n`;
+  msg += `📞 For queries, reply to this message.\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `_Elite Furniture — Quality You Can Sit On_ 🛋️`;
+
+  return msg;
+}
+
+/**
+ * Open WhatsApp with a brand-new credit-sale receipt sent directly to the customer's phone.
+ * Call this right after a credit record is successfully saved.
+ *
+ * Pass `existingWindow` (a tab opened synchronously via window.open('', '_blank')
+ * at click-time) so the redirect survives popup blockers even after an `await`.
+ */
+export function sendNewCreditReceiptWhatsApp(record, existingWindow) {
+  // Normalise Kenyan phone numbers: strip spaces/dashes, convert 07xx → 2547xx
+  let phone = (record.phone || '').replace(/[\s\-()]/g, '');
+  if (phone.startsWith('0')) phone = '254' + phone.slice(1);
+  if (!phone.startsWith('+')) phone = phone.replace(/^\+/, '');
+
+  const message = formatNewCreditReceiptForWhatsApp(record);
+  const encoded = encodeURIComponent(message);
+  const url = `https://wa.me/${phone}?text=${encoded}`;
+
+  if (existingWindow && !existingWindow.closed) {
+    existingWindow.location.href = url;
+  } else {
+    window.open(url, '_blank');
+  }
+  return true;
+}
+
+/**
  * Generate a unique order number
  */
 export function generateOrderNumber() {
