@@ -86,7 +86,7 @@ export default function Contact() {
                     </div>
                     <div className="flex items-center">
                       <Phone className="w-5 h-5 mr-4 text-primary shrink-0" />
-                      <a href={`tel:${branch.phone.replace(/\\s/g, '')}`} className="hover:text-primary transition-colors">{branch.phone}</a>
+                      <a href={`tel:${branch.phone.replace(/\s/g, '')}`} className="hover:text-primary transition-colors">{branch.phone}</a>
                     </div>
                     <div className="flex items-center">
                       <Mail className="w-5 h-5 mr-4 text-primary shrink-0" />

@@ -93,7 +93,7 @@ const testimonials = [
     name: 'James Mutua',
     location: 'Machakos',
     rating: 5,
-    text: 'Craftsman Galore delivered exactly what I envisioned. The quality of the wardrobe is exceptional — solid build, smooth finish. Would recommend to anyone.',
+    text: 'Elite Furniture delivered exactly what I envisioned. The quality of the wardrobe is exceptional — solid build, smooth finish. Would recommend to anyone.',
     avatar: 'JM',
   },
   {
@@ -248,7 +248,7 @@ export default function About() {
         <div className="text-center mb-20">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">Our Story</h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            At Craftsman Galore, we believe furniture should do more than fill a room — it should make a house feel like home. From custom designs to everyday essentials, we create pieces that combine comfort, style, and lasting quality. Every item is carefully crafted with attention to detail and built to fit your space and lifestyle.
+            At Elite Furniture, we believe furniture should do more than fill a room — it should make a house feel like home. From custom designs to everyday essentials, we create pieces that combine comfort, style, and lasting quality. Every item is carefully crafted with attention to detail and built to fit your space and lifestyle.
           </p>
         </div>
 

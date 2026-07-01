@@ -124,7 +124,7 @@ export function sendCreditReminderWhatsApp(record) {
   // Normalise Kenyan phone numbers: strip spaces/dashes, convert 07xx → 2547xx
   let phone = (record.phone || '').replace(/[\s\-()]/g, '');
   if (phone.startsWith('0')) phone = '254' + phone.slice(1);
-  if (!phone.startsWith('+')) phone = phone.replace(/^\+/, '');
+  if (phone.startsWith('+')) phone = phone.replace(/^\+/, '');
 
   const message = formatCreditReceiptForWhatsApp(record);
   const encoded = encodeURIComponent(message);
@@ -180,7 +180,7 @@ export function sendNewCreditReceiptWhatsApp(record, existingWindow) {
   // Normalise Kenyan phone numbers: strip spaces/dashes, convert 07xx → 2547xx
   let phone = (record.phone || '').replace(/[\s\-()]/g, '');
   if (phone.startsWith('0')) phone = '254' + phone.slice(1);
-  if (!phone.startsWith('+')) phone = phone.replace(/^\+/, '');
+  if (phone.startsWith('+')) phone = phone.replace(/^\+/, '');
 
   const message = formatNewCreditReceiptForWhatsApp(record);
   const encoded = encodeURIComponent(message);
@@ -231,7 +231,7 @@ export function sendSaleReceiptWhatsApp(record, existingWindow) {
   // Normalise Kenyan phone numbers: strip spaces/dashes, convert 07xx → 2547xx
   let phone = (record.phone || '').replace(/[\s\-()]/g, '');
   if (phone.startsWith('0')) phone = '254' + phone.slice(1);
-  if (!phone.startsWith('+')) phone = phone.replace(/^\+/, '');
+  if (phone.startsWith('+')) phone = phone.replace(/^\+/, '');
 
   const message = formatSaleReceiptForWhatsApp(record);
   const encoded = encodeURIComponent(message);

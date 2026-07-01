@@ -153,7 +153,7 @@ export default function CustomOrders() {
 
     const itemsSummary = quoteItems.map((it, idx) => {
       const priceStr = it.source === 'custom' ? 'Price TBD' : `${formatPrice(it.price_per_item)} each = ${formatPrice(it.total)}`;
-      return `${idx + 1}. ${it.name} x${it.quantity}${it.dimensions ? ` (${it.dimensions})` : ''} \u2014 ${priceStr}${it.description ? `\n   Description: ${it.description}` : ''}`;
+      return `${idx + 1}. ${it.name} x${it.quantity}${it.dimensions ? ` (${it.dimensions})` : ''} — ${priceStr}${it.description ? `\n   Description: ${it.description}` : ''}`;
     }).join('\n');
 
     // Build the furniture_type field from item names
@@ -216,7 +216,7 @@ export default function CustomOrders() {
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Quote Request Received!</h1>
           <p className="text-xl text-muted-foreground mb-10">
-            Thank you for trusting Craftsman Galore with your order. Our team is reviewing your quote and will get back to you within 24 hours to confirm pricing and next steps.
+            Thank you for trusting Elite Furniture with your order. Our team is reviewing your quote and will get back to you within 24 hours to confirm pricing and next steps.
           </p>
           <button onClick={() => { setSuccess(false); setItems([emptyItem()]); setTimeline(''); }} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8">Build Another Quote</button>
         </div>
@@ -230,7 +230,7 @@ export default function CustomOrders() {
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-4 text-gray-900">Build Your Quote</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Add items from our catalogue or describe a custom piece \u2014 set quantities, dimensions and pricing, and we'll confirm your total.
+            Add items from our catalogue or describe a custom piece — set quantities, dimensions and pricing, and we'll confirm your total.
           </p>
         </div>
 

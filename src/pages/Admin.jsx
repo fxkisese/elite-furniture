@@ -82,6 +82,7 @@ function LogoMark() {
 const inputStyle = { width: '100%', background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 8, padding: '9px 12px', color: COLORS.text, fontFamily: fontBody, fontSize: 14, outline: 'none' };
 const labelStyle = { display: 'block', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: COLORS.muted, marginBottom: 6, fontWeight: 700 };
 const cardStyle = { background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' };
+/** @type {import('react').CSSProperties} */
 const thStyle = { textAlign: 'left', padding: '12px 16px', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: COLORS.muted, fontWeight: 700, borderBottom: `1px solid ${COLORS.border}` };
 const tdStyle = { padding: '14px 16px', borderBottom: `1px solid ${COLORS.border}`, color: COLORS.text, fontSize: 14 };
 const sectionTitleStyle = { fontFamily: fontDisplay, fontSize: 18, fontWeight: 700, color: COLORS.text, marginBottom: 12 };
@@ -101,7 +102,7 @@ function Badge({ children, color }) {
     </span>
   );
 }
-function PageHeader({ eyebrow, title, action }) {
+function PageHeader({ eyebrow, title, action = null }) {
   return (
     <div className="cg-page-header">
       <div>
@@ -112,7 +113,7 @@ function PageHeader({ eyebrow, title, action }) {
     </div>
   );
 }
-function StatCard({ label, value, sub, accent, onClick }) {
+function StatCard({ label, value, sub = undefined, accent, onClick = undefined }) {
   return (
     <div 
       onClick={onClick}
@@ -172,7 +173,7 @@ function Modal({ title, onClose, children }) {
 const TRANSPORT_METHODS = ['Truck', 'Pickup Van', 'Courier', 'Manual Arrangement'];
 const DELIVERY_REGIONS = ['Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Nyeri'];
 
-function ProductForm({ onSubmit, onCancel, initialData }) {
+function ProductForm({ onSubmit, onCancel, initialData = null }) {
   let initMeta = {};
   let initOutside = {};
   try {
@@ -244,7 +245,7 @@ function ProductForm({ onSubmit, onCancel, initialData }) {
           resolve(canvas.toDataURL('image/jpeg', 0.6));
         };
         img.onerror = () => { toast.error("Unsupported image format. Please use JPG/PNG."); resolve(null); };
-        img.src = event.target.result;
+        img.src = typeof event.target.result === 'string' ? event.target.result : '';
       };
       reader.onerror = () => { toast.error("Error reading file."); resolve(null); };
       reader.readAsDataURL(file);
@@ -549,6 +550,7 @@ function ExpenseForm({ onSubmit, onCancel }) {
 }
 function PaymentForm({ record, onSubmit, onCancel }) {
   const [amount, setAmount] = useState('');
+  if (!record) return null; // Guard against undefined record
   const balance = record.total - record.paid;
   return (
     <form onSubmit={(e) => { e.preventDefault(); onSubmit(Number(amount) || 0); }}>
@@ -576,7 +578,7 @@ function DashboardPage({ products, sales, credit, expenses, setActiveTab }) {
     const today = new Date();
     if (filter === 'today') return dateStr === TODAY;
     if (filter === 'week') {
-      const diff = today - d;
+      const diff = today.getTime() - d.getTime();
       return diff <= 7 * 24 * 60 * 60 * 1000;
     }
     if (filter === 'month') {
@@ -1285,7 +1287,7 @@ export default function Admin() {
              resolve(canvas.toDataURL('image/jpeg', 0.6));
            };
            img.onerror = () => resolve(null);
-           img.src = event.target.result;
+           img.src = typeof event.target.result === 'string' ? event.target.result : '';
          };
          reader.readAsDataURL(file);
        });
@@ -1350,7 +1352,7 @@ export default function Admin() {
         toast.error("Unsupported image format. Please use JPG/PNG.");
         setUploadingSlide(false);
       };
-      img.src = event.target.result;
+      img.src = typeof event.target.result === 'string' ? event.target.result : '';
     };
     reader.onerror = () => {
       toast.error("Error reading file.");

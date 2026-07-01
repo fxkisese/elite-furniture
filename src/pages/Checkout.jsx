@@ -63,7 +63,10 @@ export default function Checkout() {
           const outsidePrices = typeof item.delivery_outside === 'string'
             ? JSON.parse(item.delivery_outside)
             : item.delivery_outside;
-          const fees = Object.values(outsidePrices);
+          // Exclude the 'metadata' key — only regional price values (numbers) are valid
+          const fees = Object.entries(outsidePrices)
+            .filter(([k, v]) => k !== 'metadata' && typeof v === 'number')
+            .map(([, v]) => v);
           if (fees.length > 0) return total + (Number(fees[0]) || 0) * item.quantity;
         } catch { /* fallback */ }
       }
