@@ -12,7 +12,7 @@ const SUBCATEGORIES = {
   'Living Room': ['Sofas', 'Coffee Tables', 'TV Stands'],
   'Bedroom': ['Beds', 'Wardrobes', 'Dressers'],
   'Dining': ['Dining Sets', 'Sideboards'],
-  'Office': ['Executive Desks', 'Office Chairs', 'Cabinets'],
+  'Office': ['Executive Desks', 'Office Chairs', 'Cabinets', 'Reception Desk'],
   'Storage': ['Shelving Units', 'Shoe Racks', 'Storage Cabinets'],
   'Combo Items': ['Living Room Combos', 'Bedroom Combos', 'Dining Combos', 'Office Combos'],
 };
