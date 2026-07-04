@@ -172,3 +172,14 @@ CREATE POLICY "Anyone can insert orders." ON public.orders FOR INSERT WITH CHECK
 CREATE POLICY "Anyone can read orders." ON public.orders FOR SELECT USING (true);
 CREATE POLICY "Auth users can update orders." ON public.orders FOR UPDATE USING (auth.role() = 'authenticated');
 CREATE POLICY "Auth users can delete orders." ON public.orders FOR DELETE USING (auth.role() = 'authenticated');
+
+
+-- ==========================================
+-- 8. Storage Bucket for Images
+-- ==========================================
+-- Run this in your Supabase SQL editor to create the images bucket
+-- INSERT INTO storage.buckets (id, name, public) VALUES ('images', 'images', true) ON CONFLICT DO NOTHING;
+-- CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING (bucket_id = 'images');
+-- CREATE POLICY "Auth Insert" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'images' AND auth.role() = 'authenticated');
+-- CREATE POLICY "Auth Update" ON storage.objects FOR UPDATE USING (bucket_id = 'images' AND auth.role() = 'authenticated');
+-- CREATE POLICY "Auth Delete" ON storage.objects FOR DELETE USING (bucket_id = 'images' AND auth.role() = 'authenticated');

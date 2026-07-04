@@ -242,7 +242,19 @@ function ProductForm({ onSubmit, onCancel, initialData = null }) {
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', 0.6));
+          
+          canvas.toBlob(async (blob) => {
+            if (!blob) return resolve(null);
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+            const { error } = await supabase.storage.from('images').upload(fileName, blob, { contentType: 'image/jpeg' });
+            if (error) {
+              toast.error(`Upload error: ${error.message}`);
+              resolve(null);
+            } else {
+              const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
+              resolve(publicUrl);
+            }
+          }, 'image/jpeg', 0.6);
         };
         img.onerror = () => { toast.error("Unsupported image format. Please use JPG/PNG."); resolve(null); };
         img.src = typeof event.target.result === 'string' ? event.target.result : '';
@@ -687,7 +699,7 @@ function DashboardPage({ products, sales, credit, expenses, setActiveTab }) {
   );
 }
 
-function ProductsPage({ products, handleDeleteProduct, openModal, handleBulkUpload, uploadingBulk }) {
+function ProductsPage({ products, handleDeleteProduct, openModal, handleBulkUpload, uploadingBulk, handleMigrateImages, isMigrating }) {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
   const categories = ['All', ...Array.from(new Set(products.map((p) => p.category)))];
@@ -698,6 +710,9 @@ function ProductsPage({ products, handleDeleteProduct, openModal, handleBulkUplo
     <div>
       <PageHeader eyebrow="Inventory" title="Products" action={
         <div className="flex items-center gap-3">
+          <button className="cg-btn-secondary" onClick={handleMigrateImages} disabled={isMigrating} style={{ cursor: isMigrating ? 'wait' : 'pointer', color: COLORS.amber, borderColor: COLORS.amber }}>
+             {isMigrating ? 'Migrating...' : 'Migrate Legacy Images'}
+          </button>
           <label className="cg-btn-secondary" style={{ cursor: uploadingBulk ? 'wait' : 'pointer' }}>
             <Upload style={{ width: 16, height: 16 }} /> {uploadingBulk ? 'Uploading...' : 'Bulk Upload Images'}
             <input type="file" accept="image/*" multiple onChange={handleBulkUpload} style={{ display: 'none' }} disabled={uploadingBulk} />
@@ -1224,6 +1239,55 @@ export default function Admin() {
   const [uploadingSlide, setUploadingSlide] = useState(false);
   const [uploadingBulk, setUploadingBulk] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMigrating, setIsMigrating] = useState(false);
+
+  const handleMigrateImages = async () => {
+    if (!window.confirm('This will migrate all Base64 images to Supabase Storage. Proceed?')) return;
+    setIsMigrating(true);
+    
+    const dataURLtoBlob = (dataurl) => {
+      let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+          bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+      while(n--){ u8arr[n] = bstr.charCodeAt(n); }
+      return new Blob([u8arr], {type:mime});
+    };
+
+    let migrated = 0;
+    
+    for (const p of products) {
+      if (p.image && p.image.startsWith('data:')) {
+        try {
+          const blob = dataURLtoBlob(p.image);
+          const fileName = `migrated-${p.id}-${Date.now()}.jpg`;
+          const { error } = await supabase.storage.from('images').upload(fileName, blob, { contentType: 'image/jpeg' });
+          if (!error) {
+            const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
+            await supabase.from('products').update({ image: publicUrl }).eq('id', p.id);
+            migrated++;
+          }
+        } catch(e) { console.error('Migration error for product', p.id, e); }
+      }
+    }
+    
+    for (const h of heroSlides) {
+      if (h.image && h.image.startsWith('data:')) {
+        try {
+          const blob = dataURLtoBlob(h.image);
+          const fileName = `migrated-hero-${h.id}-${Date.now()}.jpg`;
+          const { error } = await supabase.storage.from('images').upload(fileName, blob, { contentType: 'image/jpeg' });
+          if (!error) {
+            const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
+            await supabase.from('hero_slides').update({ image: publicUrl }).eq('id', h.id);
+            migrated++;
+          }
+        } catch(e) { console.error('Migration error for slide', h.id, e); }
+      }
+    }
+
+    setIsMigrating(false);
+    toast.success(`Migration complete. Migrated ${migrated} images.`);
+    loadData();
+  };
 
   useEffect(() => {
     if (user) {
@@ -1284,7 +1348,19 @@ export default function Admin() {
              canvas.width = width; canvas.height = height;
              const ctx = canvas.getContext('2d');
              ctx.drawImage(img, 0, 0, width, height);
-             resolve(canvas.toDataURL('image/jpeg', 0.6));
+             
+             canvas.toBlob(async (blob) => {
+               if (!blob) return resolve(null);
+               const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+               const { error } = await supabase.storage.from('images').upload(fileName, blob, { contentType: 'image/jpeg' });
+               if (error) {
+                 toast.error(`Bulk upload error: ${error.message}`);
+                 resolve(null);
+               } else {
+                 const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
+                 resolve(publicUrl);
+               }
+             }, 'image/jpeg', 0.6);
            };
            img.onerror = () => resolve(null);
            img.src = typeof event.target.result === 'string' ? event.target.result : '';
@@ -1341,12 +1417,24 @@ export default function Admin() {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-        
-        const { error } = await supabase.from('hero_slides').insert([{ image: dataUrl }]);
-        if (error) { toast.error('Error uploading slide'); console.error(error); }
-        else { toast.success('Slide added'); loadData(); }
-        setUploadingSlide(false);
+        canvas.toBlob(async (blob) => {
+          if (!blob) return;
+          const fileName = `hero-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+          const { error: uploadError } = await supabase.storage.from('images').upload(fileName, blob, { contentType: 'image/jpeg' });
+          
+          if (uploadError) { 
+            toast.error(`Upload error: ${uploadError.message}`); 
+            setUploadingSlide(false);
+            return;
+          }
+          
+          const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
+          
+          const { error } = await supabase.from('hero_slides').insert([{ image: publicUrl }]);
+          if (error) { toast.error('Error uploading slide'); console.error(error); }
+          else { toast.success('Slide added'); loadData(); }
+          setUploadingSlide(false);
+        }, 'image/jpeg', 0.7);
       };
       img.onerror = () => {
         toast.error("Unsupported image format. Please use JPG/PNG.");
@@ -1735,7 +1823,7 @@ export default function Admin() {
         <main className="cg-main">
           {activeTab === 'dashboard' && <DashboardPage products={products} sales={sales} credit={credit} expenses={expenses} setActiveTab={setActiveTab} />}
           {activeTab === 'orders' && <OrdersPage orders={orders} handleUpdateOrderStatus={handleUpdateOrderStatus} handleResendWhatsApp={handleResendWhatsApp} />}
-          {activeTab === 'products' && <ProductsPage products={products} handleDeleteProduct={handleDeleteProduct} openModal={openModal} handleBulkUpload={handleBulkUpload} uploadingBulk={uploadingBulk} />}
+          {activeTab === 'products' && <ProductsPage products={products} handleDeleteProduct={handleDeleteProduct} openModal={openModal} handleBulkUpload={handleBulkUpload} uploadingBulk={uploadingBulk} handleMigrateImages={handleMigrateImages} isMigrating={isMigrating} />}
           {activeTab === 'sales' && <SalesPage sales={sales} handleDeleteItem={handleDeleteItem} openModal={openModal} />}
           {activeTab === 'credit' && <CreditPage credit={credit} handleDeleteItem={handleDeleteItem} openModal={openModal} openPayment={openPayment} onSendReminder={(record) => { sendCreditReminderWhatsApp(record); toast.success(`Reminder sent to ${record.customer}`); }} />}
           {activeTab === 'expenses' && <ExpensesPage expenses={expenses} handleDeleteItem={handleDeleteItem} openModal={openModal} />}

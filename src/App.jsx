@@ -19,6 +19,7 @@ import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import Admin from '@/pages/Admin';
+import AdsGallery from '@/pages/AdsGallery';
 import PageNotFound from '@/lib/PageNotFound';
 
 function AnimatedRoutes() {
@@ -37,6 +38,7 @@ function AnimatedRoutes() {
         <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
         <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
         <Route path="/admin" element={<PageTransition><Admin /></PageTransition>} />
+        <Route path="/ads-gallery" element={<AdsGallery />} />
         <Route path="*" element={<PageTransition><PageNotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>
