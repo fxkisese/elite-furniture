@@ -1,0 +1,17 @@
+name: Nightly Vercel Redeploy
+
+on:
+  schedule:
+    # Runs at 00:00 UTC (3:00 AM East Africa Time) every day
+    - cron: '0 0 * * *'
+  
+  # Allows you to manually trigger it from the GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel Deployment
+        run: |
+          curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_cZDbtNXCduQgtTxCjE8MH7FnCGiS/iR6uoHUz6O"
