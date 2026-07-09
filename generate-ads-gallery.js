@@ -13,8 +13,12 @@ const SUPABASE_URL = 'https://xjrbztxuteqhctsvlvhf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqcmJ6dHh1dGVxaGN0c3ZsdmhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExOTM4MzAsImV4cCI6MjA5Njc2OTgzMH0._r4Ust0cOJV1TBJ_PwT_QJ7BkNrz1OTqiQf4jEk_SLQ';
 const SITE_URL = 'https://www.furnitureelitespace.co.ke';
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function fetchFromSupabase(table, select = '*', filters = '') {
   const url = `${SUPABASE_URL}/rest/v1/${table}?select=${select}${filters}`;
