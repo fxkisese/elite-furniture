@@ -52,7 +52,10 @@ function generateHTML(products, heroSlides) {
   const productEntries = products
     .map(p => {
       const imgs = extractImages(p);
-      if (imgs.length === 0) return '';
+      if (imgs.length === 0) {
+        console.warn(`  [Skipped] Product "${p.name || 'Unnamed'}" has no valid image URLs.`);
+        return '';
+      }
       
       const name = p.name || 'Product';
       const category = p.category || '';
@@ -147,8 +150,8 @@ ${productEntries}
 
 async function main() {
   console.log('Fetching products from Supabase...');
-  const products = await fetchFromSupabase('products', '*', '&in_stock=eq.true&order=created_at.desc');
-  console.log(`  Found ${products.length} in-stock products`);
+  const products = await fetchFromSupabase('products', '*', '&order=created_at.desc');
+  console.log(`  Found ${products.length} total products`);
 
   console.log('Fetching hero slides...');
   const slides = await fetchFromSupabase('hero_slides', '*', '&order=created_at.desc');
