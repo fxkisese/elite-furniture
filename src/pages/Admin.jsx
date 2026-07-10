@@ -1340,6 +1340,7 @@ export default function Admin() {
     setUploadingBulk(true);
 
     let successCount = 0;
+    let failCount = 0;
     for (const file of files) {
        const dataUrl = await new Promise((resolve) => {
          const reader = new FileReader();
@@ -1362,7 +1363,8 @@ export default function Admin() {
                const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
                const { error } = await supabase.storage.from('images').upload(fileName, blob, { contentType: 'image/jpeg' });
                if (error) {
-                 toast.error(`Bulk upload error: ${error.message}`);
+                 console.error('Storage Upload Error:', error);
+                 toast.error(`Image upload error: ${error.message}`);
                  resolve(null);
                } else {
                  const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
@@ -1370,8 +1372,15 @@ export default function Admin() {
                }
              }, 'image/jpeg', 0.6);
            };
-           img.onerror = () => resolve(null);
+           img.onerror = () => {
+             toast.error(`Unsupported image format: ${file.name}`);
+             resolve(null);
+           };
            img.src = typeof event.target.result === 'string' ? event.target.result : '';
+         };
+         reader.onerror = () => {
+           toast.error(`Error reading file: ${file.name}`);
+           resolve(null);
          };
          reader.readAsDataURL(file);
        });
@@ -1390,12 +1399,20 @@ export default function Admin() {
          if (!error) successCount++;
          else {
            console.error('Bulk Upload Insert Error:', error);
-           toast.error(`Upload error: ${error.message}`);
+           toast.error(`Database error: ${error.message}`);
+           failCount++;
          }
+       } else {
+         failCount++;
        }
     }
+    
+    // Reset file input so the same files can be selected again
+    if (e.target) e.target.value = '';
+    
     setUploadingBulk(false);
-    toast.success(`Successfully uploaded ${successCount} draft products.`);
+    if (successCount > 0) toast.success(`Successfully uploaded ${successCount} draft products.`);
+    if (failCount > 0) toast.error(`Failed to upload ${failCount} images.`);
     loadData();
   };
 
