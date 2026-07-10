@@ -1057,7 +1057,7 @@ function HeroSlidesPage({ heroSlides, handleDeleteItem, handleUploadSlide, uploa
 }
 
 /* ---------- Orders Page ---------- */
-function OrdersPage({ orders, handleUpdateOrderStatus, handleResendWhatsApp }) {
+function OrdersPage({ orders, handleUpdateOrderStatus, handleResendWhatsApp, handleDeleteItem }) {
   const ORDER_STATUSES = ['new', 'confirmed', 'processing', 'delivered'];
   const statusColors = { new: COLORS.amber, confirmed: COLORS.green, processing: COLORS.gold, delivered: '#10b981' };
   const paymentColors = { paid: COLORS.green, pending: COLORS.amber, failed: COLORS.rust };
@@ -1115,6 +1115,14 @@ function OrdersPage({ orders, handleUpdateOrderStatus, handleResendWhatsApp }) {
                           title="Send to WhatsApp"
                         >
                           <IconChat />
+                        </button>
+                        <button
+                          className="cg-icon-btn"
+                          onClick={() => { if (window.confirm('Are you sure you want to delete this order?')) handleDeleteItem('orders', o.id); }}
+                          title="Delete Order"
+                          aria-label="Delete"
+                        >
+                          <IconTrash />
                         </button>
                       </div>
                     </td>
@@ -1822,7 +1830,7 @@ export default function Admin() {
         />
         <main className="cg-main">
           {activeTab === 'dashboard' && <DashboardPage products={products} sales={sales} credit={credit} expenses={expenses} setActiveTab={setActiveTab} />}
-          {activeTab === 'orders' && <OrdersPage orders={orders} handleUpdateOrderStatus={handleUpdateOrderStatus} handleResendWhatsApp={handleResendWhatsApp} />}
+          {activeTab === 'orders' && <OrdersPage orders={orders} handleUpdateOrderStatus={handleUpdateOrderStatus} handleResendWhatsApp={handleResendWhatsApp} handleDeleteItem={handleDeleteItem} />}
           {activeTab === 'products' && <ProductsPage products={products} handleDeleteProduct={handleDeleteProduct} openModal={openModal} handleBulkUpload={handleBulkUpload} uploadingBulk={uploadingBulk} handleMigrateImages={handleMigrateImages} isMigrating={isMigrating} />}
           {activeTab === 'sales' && <SalesPage sales={sales} handleDeleteItem={handleDeleteItem} openModal={openModal} />}
           {activeTab === 'credit' && <CreditPage credit={credit} handleDeleteItem={handleDeleteItem} openModal={openModal} openPayment={openPayment} onSendReminder={(record) => { sendCreditReminderWhatsApp(record); toast.success(`Reminder sent to ${record.customer}`); }} />}
