@@ -227,21 +227,23 @@ function ProductForm({ onSubmit, onCancel, initialData = null }) {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 1200;
-          const MAX_HEIGHT = 1200;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-          } else {
-            if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
+          const TARGET_SIZE = 1200;
+          canvas.width = TARGET_SIZE;
+          canvas.height = TARGET_SIZE;
           const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Fill white background for padding
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, TARGET_SIZE, TARGET_SIZE);
+          
+          // Scale to fit while maintaining aspect ratio
+          let scale = Math.min(TARGET_SIZE / img.width, TARGET_SIZE / img.height);
+          let drawWidth = img.width * scale;
+          let drawHeight = img.height * scale;
+          let offsetX = (TARGET_SIZE - drawWidth) / 2;
+          let offsetY = (TARGET_SIZE - drawHeight) / 2;
+          
+          ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
           
           canvas.toBlob(async (blob) => {
             if (!blob) return resolve(null);
@@ -1348,15 +1350,23 @@ export default function Admin() {
            const img = new Image();
            img.onload = () => {
              const canvas = document.createElement('canvas');
-             const MAX_WIDTH = 1200; 
-             const MAX_HEIGHT = 1200;
-             let width = img.width; 
-             let height = img.height;
-             if (width > height && width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-             else if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-             canvas.width = width; canvas.height = height;
+             const TARGET_SIZE = 1200;
+             canvas.width = TARGET_SIZE;
+             canvas.height = TARGET_SIZE;
              const ctx = canvas.getContext('2d');
-             ctx.drawImage(img, 0, 0, width, height);
+             
+             // Fill white background for padding
+             ctx.fillStyle = '#ffffff';
+             ctx.fillRect(0, 0, TARGET_SIZE, TARGET_SIZE);
+             
+             // Scale to fit while maintaining aspect ratio
+             let scale = Math.min(TARGET_SIZE / img.width, TARGET_SIZE / img.height);
+             let drawWidth = img.width * scale;
+             let drawHeight = img.height * scale;
+             let offsetX = (TARGET_SIZE - drawWidth) / 2;
+             let offsetY = (TARGET_SIZE - drawHeight) / 2;
+             
+             ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
              
              canvas.toBlob(async (blob) => {
                if (!blob) return resolve(null);
@@ -1426,21 +1436,24 @@ export default function Admin() {
       const img = new Image();
       img.onload = async () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 1920;
-        const MAX_HEIGHT = 1080;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-        } else {
-          if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
+        const TARGET_WIDTH = 1200;
+        const TARGET_HEIGHT = 628;
+        canvas.width = TARGET_WIDTH;
+        canvas.height = TARGET_HEIGHT;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
+
+        // Fill white background for padding
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, TARGET_WIDTH, TARGET_HEIGHT);
+
+        // Scale to fit while maintaining aspect ratio
+        let scale = Math.min(TARGET_WIDTH / img.width, TARGET_HEIGHT / img.height);
+        let drawWidth = img.width * scale;
+        let drawHeight = img.height * scale;
+        let offsetX = (TARGET_WIDTH - drawWidth) / 2;
+        let offsetY = (TARGET_HEIGHT - drawHeight) / 2;
+
+        ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
         
         canvas.toBlob(async (blob) => {
           if (!blob) return;
